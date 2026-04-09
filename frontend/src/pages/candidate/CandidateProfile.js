@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -17,7 +17,7 @@ function CandidateProfile() {
     skills: "",
   });
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/users/me", {
         headers: {
@@ -35,11 +35,11 @@ function CandidateProfile() {
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to load profile");
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [fetchProfile]);
 
   const saveProfile = async () => {
     try {
@@ -70,8 +70,9 @@ function CandidateProfile() {
       title="Profile"
       subtitle="Manage your personal and professional details."
     >
-
       <Card
+        title="Profile Details"
+        subtitle="Your candidate identity and professional information."
       >
         <Input
           label="Full name"
