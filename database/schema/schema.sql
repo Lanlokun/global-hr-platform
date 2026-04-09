@@ -1,0 +1,42 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(50),
+    country VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS password VARCHAR(255);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS professional_title VARCHAR(150);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS skills TEXT;
+
+CREATE TABLE IF NOT EXISTS companies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    industry VARCHAR(100),
+    country VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS jobs (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    location VARCHAR(100),
+    salary_range VARCHAR(100),
+    remote BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS applications (
+    id SERIAL PRIMARY KEY,
+    job_id INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'pending',
+    cover_letter TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
