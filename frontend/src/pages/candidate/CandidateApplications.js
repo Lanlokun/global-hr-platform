@@ -6,6 +6,7 @@ import Badge from "../../components/ui/Badge";
 import Card from "../../components/ui/Card";
 import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
+import ConfirmModal from "../../components/ui/ConfirmModal";
 
 function CandidateApplications() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -124,6 +125,14 @@ function CandidateApplications() {
           </div>
         )}
       </Card>
+      <ConfirmModal
+  open={!!withdrawTarget}
+  title="Withdraw application?"
+  message={`Are you sure you want to withdraw your application for "${withdrawTarget?.job_title || "this job"}"?`}
+  confirmText="Withdraw"
+  onConfirm={withdrawApplication}
+  onCancel={() => setWithdrawTarget(null)}
+/>
     </DashboardLayout>
   );
 }
