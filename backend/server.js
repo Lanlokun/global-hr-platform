@@ -4,7 +4,13 @@ require("dotenv").config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
+  credentials: true
+}));
 app.use(express.json());
 
 app.get("/", (req, res) => {
@@ -40,3 +46,5 @@ app.use("/api/auth", authRoutes);
 const candidateManagementRoutes = require("./routes/candidateManagementRoutes");
 
 app.use("/api/candidates", candidateManagementRoutes);
+
+
