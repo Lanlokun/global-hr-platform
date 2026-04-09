@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -13,7 +13,7 @@ function EmployerCandidateDetail() {
   const [candidate, setCandidate] = useState(null);
   const [applications, setApplications] = useState([]);
 
-  const fetchCandidate = async () => {
+  const fetchCandidate = useCallback(async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/candidates/${id}`, {
         headers: {
@@ -26,11 +26,11 @@ function EmployerCandidateDetail() {
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to load candidate");
     }
-  };
+  }, [id, token]);
 
   useEffect(() => {
     fetchCandidate();
-  }, [id]);
+  }, [fetchCandidate]);
 
   const updateStatus = async (applicationId, status) => {
     try {

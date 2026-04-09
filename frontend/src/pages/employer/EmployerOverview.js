@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import DashboardLayout from "../../layouts/DashboardLayout";
-import Badge from "../../components/ui/Badge";
 import Card from "../../components/ui/Card";
-import PageHeader from "../../components/ui/PageHeader";
 
 function EmployerOverview() {
   const [companies, setCompanies] = useState([]);

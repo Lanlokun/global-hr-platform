@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import DashboardLayout from "../../layouts/DashboardLayout";
@@ -19,20 +19,22 @@ function EmployerApplications() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/applications", {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       setApplications(res.data);
     } catch {
       toast.error("Failed to load applications");
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [fetchApplications]);
 
   useEffect(() => {
     setCurrentPage(1);

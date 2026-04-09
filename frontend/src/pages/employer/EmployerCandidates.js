@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback , useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
@@ -21,7 +21,7 @@ function EmployerCandidates() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 8;
 
-  const fetchCandidates = async () => {
+  const fetchCandidates = useCallback(async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/candidates", {
         headers: {
@@ -32,11 +32,11 @@ function EmployerCandidates() {
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to load candidates");
     }
-  };
+}, [token]);
 
   useEffect(() => {
     fetchCandidates();
-  }, []);
+  }, [fetchCandidates]);
 
   useEffect(() => {
     setCurrentPage(1);
