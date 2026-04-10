@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import AuthLayout from "../../components/auth/AuthLayout";
 import AuthInput from "../../components/auth/AuthInput";
 import PasswordInput from "../../components/auth/PasswordInput";
 import AuthButton from "../../components/auth/AuthButton";
 import AuthDivider from "../../components/auth/AuthDivider";
 import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 import AuthFooter from "../../components/auth/AuthFooter";
+import "../../components/auth/itss-auth.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -54,84 +54,100 @@ function Login() {
   };
 
   return (
-    <AuthLayout
-      title="Welcome back"
-      subtitle="Login to manage your workforce and hiring pipeline."
-    >
-      {message && <p style={styles.message}>{message}</p>}
+    <div className="itss-auth-page">
+      <div className="itss-auth-glow itss-auth-glow-1"></div>
+      <div className="itss-auth-glow itss-auth-glow-2"></div>
 
-      <AuthInput
-        label="Email"
-        name="email"
-        type="email"
-        placeholder="you@company.com"
-        value={form.email}
-        onChange={(e) => setForm({ ...form, email: e.target.value })}
-        error={errors.email}
-      />
-
-      <PasswordInput
-        label="Password"
-        name="password"
-        placeholder="Enter your password"
-        value={form.password}
-        onChange={(e) => setForm({ ...form, password: e.target.value })}
-        error={errors.password}
-      />
-
-      <div style={styles.row}>
-        <label style={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={form.remember}
-            onChange={(e) => setForm({ ...form, remember: e.target.checked })}
-          />{" "}
-          Remember me
-        </label>
-
-        <Link className="auth-link" to="/forgot-password">
-          Forgot password?
+      <nav className="itss-auth-nav">
+        <Link to="/" className="itss-auth-brand">
+          International Talent Space Station
         </Link>
+
+        <div className="itss-auth-nav-actions">
+          <Link className="itss-auth-nav-link" to="/signup">
+            Create account
+          </Link>
+        </div>
+      </nav>
+
+      <div className="itss-auth-shell">
+        <div className="itss-auth-left">
+          <div className="itss-auth-badge">Pan-African talent access</div>
+          <h1 className="itss-auth-title">
+            Welcome back to International Talent Space Station
+          </h1>
+          <p className="itss-auth-subtitle">
+            Sign in to connect with talent, manage hiring pipelines, and explore
+            workforce opportunities across Africa from one platform.
+          </p>
+
+          <div className="itss-auth-feature-list">
+            <div className="itss-auth-feature">Cross-border talent discovery</div>
+            <div className="itss-auth-feature">Employer and candidate access</div>
+            <div className="itss-auth-feature">Unified hiring workflows</div>
+          </div>
+        </div>
+
+        <div className="itss-auth-card">
+          <div className="itss-auth-card-header">
+            <h2>Sign in</h2>
+            <p>Access your account and continue your hiring journey.</p>
+          </div>
+
+          {message && <p className="itss-auth-message">{message}</p>}
+
+          <AuthInput
+            label="Email"
+            name="email"
+            type="email"
+            placeholder="you@company.com"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            error={errors.email}
+          />
+
+          <PasswordInput
+            label="Password"
+            name="password"
+            placeholder="Enter your password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            error={errors.password}
+          />
+
+          <div className="itss-auth-row">
+            <label className="itss-auth-checkbox">
+              <input
+                type="checkbox"
+                checked={form.remember}
+                onChange={(e) =>
+                  setForm({ ...form, remember: e.target.checked })
+                }
+              />
+              <span>Remember me</span>
+            </label>
+
+            <Link className="itss-auth-forgot" to="/forgot-password">
+              Forgot password?
+            </Link>
+          </div>
+
+          <AuthButton onClick={handleLogin} loading={loading}>
+            Sign in
+          </AuthButton>
+
+          <AuthDivider />
+          <SocialAuthButtons />
+
+          <AuthFooter
+            text="Do not have an account?"
+            linkText="Create account"
+            to="/signup"
+          />
+        </div>
       </div>
-
-      <AuthButton onClick={handleLogin} loading={loading}>
-        Sign in
-      </AuthButton>
-
-      <AuthDivider />
-      <SocialAuthButtons />
-
-      <AuthFooter text="Do not have an account?" linkText="Create account" to="/signup" />
-      
-    </AuthLayout>
+    </div>
   );
 }
-
-const styles = {
-  row: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: "8px",
-  },
-  checkboxLabel: {
-    fontSize: "14px",
-    color: "#475569",
-  },
-  link: {
-    fontSize: "14px",
-    color: "#2563eb",
-    textDecoration: "none",
-    fontWeight: "600",
-  },
-  message: {
-    background: "#fef2f2",
-    color: "#b91c1c",
-    padding: "12px",
-    borderRadius: "10px",
-    fontSize: "14px",
-    marginBottom: "16px",
-  },
-};
 
 export default Login;

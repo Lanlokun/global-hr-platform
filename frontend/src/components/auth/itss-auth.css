@@ -1,0 +1,344 @@
+.itss-auth-page {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.12), transparent 28%),
+    linear-gradient(180deg, #020617 0%, #071224 100%);
+  color: #ffffff;
+  padding: 28px;
+}
+
+.itss-auth-glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(80px);
+  opacity: 0.18;
+  pointer-events: none;
+}
+
+.itss-auth-glow-1 {
+  width: 240px;
+  height: 240px;
+  background: #3b82f6;
+  top: 80px;
+  left: 10%;
+}
+
+.itss-auth-glow-2 {
+  width: 280px;
+  height: 280px;
+  background: #2563eb;
+  bottom: 60px;
+  right: 10%;
+}
+
+.itss-auth-nav {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.itss-auth-brand {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.itss-auth-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.itss-auth-nav-link {
+  color: #dbeafe;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.itss-auth-nav-link:hover {
+  color: #ffffff;
+}
+
+.itss-auth-shell {
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 140px);
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.itss-auth-left {
+  max-width: 580px;
+}
+
+.itss-auth-badge {
+  display: inline-block;
+  margin-bottom: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(147, 197, 253, 0.15);
+  color: #bfdbfe;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.itss-auth-title {
+  margin: 0 0 14px;
+  font-size: clamp(2.2rem, 4vw, 4.1rem);
+  line-height: 1.05;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.itss-auth-subtitle {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  max-width: 540px;
+}
+
+.itss-auth-feature-list {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.itss-auth-feature {
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.itss-auth-card {
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(14px);
+  border-radius: 28px;
+  padding: 32px;
+}
+
+.itss-auth-card-header {
+  margin-bottom: 20px;
+}
+
+.itss-auth-card-header h2 {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.itss-auth-card-header p {
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.itss-auth-message {
+  background: rgba(127, 29, 29, 0.25);
+  color: #fecaca;
+  padding: 12px 14px;
+  border: 1px solid rgba(248, 113, 113, 0.22);
+  border-radius: 12px;
+  font-size: 0.92rem;
+  margin-bottom: 16px;
+}
+
+.itss-auth-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 16px;
+}
+
+.itss-auth-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #cbd5e1;
+  font-size: 0.92rem;
+}
+
+.itss-auth-checkbox input {
+  accent-color: #3b82f6;
+}
+
+.itss-auth-forgot {
+  color: #93c5fd;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.itss-auth-forgot:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 960px) {
+  .itss-auth-page {
+    padding: 18px;
+  }
+
+  .itss-auth-shell {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    min-height: auto;
+  }
+
+  .itss-auth-left {
+    max-width: none;
+    text-align: center;
+  }
+
+  .itss-auth-subtitle {
+    margin: 0 auto;
+  }
+
+  .itss-auth-feature-list {
+    align-items: center;
+  }
+
+  .itss-auth-card {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .itss-auth-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 28px;
+  }
+
+  .itss-auth-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .itss-auth-title {
+    font-size: 2.2rem;
+  }
+}
+
+.itss-role-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.itss-role-tab {
+  border: none;
+  border-radius: 12px;
+  padding: 12px 14px;
+  background: transparent;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.itss-role-tab:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.itss-role-tab.active {
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 10px 24px rgba(255, 255, 255, 0.12);
+}
+
+.itss-verify-note {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 18px;
+  padding: 18px;
+  color: #cbd5e1;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.itss-verify-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.itss-verify-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  text-transform: lowercase;
+}
+
+.itss-verify-divider span {
+  position: relative;
+  padding: 0 12px;
+}
+
+.itss-verify-divider span::before,
+.itss-verify-divider span::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 48px;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.itss-verify-divider span::before {
+  right: 100%;
+}
+
+.itss-verify-divider span::after {
+  left: 100%;
+}
+
+.itss-reset-page .itss-reset-login-link {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.itss-reset-page .itss-reset-login-button {
+  background: transparent;
+  border: none;
+  color: #93c5fd;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.itss-reset-page .itss-reset-login-button:hover {
+  color: #ffffff;
+}

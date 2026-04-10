@@ -70,14 +70,8 @@ function CandidateApplications() {
       title="My Applications"
       subtitle="Track the status of your submitted applications."
     >
-      <PageHeader
-        title="Application Tracker"
-        subtitle="Monitor where each application stands in the hiring process."
-      />
 
       <Card
-        title="Submitted Applications"
-        subtitle="All applications linked to your account."
       >
         {applications.length === 0 ? (
           <p style={{ color: "#64748b", marginBottom: 0 }}>No applications yet.</p>
