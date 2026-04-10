@@ -36,7 +36,7 @@ function EmployerDashboard() {
 
   const fetchCompanies = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/companies");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/companies"`);
       setCompanies(res.data);
     } catch {
       toast.error("Failed to load companies");
@@ -45,7 +45,7 @@ function EmployerDashboard() {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/jobs");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/jobs"`);
       setJobs(res.data);
     } catch {
       toast.error("Failed to load jobs");
@@ -59,7 +59,7 @@ function EmployerDashboard() {
 
   const createCompany = async () => {
     try {
-      await axios.post("http://localhost:5000/api/companies", companyForm, authHeaders);
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/companies"`, companyForm, authHeaders);
       toast.success("Company created");
       setCompanyForm({ name: "", industry: "", country: "" });
       fetchCompanies();
@@ -70,8 +70,7 @@ function EmployerDashboard() {
 
   const createJob = async () => {
     try {
-      await axios.post(
-        "http://localhost:5000/api/jobs",
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/jobs`,
         { ...jobForm, company_id: Number(jobForm.company_id) },
         authHeaders
       );

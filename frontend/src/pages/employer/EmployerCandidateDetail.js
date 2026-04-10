@@ -15,7 +15,7 @@ function EmployerCandidateDetail() {
 
   const fetchCandidate = useCallback(async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/candidates/${id}`, {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/candidates/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -34,8 +34,7 @@ function EmployerCandidateDetail() {
 
   const updateStatus = async (applicationId, status) => {
     try {
-      await axios.patch(
-        `http://localhost:5000/api/applications/${applicationId}/status`,
+      await axios.patch(`${process.env.REACT_APP_API_URL}/api/applications/${applicationId}/status`,
         { status },
         {
           headers: {

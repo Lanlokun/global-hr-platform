@@ -14,7 +14,7 @@ function CandidateApplications() {
 
   const fetchApplications = useCallback(async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/applications", {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/applications`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -40,8 +40,7 @@ function CandidateApplications() {
     if (!withdrawTarget) return;
 
     try {
-      await axios.delete(
-        `http://localhost:5000/api/applications/${withdrawTarget.id}`,
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/applications/${withdrawTarget.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

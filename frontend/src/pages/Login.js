@@ -9,6 +9,7 @@ import AuthButton from "../../components/auth/AuthButton";
 import AuthDivider from "../../components/auth/AuthDivider";
 import SocialAuthButtons from "../../components/auth/SocialAuthButtons";
 import AuthFooter from "../../components/auth/AuthFooter";
+  
 
 function Login() {
   const navigate = useNavigate();
@@ -36,7 +37,7 @@ function Login() {
 
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:5000/api/auth/login", {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/login`, {
         email: form.email,
         password: form.password,
       });

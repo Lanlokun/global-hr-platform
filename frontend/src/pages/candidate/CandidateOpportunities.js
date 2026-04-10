@@ -23,7 +23,7 @@ function CandidateOpportunities() {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/jobs");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/jobs`);
       setJobs(res.data);
     } catch {
       toast.error("Failed to load jobs");
@@ -40,8 +40,7 @@ function CandidateOpportunities() {
 
   const applyToJob = async (jobId) => {
     try {
-      await axios.post(
-        "http://localhost:5000/api/applications",
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/applications`,
         {
           job_id: jobId,
           user_id: user.id,

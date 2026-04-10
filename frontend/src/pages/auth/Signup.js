@@ -51,7 +51,7 @@ function Signup() {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:5000/api/auth/signup", form);
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/signup`, form);
       navigate("/verify-email");
     } catch (error) {
       setMessage(error.response?.data?.error || "Signup failed");

@@ -12,9 +12,9 @@ function EmployerOverview() {
     const loadData = async () => {
       try {
         const [companiesRes, jobsRes, applicationsRes] = await Promise.all([
-          axios.get("http://localhost:5000/api/companies"),
-          axios.get("http://localhost:5000/api/jobs"),
-          axios.get("http://localhost:5000/api/applications", {
+          axios.get(`${process.env.REACT_APP_API_URL}/api/companies`),
+          axios.get(`${process.env.REACT_APP_API_URL}/api/jobs`),
+          axios.get(`${process.env.REACT_APP_API_URL}/api/applications`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },

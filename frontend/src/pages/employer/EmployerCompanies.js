@@ -41,7 +41,7 @@ function EmployerCompanies() {
 
   const fetchCompanies = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/companies");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/companies`);
       setCompanies(res.data);
     } catch {
       toast.error("Failed to load companies");
@@ -58,7 +58,7 @@ function EmployerCompanies() {
 
   const createCompany = async () => {
     try {
-      await axios.post("http://localhost:5000/api/companies", form, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/companies`, form, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -77,8 +77,7 @@ function EmployerCompanies() {
     if (!deleteTarget) return;
 
     try {
-      await axios.delete(
-        `http://localhost:5000/api/companies/${deleteTarget.id}`,
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/companies/${deleteTarget.id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -104,7 +103,7 @@ function EmployerCompanies() {
 
   const saveEdit = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/companies/${id}`, editForm, {
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/companies/${id}`, editForm, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

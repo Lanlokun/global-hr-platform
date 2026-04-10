@@ -52,7 +52,7 @@ function EmployerJobs() {
 
   const fetchCompanies = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/companies");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/companies`);
       setCompanies(res.data);
     } catch {
       toast.error("Failed to load companies");
@@ -61,7 +61,7 @@ function EmployerJobs() {
 
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/jobs");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/jobs`);
       setJobs(res.data);
     } catch {
       toast.error("Failed to load jobs");
@@ -79,8 +79,7 @@ function EmployerJobs() {
 
   const createJob = async () => {
     try {
-      await axios.post(
-        "http://localhost:5000/api/jobs",
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/jobs`,
         { ...form, company_id: Number(form.company_id) },
         {
           headers: {
@@ -112,8 +111,7 @@ function EmployerJobs() {
 
   const saveEdit = async (id) => {
     try {
-      await axios.put(
-        `http://localhost:5000/api/jobs/${id}`,
+      await axios.put(`${process.env.REACT_APP_API_URL}/api/jobs/${id}`,
         {
           ...editForm,
           company_id: Number(editForm.company_id),
@@ -137,7 +135,7 @@ function EmployerJobs() {
     if (!deleteTarget) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/jobs/${deleteTarget.id}`, {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/api/jobs/${deleteTarget.id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
