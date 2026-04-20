@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import EmployerOverview from "./employer/EmployerOverview";
 import EmployerCompanies from "./employer/EmployerCompanies";
@@ -37,6 +37,10 @@ function Dashboard() {
         <Route path="/profile" element={<CandidateProfile />} />
       </Routes>
     );
+  }
+
+  if (user.role === "admin") {
+    return <Navigate to="/admin" replace />;
   }
 
   return <div>No dashboard available</div>;

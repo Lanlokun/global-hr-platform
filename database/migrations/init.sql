@@ -103,24 +103,6 @@ ADD COLUMN IF NOT EXISTS recruiter_notes TEXT,
 ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
 
-CREATE TABLE IF NOT EXISTS candidate_evaluations (
-    id SERIAL PRIMARY KEY,
-    candidate_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    employer_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    technical_score INTEGER DEFAULT 0,
-    communication_score INTEGER DEFAULT 0,
-    problem_solving_score INTEGER DEFAULT 0,
-    culture_fit_score INTEGER DEFAULT 0,
-    experience_relevance_score INTEGER DEFAULT 0,
-    confidence_score INTEGER DEFAULT 0,
-    overall_score INTEGER DEFAULT 0,
-    recommendation VARCHAR(50) DEFAULT 'hold',
-    interview_notes TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(candidate_id, employer_id)
-);
-
 CREATE INDEX IF NOT EXISTS idx_users_country ON users(country);
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 

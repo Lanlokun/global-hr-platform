@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import LandingPage from "./pages/public/LandingPage";
+import CountryPage from "./pages/public/CountryPage";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import ForgotPassword from "./pages/auth/ForgotPassword";
@@ -8,6 +9,13 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import VerifyEmail from "./pages/auth/VerifyEmail";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
+import AdminOverview from "./pages/admin/AdminOverview";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminCompanies from "./pages/admin/AdminCompanies";
+import AdminJobs from "./pages/admin/AdminJobs";
+import AdminApplications from "./pages/admin/AdminApplications";
+import AdminCandidates from "./pages/admin/AdminCandidates";
 
 function App() {
   return (
@@ -20,14 +28,68 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/country/:country" element={<CountryPage />} />        <Route
+          path="/dashboard/*" 
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
-            path="/dashboard/*"
-            element={
-                <ProtectedRoute>
-                <Dashboard />
-                </ProtectedRoute>
-            }
-            />
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminOverview />
+            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <AdminUsers />
+            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/companies"
+          element={
+            <AdminRoute>
+              <AdminCompanies />
+            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/jobs"
+          element={
+            <AdminRoute>
+              <AdminJobs />
+            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/applications"
+          element={
+            <AdminRoute>
+              <AdminApplications />
+            </AdminRoute>
+          }
+        />
+        
+        <Route
+          path="/admin/candidates"
+          element={
+            <AdminRoute>
+              <AdminCandidates />
+            </AdminRoute>
+          }
+        />
       </Routes>
     </>
   );

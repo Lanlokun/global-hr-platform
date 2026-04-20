@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import {
   Briefcase,
   Building2,
@@ -7,12 +8,29 @@ import {
   Users,
   LogOut,
   Globe2,
+  Bell,
+  Search,
+  Menu,
+  X,
+  HelpCircle,
+  ChevronRight,
+  Sparkles,
+  Shield,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import "./../components/ui/dashboard.css";
 
 function DashboardLayout({ title, subtitle, children }) {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const user = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return {};
+    }
+  }, []);
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -24,104 +42,282 @@ function DashboardLayout({ title, subtitle, children }) {
     `dashboard-nav-item ${isActive ? "active" : ""}`;
 
   const workspaceLabel =
-    user.role === "employer" ? "Company Workspace" : "Individual Workspace";
+    user.role === "admin"
+      ? "Admin Workspace"
+      : user.role === "employer"
+      ? "Company Workspace"
+      : "Candidate Workspace";
+
+  const firstName =
+    user?.first_name ||
+    user?.name?.split(" ")?.[0] ||
+    user?.full_name?.split(" ")?.[0] ||
+    "User";
+
+  const pageName = useMemo(() => {
+    const parts = location.pathname.split("/").filter(Boolean);
+    return parts[parts.length - 1] || "dashboard";
+  }, [location.pathname]);
+
+  const formattedPageName =
+    pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/-/g, " ");
+
+  const candidateNav = [
+    {
+      to: "/dashboard",
+      label: "Overview",
+      icon: <LayoutDashboard size={18} />,
+      end: true,
+    },
+    {
+      to: "/dashboard/opportunities",
+      label: "Opportunities",
+      icon: <Briefcase size={18} />,
+      badge: "New",
+    },
+    {
+      to: "/dashboard/applications",
+      label: "Applications",
+      icon: <FileText size={18} />,
+    },
+    {
+      to: "/dashboard/profile",
+      label: "Profile",
+      icon: <UserCircle2 size={18} />,
+    },
+  ];
+
+  const employerNav = [
+    {
+      to: "/dashboard",
+      label: "Overview",
+      icon: <LayoutDashboard size={18} />,
+      end: true,
+    },
+    {
+      to: "/dashboard/companies",
+      label: "Companies",
+      icon: <Building2 size={18} />,
+    },
+    {
+      to: "/dashboard/jobs",
+      label: "Jobs",
+      icon: <Briefcase size={18} />,
+    },
+    {
+      to: "/dashboard/applications",
+      label: "Applications",
+      icon: <FileText size={18} />,
+    },
+    {
+      to: "/dashboard/candidates",
+      label: "Talent Directory",
+      icon: <Users size={18} />,
+    },
+  ];
+
+  const adminNav = [
+    {
+      to: "/admin",
+      label: "Overview",
+      icon: <LayoutDashboard size={18} />,
+      end: true,
+    },
+    {
+      to: "/admin/users",
+      label: "Users",
+      icon: <UserCircle2 size={18} />,
+    },
+    {
+      to: "/admin/companies",
+      label: "Companies",
+      icon: <Building2 size={18} />,
+    },
+    {
+      to: "/admin/jobs",
+      label: "Jobs",
+      icon: <Briefcase size={18} />,
+    },
+    {
+      to: "/admin/applications",
+      label: "Applications",
+      icon: <FileText size={18} />,
+    },
+    {
+      to: "/admin/candidates",
+      label: "Candidates",
+      icon: <Users size={18} />,
+    },
+  ];
+
+  const navItems =
+    user.role === "admin"
+      ? adminNav
+      : user.role === "employer"
+      ? employerNav
+      : candidateNav;
+
+  const searchPlaceholder =
+    user.role === "admin"
+      ? "Search users, companies, jobs..."
+      : user.role === "employer"
+      ? "Search jobs, talent, companies..."
+      : "Search jobs, applications..."
 
   return (
     <div className="dashboard-shell">
-      <aside className="dashboard-sidebar">
-        <div className="dashboard-brand">
-          <div className="dashboard-brand-icon">
-            <Globe2 size={18} />
+      <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`}>
+        <div className="dashboard-sidebar-top">
+          <div className="dashboard-brand">
+            <div className="dashboard-brand-icon">
+              {user.role === "admin" ? <Shield size={18} /> : <Globe2 size={18} />}
+            </div>
+
+            <div className="dashboard-brand-copy">
+              <h2>International Talent Space Station</h2>
+              <p>
+                {user.role === "admin"
+                  ? "Platform control and operational oversight."
+                  : "Connecting companies to talent across Africa."}
+              </p>
+            </div>
           </div>
+
+          <button
+            className="dashboard-sidebar-close"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="dashboard-workspace-card">
+          <div className="dashboard-workspace-icon">
+            <Sparkles size={16} />
+          </div>
+
           <div>
-            <h2>International Talent Space Station</h2>
-            <p>Connecting companies to talent across Africa.</p>
+            <span className="dashboard-workspace-label">Active Workspace</span>
+            <strong className="dashboard-workspace-title">{workspaceLabel}</strong>
+            <p className="dashboard-workspace-text">
+              {user.role === "admin"
+                ? "Control users, companies, jobs, and platform-wide activity."
+                : user.role === "employer"
+                ? "Manage companies, jobs, and hiring activity."
+                : "Track opportunities, applications, and profile visibility."}
+            </p>
           </div>
         </div>
 
-        <nav className="dashboard-nav">
-          {user.role === "employer" && (
-            <>
-              <NavLink to="/dashboard" end className={navClass}>
-                <LayoutDashboard size={18} />
-                <span>Overview</span>
-              </NavLink>
+        <div className="dashboard-nav-section">
+          <span className="dashboard-nav-section-title">Navigation</span>
 
-              <NavLink to="/dashboard/companies" className={navClass}>
-                <Building2 size={18} />
-                <span>Companies</span>
-              </NavLink>
+          <nav className="dashboard-nav">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={navClass}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <div className="dashboard-nav-item-left">
+                  {item.icon}
+                  <span>{item.label}</span>
+                </div>
 
-              <NavLink to="/dashboard/jobs" className={navClass}>
-                <Briefcase size={18} />
-                <span>Jobs</span>
+                {item.badge ? (
+                  <span className="dashboard-nav-badge">{item.badge}</span>
+                ) : null}
               </NavLink>
+            ))}
+          </nav>
+        </div>
 
-              <NavLink to="/dashboard/applications" className={navClass}>
-                <FileText size={18} />
-                <span>Applications</span>
-              </NavLink>
+        <div className="dashboard-sidebar-footer">
+          <div className="dashboard-user-card">
+            <div className="dashboard-user-meta">
+              <div className="dashboard-user-avatar">
+                {(user.name || user.full_name || "U").charAt(0).toUpperCase()}
+              </div>
 
-              <NavLink to="/dashboard/candidates" className={navClass}>
-                <Users size={18} />
-                <span>Candidates</span>
-              </NavLink>
-            </>
-          )}
-
-          {user.role === "candidate" && (
-            <>
-              <NavLink to="/dashboard" end className={navClass}>
-                <LayoutDashboard size={18} />
-                <span>Overview</span>
-              </NavLink>
-
-              <NavLink to="/dashboard/opportunities" className={navClass}>
-                <Briefcase size={18} />
-                <span>Opportunities</span>
-              </NavLink>
-
-              <NavLink to="/dashboard/applications" className={navClass}>
-                <FileText size={18} />
-                <span>Applications</span>
-              </NavLink>
-
-              <NavLink to="/dashboard/profile" className={navClass}>
-                <UserCircle2 size={18} />
-                <span>Profile</span>
-              </NavLink>
-            </>
-          )}
-        </nav>
-
-        <div className="dashboard-user-card">
-          <div className="dashboard-user-meta">
-            <div className="dashboard-user-avatar">
-              {(user.name || "U").charAt(0).toUpperCase()}
+              <div className="dashboard-user-copy">
+                <strong>{user.name || user.full_name || "User"}</strong>
+                <span>{workspaceLabel}</span>
+              </div>
             </div>
 
-            <div>
-              <strong>{user.name || "User"}</strong>
-              <span>{workspaceLabel}</span>
-            </div>
+            <button className="dashboard-logout" onClick={logout}>
+              <LogOut size={16} />
+              Logout
+            </button>
           </div>
-
-          <button className="dashboard-logout" onClick={logout}>
-            <LogOut size={16} />
-            Logout
-          </button>
         </div>
       </aside>
 
+      {sidebarOpen && (
+        <button
+          className="dashboard-sidebar-backdrop"
+          onClick={() => setSidebarOpen(false)}
+          aria-label="Close sidebar backdrop"
+        />
+      )}
+
       <main className="dashboard-main">
         <div className="dashboard-topbar">
-          <div>
-            <h1>{title}</h1>
-            <p>{subtitle}</p>
+          <div className="dashboard-topbar-left">
+            <button
+              className="dashboard-menu-toggle"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open sidebar"
+            >
+              <Menu size={18} />
+            </button>
+
+            <div className="dashboard-page-heading">
+              <div className="dashboard-breadcrumbs">
+                <span>{user.role === "admin" ? "Admin" : "Dashboard"}</span>
+                <ChevronRight size={14} />
+                <span>{formattedPageName}</span>
+              </div>
+
+              <h1>{title}</h1>
+              <p>{subtitle}</p>
+            </div>
           </div>
 
-          <div className="dashboard-topbar-badge">
-            {workspaceLabel}
+          <div className="dashboard-topbar-right">
+            <div className="dashboard-search">
+              <Search size={16} />
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+              />
+            </div>
+
+            <button className="dashboard-icon-button" aria-label="Help">
+              <HelpCircle size={18} />
+            </button>
+
+            <button
+              className="dashboard-icon-button dashboard-notification-button"
+              aria-label="Notifications"
+            >
+              <Bell size={18} />
+              <span className="dashboard-notification-dot" />
+            </button>
+
+            <div className="dashboard-topbar-user">
+              <div className="dashboard-topbar-avatar">
+                {(firstName || "U").charAt(0).toUpperCase()}
+              </div>
+
+              <div className="dashboard-topbar-user-copy">
+                <strong>{firstName}</strong>
+                <span>{workspaceLabel}</span>
+              </div>
+            </div>
           </div>
         </div>
 
