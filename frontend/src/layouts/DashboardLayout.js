@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Sparkles,
   Shield,
+  Settings,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import "./../components/ui/dashboard.css";
@@ -63,91 +64,28 @@ function DashboardLayout({ title, subtitle, children }) {
     pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/-/g, " ");
 
   const candidateNav = [
-    {
-      to: "/dashboard",
-      label: "Overview",
-      icon: <LayoutDashboard size={18} />,
-      end: true,
-    },
-    {
-      to: "/dashboard/opportunities",
-      label: "Opportunities",
-      icon: <Briefcase size={18} />,
-      badge: "New",
-    },
-    {
-      to: "/dashboard/applications",
-      label: "Applications",
-      icon: <FileText size={18} />,
-    },
-    {
-      to: "/dashboard/profile",
-      label: "Profile",
-      icon: <UserCircle2 size={18} />,
-    },
+    { to: "/dashboard", label: "Overview", icon: <LayoutDashboard size={18} />, end: true },
+    { to: "/dashboard/opportunities", label: "Opportunities", icon: <Briefcase size={18} />, badge: "New" },
+    { to: "/dashboard/applications", label: "Applications", icon: <FileText size={18} /> },
+    { to: "/dashboard/profile", label: "Profile", icon: <UserCircle2 size={18} /> },
   ];
 
   const employerNav = [
-    {
-      to: "/dashboard",
-      label: "Overview",
-      icon: <LayoutDashboard size={18} />,
-      end: true,
-    },
-    {
-      to: "/dashboard/companies",
-      label: "Companies",
-      icon: <Building2 size={18} />,
-    },
-    {
-      to: "/dashboard/jobs",
-      label: "Jobs",
-      icon: <Briefcase size={18} />,
-    },
-    {
-      to: "/dashboard/applications",
-      label: "Applications",
-      icon: <FileText size={18} />,
-    },
-    {
-      to: "/dashboard/candidates",
-      label: "Talent Directory",
-      icon: <Users size={18} />,
-    },
+    { to: "/dashboard", label: "Overview", icon: <LayoutDashboard size={18} />, end: true },
+    { to: "/dashboard/company", label: "My Company", icon: <Building2 size={18} /> },
+    { to: "/dashboard/jobs", label: "Jobs", icon: <Briefcase size={18} /> },
+    { to: "/dashboard/applicants", label: "Applicants", icon: <FileText size={18} /> },
+    { to: "/dashboard/talent", label: "Talent Directory", icon: <Users size={18} /> },
+    { to: "/dashboard/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
 
   const adminNav = [
-    {
-      to: "/admin",
-      label: "Overview",
-      icon: <LayoutDashboard size={18} />,
-      end: true,
-    },
-    {
-      to: "/admin/users",
-      label: "Users",
-      icon: <UserCircle2 size={18} />,
-    },
-    {
-      to: "/admin/companies",
-      label: "Companies",
-      icon: <Building2 size={18} />,
-    },
-    {
-      to: "/admin/jobs",
-      label: "Jobs",
-      icon: <Briefcase size={18} />,
-    },
-    {
-      to: "/admin/applications",
-      label: "Applications",
-      icon: <FileText size={18} />,
-    },
-    {
-      to: "/admin/candidates",
-      label: "Candidates",
-      icon: <Users size={18} />,
-    },
+    { to: "/admin", label: "Overview", icon: <LayoutDashboard size={18} />, end: true },
+    { to: "/admin/users", label: "Users", icon: <UserCircle2 size={18} /> },
+    { to: "/admin/companies", label: "Companies", icon: <Building2 size={18} /> },
+    { to: "/admin/jobs", label: "Jobs", icon: <Briefcase size={18} /> },
+    { to: "/admin/applications", label: "Applications", icon: <FileText size={18} /> },
+    { to: "/admin/candidates", label: "Candidates", icon: <Users size={18} /> },
   ];
 
   const navItems =
@@ -161,8 +99,8 @@ function DashboardLayout({ title, subtitle, children }) {
     user.role === "admin"
       ? "Search users, companies, jobs..."
       : user.role === "employer"
-      ? "Search jobs, talent, companies..."
-      : "Search jobs, applications..."
+      ? "Search jobs, applicants, talent..."
+      : "Search jobs, applications...";
 
   return (
     <div className="dashboard-shell">
@@ -204,7 +142,7 @@ function DashboardLayout({ title, subtitle, children }) {
               {user.role === "admin"
                 ? "Control users, companies, jobs, and platform-wide activity."
                 : user.role === "employer"
-                ? "Manage companies, jobs, and hiring activity."
+                ? "Manage your company, jobs, applicants, and talent discovery."
                 : "Track opportunities, applications, and profile visibility."}
             </p>
           </div>
@@ -290,20 +228,14 @@ function DashboardLayout({ title, subtitle, children }) {
           <div className="dashboard-topbar-right">
             <div className="dashboard-search">
               <Search size={16} />
-              <input
-                type="text"
-                placeholder={searchPlaceholder}
-              />
+              <input type="text" placeholder={searchPlaceholder} />
             </div>
 
             <button className="dashboard-icon-button" aria-label="Help">
               <HelpCircle size={18} />
             </button>
 
-            <button
-              className="dashboard-icon-button dashboard-notification-button"
-              aria-label="Notifications"
-            >
+            <button className="dashboard-icon-button dashboard-notification-button" aria-label="Notifications">
               <Bell size={18} />
               <span className="dashboard-notification-dot" />
             </button>

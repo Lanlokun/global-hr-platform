@@ -45,51 +45,6 @@ function App() {
             </AdminRoute>
           }
         />
-        
-        <Route
-          path="/admin/users"
-          element={
-            <AdminRoute>
-              <AdminUsers />
-            </AdminRoute>
-          }
-        />
-        
-        <Route
-          path="/admin/companies"
-          element={
-            <AdminRoute>
-              <AdminCompanies />
-            </AdminRoute>
-          }
-        />
-        
-        <Route
-          path="/admin/jobs"
-          element={
-            <AdminRoute>
-              <AdminJobs />
-            </AdminRoute>
-          }
-        />
-        
-        <Route
-          path="/admin/applications"
-          element={
-            <AdminRoute>
-              <AdminApplications />
-            </AdminRoute>
-          }
-        />
-        
-        <Route
-          path="/admin/candidates"
-          element={
-            <AdminRoute>
-              <AdminCandidates />
-            </AdminRoute>
-          }
-        />
       </Routes>
     </>
   );

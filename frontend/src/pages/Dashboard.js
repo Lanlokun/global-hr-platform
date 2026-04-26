@@ -1,11 +1,11 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import EmployerOverview from "./employer/EmployerOverview";
-import EmployerCompanies from "./employer/EmployerCompanies";
+import EmployerCompany from "./employer/EmployerCompany";
 import EmployerJobs from "./employer/EmployerJobs";
-import EmployerApplications from "./employer/EmployerApplications";
-import EmployerCandidates from "./employer/EmployerCandidates";
-import EmployerCandidateDetail from "./employer/EmployerCandidateDetail";
+import EmployerApplicants from "./employer/EmployerApplicants";
+import EmployerTalent from "./employer/EmployerTalent";
+import EmployerSettings from "./employer/EmployerSettings";
 
 import CandidateOverview from "./candidate/CandidateOverview";
 import CandidateOpportunities from "./candidate/CandidateOpportunities";
@@ -19,11 +19,11 @@ function Dashboard() {
     return (
       <Routes>
         <Route path="/" element={<EmployerOverview />} />
-        <Route path="/companies" element={<EmployerCompanies />} />
+        <Route path="/company" element={<EmployerCompany />} />
         <Route path="/jobs" element={<EmployerJobs />} />
-        <Route path="/applications" element={<EmployerApplications />} />
-        <Route path="/candidates" element={<EmployerCandidates />} />
-        <Route path="/candidates/:id" element={<EmployerCandidateDetail />} />
+        <Route path="/applicants" element={<EmployerApplicants />} />
+        <Route path="/talent" element={<EmployerTalent />} />
+        <Route path="/settings" element={<EmployerSettings />} />
       </Routes>
     );
   }

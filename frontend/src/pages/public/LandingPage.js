@@ -126,7 +126,7 @@ function LandingPage() {
 
                     return (
                       <Geography
-                        key={geo.rsmKey}
+                            key={geo.rsmKey || geo.properties?.name || geo.id}
                         geography={geo}
                         onClick={() => {
                           if (geoName) {

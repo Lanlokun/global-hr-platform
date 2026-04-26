@@ -178,8 +178,8 @@ function CountryPage() {
               <div className="itss-info-card">
                 <h3>Key Cities</h3>
                 <div className="itss-city-grid">
-                  {countryInfo.keyCities.map((city) => (
-                    <div key={city} className="itss-city-item">
+                  {countryInfo.keyCities.map((city, idx) => (
+                    <div key={`${city}-${idx}`} className="itss-city-item">
                       {city}
                     </div>
                   ))}
@@ -189,8 +189,8 @@ function CountryPage() {
               <div className="itss-info-card">
                 <h3>Top Industries</h3>
                 <div className="itss-industry-grid">
-                  {countryInfo.topIndustries.map((industry) => (
-                    <div key={industry} className="itss-industry-item">
+                  {countryInfo.topIndustries.map((industry, idx) => (
+                    <div key={`${industry}-${idx}`} className="itss-industry-item">
                       {industry}
                     </div>
                   ))}
@@ -205,8 +205,8 @@ function CountryPage() {
               <div className="itss-info-card">
                 <h3>Talent Pool</h3>
                 <div className="itss-industry-grid">
-                  {countryInfo.talentPool.map((talent) => (
-                    <div key={talent} className="itss-industry-item">
+                  {countryInfo.talentPool.map((talent, idx) => (
+                    <div key={`${talent}-${idx}`} className="itss-industry-item">
                       {talent}
                     </div>
                   ))}
@@ -216,8 +216,8 @@ function CountryPage() {
               <div className="itss-info-card">
                 <h3>Need to Knows</h3>
                 <ul className="itss-need-list">
-                  {countryInfo.needToKnows.map((item) => (
-                    <li key={item} className="itss-need-item">
+                  {countryInfo.needToKnows.map((item, idx) => (
+                    <li key={`${item}-${idx}`} className="itss-need-item">
                       {item}
                     </li>
                   ))}
@@ -263,8 +263,8 @@ function CountryPage() {
                     <span>Availability</span>
                   </div>
 
-                  {countryInfo.salarySnapshot.map((item) => (
-                    <div key={item.role} className="itss-salary-row">
+                  {countryInfo.salarySnapshot.map((item, idx) => (
+                    <div key={`${item.role || idx}-${idx}`} className="itss-salary-row">
                       <span>{item.role}</span>
                       <span>{item.range}</span>
                       <span>{item.availability}</span>
@@ -290,8 +290,8 @@ function CountryPage() {
                     <>
                       {companies.length > 0 ? (
                         <div className="itss-jobs-grid">
-                          {companies.map((company) => (
-                            <div key={company.name} className="itss-job-card">
+                          {companies.map((company, idx) => (
+                            <div key={`${company.name || idx}-${idx}`} className="itss-job-card">
                               <h3>{company.name}</h3>
                               <p className="itss-job-company">{company.industry}</p>
                               <p className="itss-job-location">{company.location}</p>
