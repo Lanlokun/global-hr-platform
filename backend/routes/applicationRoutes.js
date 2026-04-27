@@ -13,7 +13,7 @@ const role = require("../middleware/roleMiddleware");
 
 router.get("/", auth, getApplications);
 router.post("/", auth, role("candidate"), createApplication);
-router.patch("/:id/status", auth, role("employer"), updateApplicationStatus);
+router.patch("/:id/status", auth, updateApplicationStatus);
 router.delete("/:id", auth, role("candidate"), deleteMyApplication);
 
 module.exports = router;

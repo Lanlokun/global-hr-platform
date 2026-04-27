@@ -1,14 +1,33 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
+import {
+  Mail,
+  MapPin,
+  Briefcase,
+  UserCircle2,
+  X,
+  ExternalLink,
+  Phone,
+  Globe2,
+  GraduationCap,
+  Award,
+  FileText,
+} from "lucide-react";
+
 import api from "../../services/api";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Badge from "../../components/ui/Badge";
+import Button from "../../components/ui/Button";
 
 function EmployerApplicants() {
   const [applicants, setApplicants] = useState([]);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const applicantsPerPage = 16;
+
   const [filters, setFilters] = useState({
     search: "",
     status: "",
@@ -38,6 +57,10 @@ function EmployerApplicants() {
       await api.patch(`/api/applications/${id}/status`, { status }, authHeaders);
       toast.success("Application status updated");
       fetchApplicants();
+
+      setSelectedApplicant((prev) =>
+        prev && prev.id === id ? { ...prev, status } : prev
+      );
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to update status");
     }
@@ -59,7 +82,9 @@ function EmployerApplicants() {
         item.candidate_name?.toLowerCase().includes(q) ||
         item.candidate_email?.toLowerCase().includes(q) ||
         item.job_title?.toLowerCase().includes(q) ||
-        item.skills?.toLowerCase().includes(q);
+        item.skills?.toLowerCase().includes(q) ||
+        item.country?.toLowerCase().includes(q) ||
+        item.professional_title?.toLowerCase().includes(q);
 
       const matchesStatus =
         !filters.status || (item.status || "pending") === filters.status;
@@ -68,32 +93,199 @@ function EmployerApplicants() {
     });
   }, [applicants, filters]);
 
+  const totalPages = Math.ceil(filteredApplicants.length / applicantsPerPage);
+
+  const paginatedApplicants = useMemo(() => {
+    const start = (currentPage - 1) * applicantsPerPage;
+    return filteredApplicants.slice(start, start + applicantsPerPage);
+  }, [filteredApplicants, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.search, filters.status]);
+
   return (
     <DashboardLayout
       title="Applicants"
-      subtitle="Review applications submitted to your jobs."
+      subtitle="Review complete candidate profiles for your job applications."
     >
       <PageHeader
-        title="Applicant Pipeline"
-        subtitle="This page only includes candidates who applied to your company’s jobs."
-        action={<Badge variant="default">{filteredApplicants.length} applicants</Badge>}
+        action={
+          <Badge variant="default">{filteredApplicants.length} applicants</Badge>
+        }
       />
 
-      <Card title="Search and Filter" subtitle="Search by candidate, job, or status.">
-        <div className="ui-toolbar">
+        <div style={styles.filterBar}>
+          <div style={styles.searchBox}>
+            <Input
+              label=""
+              placeholder="Search applicants by name, job, skill, or country..."
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            />
+          </div>
+
+          <div style={styles.statusBox}>
+            <Input
+              label=""
+              as="select"
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              options={[
+                { value: "", label: "All statuses" },
+                { value: "pending", label: "Pending" },
+                { value: "reviewed", label: "Reviewed" },
+                { value: "shortlisted", label: "Shortlisted" },
+                { value: "rejected", label: "Rejected" },
+              ]}
+            />
+          </div>
+        </div>
+
+      <div style={{ height: 20 }} />
+
+      <div style={styles.applicantGrid}>
+        {filteredApplicants.length === 0 ? (
+          <Card>
+            <div style={styles.emptyState}>
+              <UserCircle2 size={42} />
+              <h3>No applicants found</h3>
+              <p>Try changing your search or status filter.</p>
+            </div>
+          </Card>
+        ) : (
+          paginatedApplicants.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              style={styles.applicantCard}
+              onClick={() => setSelectedApplicant(item)}
+            >
+              <div style={styles.cardTop}>
+                <Avatar applicant={item} />
+
+                <div style={{ flex: 1 }}>
+                  <h3 style={styles.name}>
+                    {item.candidate_name || "Unknown candidate"}
+                  </h3>
+                  <p style={styles.title}>
+                    {item.professional_title || "Applicant"}
+                  </p>
+                </div>
+
+                <Badge variant={statusVariant(item.status)}>
+                  {item.status || "pending"}
+                </Badge>
+              </div>
+
+              <div style={styles.metaList}>
+               <span style={styles.metaItem}>
+                  <Mail size={15} />
+                  <span>{item.candidate_email || "No email"}</span>
+                </span>
+
+                <span style={styles.metaItem}>
+                  <Briefcase size={15} />
+                  <span>{item.job_title || "Unknown job"}</span>
+                </span>
+
+                <span style={styles.metaItem}>
+                  <MapPin size={15} />
+                  <span>{item.country || "Country not set"}</span>
+                </span>
+
+              </div>
+
+            <div style={styles.skillTags}>
+              {(item.skills || "").split(",").map((skill, i) => (
+                <span key={i} style={styles.skillTag}>
+                  {skill.trim()}
+                </span>
+              ))}
+            </div>
+              <div style={styles.cardFooter}>
+                <span>View full profile</span>
+                <ExternalLink size={15} />
+              </div>
+            </button>
+          ))
+        )}
+      </div>
+
+
+        {filteredApplicants.length > applicantsPerPage && (
+        <div style={styles.pagination}>
+          <Button
+            variant="secondary"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((page) => page - 1)}
+          >
+            Previous
+          </Button>
+
+          <span style={styles.pageInfo}>
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <Button
+            variant="secondary"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
+      {selectedApplicant && (
+        <ApplicantModal
+          applicant={selectedApplicant}
+          statusVariant={statusVariant}
+          updateStatus={updateStatus}
+          onClose={() => setSelectedApplicant(null)}
+        />
+      )}
+    </DashboardLayout>
+  );
+}
+
+function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
+  const resumeUrl = applicant.resume_url || applicant.application_resume_url;
+
+  return (
+    <div style={styles.modalOverlay}>
+      <div style={styles.modal}>
+        <div style={styles.modalHeader}>
+          <div style={styles.modalIdentity}>
+            <Avatar applicant={applicant} large />
+
+            <div>
+              <h2 style={styles.modalName}>
+                {applicant.candidate_name || "Unknown candidate"}
+              </h2>
+              <p style={styles.modalRole}>
+                {applicant.professional_title || "Applicant"}
+              </p>
+              <p style={styles.modalSubText}>
+                Applied for {applicant.job_title || "Unknown job"}
+              </p>
+            </div>
+          </div>
+
+          <button style={styles.closeButton} onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+
+        <div style={styles.modalStatusRow}>
+          <Badge variant={statusVariant(applicant.status)}>
+            {applicant.status || "pending"}
+          </Badge>
+
           <Input
-            label="Search"
-            placeholder="Search applicants"
-            value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-          />
-          <Input
-            label="Status"
             as="select"
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            value={applicant.status || "pending"}
+            onChange={(e) => updateStatus(applicant.id, e.target.value)}
             options={[
-              { value: "", label: "All statuses" },
               { value: "pending", label: "Pending" },
               { value: "reviewed", label: "Reviewed" },
               { value: "shortlisted", label: "Shortlisted" },
@@ -101,66 +293,527 @@ function EmployerApplicants() {
             ]}
           />
         </div>
-      </Card>
 
-      <div style={{ height: 20 }} />
+        <Section title="Contact Information" icon={<Phone size={18} />}>
+          <InfoGrid
+            items={[
+              ["Email", applicant.candidate_email],
+              ["Phone", applicant.phone],
+              ["Country", applicant.country],
+              ["City", applicant.city],
+              ["Address", applicant.address],
+            ]}
+          />
+        </Section>
 
-      <Card title="Applicants Table" subtitle="Applications tied only to your jobs.">
-        <div className="ui-table-wrap">
-          <table className="ui-table">
-            <thead>
-              <tr>
-                <th>Candidate</th>
-                <th>Email</th>
-                <th>Job</th>
-                <th>Country</th>
-                <th>Skills</th>
-                <th>Status</th>
-                <th>Update</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredApplicants.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="ui-table-empty">
-                    No applicants found.
-                  </td>
-                </tr>
-              ) : (
-                filteredApplicants.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.candidate_name || "Unknown candidate"}</td>
-                    <td>{item.candidate_email || "N/A"}</td>
-                    <td>{item.job_title || "Unknown job"}</td>
-                    <td>{item.country || "N/A"}</td>
-                    <td>{item.skills || "N/A"}</td>
-                    <td>
-                      <Badge variant={statusVariant(item.status)}>
-                        {item.status || "pending"}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Input
-                        as="select"
-                        value={item.status || "pending"}
-                        onChange={(e) => updateStatus(item.id, e.target.value)}
-                        options={[
-                          { value: "pending", label: "Pending" },
-                          { value: "reviewed", label: "Reviewed" },
-                          { value: "shortlisted", label: "Shortlisted" },
-                          { value: "rejected", label: "Rejected" },
-                        ]}
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        <Section title="Professional Profile" icon={<Briefcase size={18} />}>
+          <InfoGrid
+            items={[
+              ["Title", applicant.professional_title],
+              ["Years of Experience", applicant.years_of_experience],
+              ["Languages", applicant.languages],
+              ["Skills", applicant.skills],
+            ]}
+          />
+
+          <div style={{ height: 12 }} />
+
+          <TextBlock
+            title="Professional Summary"
+            text={applicant.professional_summary}
+            empty="No professional summary provided."
+          />
+        </Section>
+
+        <Section title="Job Preferences" icon={<Globe2 size={18} />}>
+          <InfoGrid
+            items={[
+              ["Desired Role", applicant.desired_job_title],
+              ["Employment Type", applicant.preferred_employment_type],
+              ["Work Mode", applicant.preferred_work_mode],
+              [
+                "Expected Salary",
+                applicant.expected_salary
+                  ? `${applicant.salary_currency || ""} ${applicant.expected_salary}`
+                  : "N/A",
+              ],
+              ["Notice Period", applicant.notice_period],
+              ["Availability", applicant.availability],
+              ["Work Authorization", applicant.work_authorization],
+              [
+                "Willing to Relocate",
+                applicant.willing_to_relocate ? "Yes" : "No",
+              ],
+            ]}
+          />
+        </Section>
+
+        <Section title="Experience" icon={<Briefcase size={18} />}>
+          <TimelineList
+            items={applicant.experience}
+            emptyText="No work experience added."
+            renderItem={(item) => (
+              <>
+                <strong>{item.job_title || "Role not specified"}</strong>
+                <p>{item.company || "Company not specified"}</p>
+                <p>
+                  {item.start_date || "Start date"} -{" "}
+                  {item.currently_working ? "Present" : item.end_date || "End date"}
+                </p>
+                <p>{item.description || "No description provided."}</p>
+              </>
+            )}
+          />
+        </Section>
+
+        <Section title="Education" icon={<GraduationCap size={18} />}>
+          <TimelineList
+            items={applicant.education}
+            emptyText="No education added."
+            renderItem={(item) => (
+              <>
+                <strong>{item.degree || "Degree not specified"}</strong>
+                <p>{item.institution || "Institution not specified"}</p>
+                <p>{item.field_of_study || "Field not specified"}</p>
+                <p>
+                  {item.start_year || "Start year"} - {item.end_year || "End year"}
+                </p>
+                {item.grade && <p>Grade: {item.grade}</p>}
+                {item.description && <p>{item.description}</p>}
+              </>
+            )}
+          />
+        </Section>
+
+        <Section title="Certifications" icon={<Award size={18} />}>
+          <TimelineList
+            items={applicant.certifications}
+            emptyText="No certifications added."
+            renderItem={(item) => (
+              <>
+                <strong>{item.name || "Certification not specified"}</strong>
+                <p>{item.issuer || "Issuer not specified"}</p>
+                <p>{item.issue_date || "Issue date not set"}</p>
+                {item.credential_url && (
+                  <a
+                    href={item.credential_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={styles.link}
+                  >
+                    View credential
+                  </a>
+                )}
+              </>
+            )}
+          />
+        </Section>
+
+        <Section title="Application Materials" icon={<FileText size={18} />}>
+          <TextBlock
+            title="Cover Letter"
+            text={applicant.cover_letter}
+            empty="No cover letter submitted."
+          />
+
+          <div style={{ height: 12 }} />
+
+          <div style={styles.linkGrid}>
+            {applicant.linkedin_url && (
+              <a href={applicant.linkedin_url} target="_blank" rel="noreferrer">
+                LinkedIn
+              </a>
+            )}
+            {applicant.github_url && (
+              <a href={applicant.github_url} target="_blank" rel="noreferrer">
+                GitHub
+              </a>
+            )}
+            {applicant.portfolio_url && (
+              <a href={applicant.portfolio_url} target="_blank" rel="noreferrer">
+                Portfolio
+              </a>
+            )}
+            {resumeUrl && (
+              <a href={resumeUrl} target="_blank" rel="noreferrer">
+                Resume
+              </a>
+            )}
+          </div>
+
+          {!applicant.linkedin_url &&
+            !applicant.github_url &&
+            !applicant.portfolio_url &&
+            !resumeUrl && <p style={styles.muted}>No links provided.</p>}
+        </Section>
+
+        <div style={styles.modalActions}>
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
         </div>
-      </Card>
-    </DashboardLayout>
+      </div>
+    </div>
   );
 }
+
+function Avatar({ applicant, large = false }) {
+  const size = large ? 72 : 48;
+
+  if (applicant.profile_image) {
+    return (
+      <img
+        src={applicant.profile_image}
+        alt={applicant.candidate_name || "Candidate"}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: large ? 24 : 16,
+          objectFit: "cover",
+          border: "1px solid #e5e7eb",
+        }}
+      />
+    );
+  }
+
+  return (
+    <div
+      style={{
+        ...styles.avatar,
+        width: size,
+        height: size,
+        borderRadius: large ? 24 : 16,
+        fontSize: large ? 26 : 18,
+      }}
+    >
+      {(applicant.candidate_name || "U").charAt(0).toUpperCase()}
+    </div>
+  );
+}
+
+function Section({ title, icon, children }) {
+  return (
+    <div style={styles.section}>
+      <div style={styles.sectionHeader}>
+        {icon}
+        <h4>{title}</h4>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function InfoGrid({ items }) {
+  return (
+    <div style={styles.infoGrid}>
+      {items.map(([label, value]) => (
+        <div key={label} style={styles.infoBox}>
+          <span style={styles.infoLabel}>{label}</span>
+          <strong style={styles.infoValue}>{value || "N/A"}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TimelineList({ items, emptyText, renderItem }) {
+  const safeItems = Array.isArray(items) ? items : [];
+
+  if (safeItems.length === 0) {
+    return <p style={styles.muted}>{emptyText}</p>;
+  }
+
+  return (
+    <div style={styles.timelineList}>
+      {safeItems.map((item, index) => (
+        <div key={index} style={styles.timelineItem}>
+          {renderItem(item)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TextBlock({ title, text, empty }) {
+  return (
+    <div style={styles.textBlock}>
+      <strong>{title}</strong>
+      <p>{text || empty}</p>
+    </div>
+  );
+}
+
+const styles = {
+applicantGrid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+  gap: 18,
+},
+  applicantCard: {
+    width: "100%",
+    textAlign: "left",
+    border: "1px solid #e5e7eb",
+    background: "#fff",
+    borderRadius: 22,
+    padding: 18,
+    cursor: "pointer",
+    boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
+  },
+  cardTop: {
+    display: "flex",
+    gap: 14,
+    alignItems: "flex-start",
+  },
+  avatar: {
+    background: "linear-gradient(135deg, #111827, #2563eb)",
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 800,
+  },
+  name: {
+    margin: 0,
+    fontSize: 17,
+    color: "#111827",
+  },
+  title: {
+    margin: "4px 0 0",
+    color: "#6b7280",
+    fontSize: 14,
+  },
+metaList: {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  marginTop: 14,
+},
+skillsPreview: {
+  marginTop: 14,
+  padding: 12,
+  borderRadius: 14,
+  background: "#f9fafb",
+  color: "#4b5563",
+  fontSize: 14,
+  lineHeight: 1.5,
+  wordBreak: "break-word",
+},
+
+skillTags: {
+  display: "flex",
+  flexWrap: "wrap",
+  gap: 6,
+  marginTop: 10,
+},
+
+skillTag: {
+  padding: "6px 10px",
+  borderRadius: 10,
+  background: "#e5e7eb",
+  fontSize: 12,
+  fontWeight: 600,
+},
+
+  metaItem: {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  fontSize: 14,
+  color: "#374151",
+  lineHeight: 1.4,
+  wordBreak: "break-word",
+},
+  cardFooter: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 14,
+    color: "#2563eb",
+    fontWeight: 700,
+    fontSize: 14,
+  },
+  emptyState: {
+    textAlign: "center",
+    padding: "45px 20px",
+    color: "#6b7280",
+  },
+  modalOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(17, 24, 39, 0.62)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+    zIndex: 1000,
+  },
+  modal: {
+    width: "100%",
+    maxWidth: 960,
+    maxHeight: "90vh",
+    overflowY: "auto",
+    background: "#fff",
+    borderRadius: 26,
+    padding: 26,
+    boxShadow: "0 30px 80px rgba(0,0,0,0.28)",
+  },
+  modalHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 18,
+    marginBottom: 18,
+  },
+  modalIdentity: {
+    display: "flex",
+    alignItems: "center",
+    gap: 16,
+  },
+  modalName: {
+    margin: 0,
+    fontSize: 26,
+    color: "#111827",
+  },
+  modalRole: {
+    margin: "5px 0 0",
+    color: "#6b7280",
+  },
+  modalSubText: {
+    margin: "5px 0 0",
+    color: "#2563eb",
+    fontWeight: 700,
+  },
+  closeButton: {
+    width: 40,
+    height: 40,
+    border: "none",
+    borderRadius: "50%",
+    background: "#f3f4f6",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalStatusRow: {
+    display: "grid",
+    gridTemplateColumns: "160px minmax(220px, 1fr)",
+    gap: 14,
+    alignItems: "end",
+    marginBottom: 18,
+  },
+  section: {
+    padding: 16,
+    borderRadius: 18,
+    border: "1px solid #e5e7eb",
+    marginTop: 14,
+  },
+  sectionHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 14,
+    color: "#111827",
+  },
+
+  infoGrid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+  gap: 12,
+},
+
+infoBox: {
+  display: "flex",
+  flexDirection: "column",
+  gap: 6,
+  minHeight: 72,
+  padding: 14,
+  borderRadius: 14,
+  background: "#f9fafb",
+  border: "1px solid #e5e7eb",
+},
+
+filterBar: {
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr) 220px",
+  gap: 12,
+  padding: 14,
+  borderRadius: 18,
+  background: "#fff",
+  border: "1px solid #e5e7eb",
+  boxShadow: "0 10px 25px rgba(15, 23, 42, 0.04)",
+  marginBottom: 20,
+},
+
+searchBox: {
+  minWidth: 0,
+},
+
+statusBox: {
+  minWidth: 180,
+},
+
+pagination: {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  gap: 12,
+  marginTop: 24,
+},
+
+pageInfo: {
+  fontSize: 14,
+  fontWeight: 700,
+  color: "#374151",
+},
+
+
+infoLabel: {
+  fontSize: 12,
+  fontWeight: 700,
+  color: "#6b7280",
+  textTransform: "uppercase",
+  letterSpacing: 0.4,
+},
+
+infoValue: {
+  fontSize: 14,
+  color: "#111827",
+  lineHeight: 1.4,
+  wordBreak: "break-word",
+},
+  timelineList: {
+    display: "grid",
+    gap: 12,
+  },
+  timelineItem: {
+    padding: 14,
+    borderRadius: 16,
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+  },
+  textBlock: {
+    padding: 14,
+    borderRadius: 16,
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+  },
+  linkGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  link: {
+    color: "#2563eb",
+    fontWeight: 700,
+  },
+  muted: {
+    color: "#6b7280",
+    margin: 0,
+  },
+  modalActions: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: 20,
+  },
+};
 
 export default EmployerApplicants;

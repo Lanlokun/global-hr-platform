@@ -37,6 +37,7 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+
 // Core middleware first
 app.use(cors(corsOptions));
 app.options("/{*splat}", cors(corsOptions));
@@ -54,11 +55,13 @@ const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const authRoutes = require("./routes/authRoutes");
 const candidateManagementRoutes = require("./routes/candidateManagementRoutes");
+const employerRoutes = require("./routes/employerRoutes");
+
 
 app.get("/", (req, res) => {
   res.send("Global HR Platform API running");
 });
-
+app.use("/api/employer", employerRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/profile", userProfileRoutes);
 app.use("/api/uploads", uploadRoutes);
