@@ -61,7 +61,10 @@ function DashboardLayout({ title, subtitle, children }) {
   }, [location.pathname]);
 
   const formattedPageName =
-    pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/-/g, " ");
+    pageName.charAt(0).toUpperCase() +
+    pageName.slice(1).replace(/-/g, " ");
+
+  /* ================= NAV ================= */
 
   const candidateNav = [
     { to: "/dashboard", label: "Overview", icon: <LayoutDashboard size={18} />, end: true },
@@ -104,6 +107,7 @@ function DashboardLayout({ title, subtitle, children }) {
 
   return (
     <div className="dashboard-shell">
+      {/* ================= SIDEBAR ================= */}
       <aside className={`dashboard-sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="dashboard-sidebar-top">
           <div className="dashboard-brand">
@@ -112,11 +116,12 @@ function DashboardLayout({ title, subtitle, children }) {
             </div>
 
             <div className="dashboard-brand-copy">
-              <h2>International Talent Space Station</h2>
+              {/* 🔥 BRAND UPDATED */}
+              <h2>SGET International Talent Space Station</h2>
               <p>
                 {user.role === "admin"
-                  ? "Platform control and operational oversight."
-                  : "Connecting companies to talent across Africa."}
+                  ? "SGET platform control and system oversight."
+                  : "SGET connecting companies to talent across Africa."}
               </p>
             </div>
           </div>
@@ -124,12 +129,12 @@ function DashboardLayout({ title, subtitle, children }) {
           <button
             className="dashboard-sidebar-close"
             onClick={() => setSidebarOpen(false)}
-            aria-label="Close sidebar"
           >
             <X size={18} />
           </button>
         </div>
 
+        {/* ================= WORKSPACE ================= */}
         <div className="dashboard-workspace-card">
           <div className="dashboard-workspace-icon">
             <Sparkles size={16} />
@@ -137,17 +142,21 @@ function DashboardLayout({ title, subtitle, children }) {
 
           <div>
             <span className="dashboard-workspace-label">Active Workspace</span>
-            <strong className="dashboard-workspace-title">{workspaceLabel}</strong>
+            <strong className="dashboard-workspace-title">
+              {workspaceLabel}
+            </strong>
+
             <p className="dashboard-workspace-text">
               {user.role === "admin"
-                ? "Control users, companies, jobs, and platform-wide activity."
+                ? "Manage users, companies, jobs, and system operations."
                 : user.role === "employer"
-                ? "Manage your company, jobs, applicants, and talent discovery."
-                : "Track opportunities, applications, and profile visibility."}
+                ? "Manage your company, jobs, and discover talent."
+                : "Track jobs, applications, and grow your profile."}
             </p>
           </div>
         </div>
 
+        {/* ================= NAV ================= */}
         <div className="dashboard-nav-section">
           <span className="dashboard-nav-section-title">Navigation</span>
 
@@ -165,19 +174,24 @@ function DashboardLayout({ title, subtitle, children }) {
                   <span>{item.label}</span>
                 </div>
 
-                {item.badge ? (
-                  <span className="dashboard-nav-badge">{item.badge}</span>
-                ) : null}
+                {item.badge && (
+                  <span className="dashboard-nav-badge">
+                    {item.badge}
+                  </span>
+                )}
               </NavLink>
             ))}
           </nav>
         </div>
 
+        {/* ================= FOOTER ================= */}
         <div className="dashboard-sidebar-footer">
           <div className="dashboard-user-card">
             <div className="dashboard-user-meta">
               <div className="dashboard-user-avatar">
-                {(user.name || user.full_name || "U").charAt(0).toUpperCase()}
+                {(user.name || user.full_name || "U")
+                  .charAt(0)
+                  .toUpperCase()}
               </div>
 
               <div className="dashboard-user-copy">
@@ -194,21 +208,21 @@ function DashboardLayout({ title, subtitle, children }) {
         </div>
       </aside>
 
+      {/* ================= BACKDROP ================= */}
       {sidebarOpen && (
         <button
           className="dashboard-sidebar-backdrop"
           onClick={() => setSidebarOpen(false)}
-          aria-label="Close sidebar backdrop"
         />
       )}
 
+      {/* ================= MAIN ================= */}
       <main className="dashboard-main">
         <div className="dashboard-topbar">
           <div className="dashboard-topbar-left">
             <button
               className="dashboard-menu-toggle"
               onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
             >
               <Menu size={18} />
             </button>
@@ -231,11 +245,11 @@ function DashboardLayout({ title, subtitle, children }) {
               <input type="text" placeholder={searchPlaceholder} />
             </div>
 
-            <button className="dashboard-icon-button" aria-label="Help">
+            <button className="dashboard-icon-button">
               <HelpCircle size={18} />
             </button>
 
-            <button className="dashboard-icon-button dashboard-notification-button" aria-label="Notifications">
+            <button className="dashboard-icon-button dashboard-notification-button">
               <Bell size={18} />
               <span className="dashboard-notification-dot" />
             </button>

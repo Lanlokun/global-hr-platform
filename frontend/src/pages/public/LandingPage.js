@@ -69,7 +69,7 @@ function LandingPage() {
     <>
       <div className="itss-page">
         <nav className="itss-nav">
-          <div className="itss-brand">International Talent Space Station</div>
+          <div className="itss-brand"> SGET International Talent Space Station</div>
 
           <div className="itss-nav-actions">
             <Link className="itss-link" to="/login">
@@ -192,7 +192,7 @@ function LandingPage() {
 
       <footer className="itss-footer">
         <div className="itss-footer-bottom">
-          © {new Date().getFullYear()} International Talent Space Station. All rights reserved.
+          © {new Date().getFullYear()} SGET International Talent Space Station. All rights reserved.
         </div>
       </footer>
     </>
