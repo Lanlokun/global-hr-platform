@@ -1,0 +1,113 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    role VARCHAR(50),
+    country VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE users 
+ADD COLUMN IF NOT EXISTS password VARCHAR(255);
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS professional_title VARCHAR(150);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS skills TEXT; 
+
+ALTER TABLE users
+
+-- basic info
+ADD COLUMN IF NOT EXISTS phone VARCHAR(50),
+ADD COLUMN IF NOT EXISTS city VARCHAR(100),
+ADD COLUMN IF NOT EXISTS address TEXT,
+ADD COLUMN IF NOT EXISTS date_of_birth DATE,
+ADD COLUMN IF NOT EXISTS gender VARCHAR(30),
+ADD COLUMN IF NOT EXISTS profile_image TEXT,
+
+-- professional
+ADD COLUMN IF NOT EXISTS years_of_experience INTEGER,
+ADD COLUMN IF NOT EXISTS professional_summary TEXT,
+ADD COLUMN IF NOT EXISTS languages TEXT,
+
+-- structured JSON fields
+ADD COLUMN IF NOT EXISTS experience JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS education JSONB DEFAULT '[]'::jsonb,
+ADD COLUMN IF NOT EXISTS certifications JSONB DEFAULT '[]'::jsonb,
+
+-- job preferences
+ADD COLUMN IF NOT EXISTS desired_job_title VARCHAR(150),
+ADD COLUMN IF NOT EXISTS preferred_employment_type VARCHAR(50),
+ADD COLUMN IF NOT EXISTS preferred_work_mode VARCHAR(50),
+ADD COLUMN IF NOT EXISTS expected_salary NUMERIC(12,2),
+ADD COLUMN IF NOT EXISTS salary_currency VARCHAR(10) DEFAULT 'USD',
+ADD COLUMN IF NOT EXISTS notice_period VARCHAR(100),
+ADD COLUMN IF NOT EXISTS availability VARCHAR(100),
+ADD COLUMN IF NOT EXISTS work_authorization VARCHAR(150),
+ADD COLUMN IF NOT EXISTS willing_to_relocate BOOLEAN DEFAULT FALSE,
+
+-- links
+ADD COLUMN IF NOT EXISTS linkedin_url TEXT,
+ADD COLUMN IF NOT EXISTS github_url TEXT,
+ADD COLUMN IF NOT EXISTS portfolio_url TEXT,
+ADD COLUMN IF NOT EXISTS resume_url TEXT,
+
+-- timestamps
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+CREATE TABLE IF NOT EXISTS companies (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    industry VARCHAR(100),
+    country VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE companies
+ADD COLUMN IF NOT EXISTS description TEXT,
+ADD COLUMN IF NOT EXISTS website TEXT,
+ADD COLUMN IF NOT EXISTS logo TEXT,
+ADD COLUMN IF NOT EXISTS size VARCHAR(50),
+ADD COLUMN IF NOT EXISTS founded_year INTEGER;
+
+CREATE TABLE IF NOT EXISTS jobs (
+    id SERIAL PRIMARY KEY,
+    company_id INTEGER REFERENCES companies(id) ON DELETE CASCADE,
+    title VARCHAR(150) NOT NULL,
+    description TEXT,
+    location VARCHAR(100),
+    salary_range VARCHAR(100),
+    remote BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE jobs
+ADD COLUMN IF NOT EXISTS employment_type VARCHAR(50),
+ADD COLUMN IF NOT EXISTS experience_level VARCHAR(50),
+ADD COLUMN IF NOT EXISTS required_skills TEXT,
+ADD COLUMN IF NOT EXISTS salary_min NUMERIC,
+ADD COLUMN IF NOT EXISTS salary_max NUMERIC,
+ADD COLUMN IF NOT EXISTS currency VARCHAR(10),
+ADD COLUMN IF NOT EXISTS expires_at TIMESTAMP;
+
+CREATE TABLE IF NOT EXISTS applications (
+    id SERIAL PRIMARY KEY,
+    job_id INTEGER REFERENCES jobs(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    status VARCHAR(50) DEFAULT 'pending',
+    cover_letter TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ALTER TABLE applications
+ADD COLUMN IF NOT EXISTS resume_url TEXT,
+ADD COLUMN IF NOT EXISTS recruiter_notes TEXT,
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+
+CREATE INDEX IF NOT EXISTS idx_users_country ON users(country);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+
+CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON jobs(company_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_location ON jobs(location);
+
+CREATE INDEX IF NOT EXISTS idx_applications_user_id ON applications(user_id);
+CREATE INDEX IF NOT EXISTS idx_applications_job_id ON applications(job_id);

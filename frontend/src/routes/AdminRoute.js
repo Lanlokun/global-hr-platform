@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 
-function ProtectedRoute({ children, allowedRoles = [] }) {
+function AdminRoute({ children }) {
   const token = localStorage.getItem("token");
 
   let user = null;
@@ -13,23 +13,19 @@ function ProtectedRoute({ children, allowedRoles = [] }) {
 
   const validRoles = ["admin", "employer", "candidate"];
 
-  if (!token) {
-    return <Navigate to="/" replace />;
-  }
-
-  // If user object is malformed or has an unexpected role, clear auth and send to login
-  if (!user || !user.role || !validRoles.includes(user.role)) {
+  // If there's no token or user is malformed, clear auth and send to login
+  if (!token || !user || !user.role || !validRoles.includes(user.role)) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     return <Navigate to="/login" replace />;
   }
 
-  // If allowedRoles is set, enforce it
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+  // Non-admin users should not access admin routes
+  if (user.role !== "admin") {
     return <Navigate to="/dashboard" replace />;
   }
 
   return children;
 }
 
-export default ProtectedRoute;
+export default AdminRoute;

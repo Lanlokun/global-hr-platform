@@ -52,6 +52,20 @@ exports.updateApplicationStatus = async (req, res) => {
   const { status } = req.body;
 
   try {
+    if (req.user.role === "employer") {
+      const ownerCheck = await db.query(
+        `SELECT a.id
+         FROM applications a
+         JOIN jobs j ON a.job_id = j.id
+         WHERE a.id = $1 AND j.company_id = $2`,
+        [id, req.user.company_id]
+      );
+
+      if (ownerCheck.rows.length === 0) {
+        return res.status(403).json({ error: "Not allowed to update this application" });
+      }
+    }
+
     const result = await db.query(
       `UPDATE applications
        SET status = $1
