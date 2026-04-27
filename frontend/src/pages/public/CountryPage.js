@@ -1,21 +1,56 @@
 import { motion } from "framer-motion";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import "../../components/marketing/landing.css";
+import "../../components/marketing/country.css";
 import countryData, { countryAliases } from "../../data/countryData";
 
 const API_URL = process.env.REACT_APP_API_URL || "";
+const ITEMS_PER_PAGE = 8;
+
+function Pagination({ currentPage, totalPages, onPageChange }) {
+  if (!totalPages || totalPages <= 1) return null;
+
+  return (
+    <div className="itss-pagination">
+      <button
+        type="button"
+        disabled={currentPage === 1}
+        onClick={() => onPageChange(currentPage - 1)}
+      >
+        Previous
+      </button>
+
+      <span>
+        Page {currentPage} of {totalPages}
+      </span>
+
+      <button
+        type="button"
+        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(currentPage + 1)}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
 
 function CountryPage() {
   const { country } = useParams();
   const navigate = useNavigate();
 
   const [viewerType, setViewerType] = useState("applicant");
+
   const [jobs, setJobs] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [candidates, setCandidates] = useState([]);
-  const [loadingJobs, setLoadingJobs] = useState(true);
-  const [loadingCandidates, setLoadingCandidates] = useState(true);
+
+  const [loading, setLoading] = useState(true);
+
+  const [jobsPage, setJobsPage] = useState(1);
+  const [companiesPage, setCompaniesPage] = useState(1);
+  const [candidatesPage, setCandidatesPage] = useState(1);
 
   const resolvedSlug = useMemo(() => {
     if (!country) return "";
@@ -33,90 +68,72 @@ function CountryPage() {
   useEffect(() => {
     if (!countryInfo) return;
 
-    const fetchApplicantData = async () => {
+    const fetchCountryMarket = async () => {
       try {
-        setLoadingJobs(true);
+        setLoading(true);
 
-        const jobsRes = await fetch(
-          `${API_URL}/api/jobs?country=${encodeURIComponent(countryInfo.name)}`
+        const response = await fetch(
+          `${API_URL}/api/public/country-market?country=${encodeURIComponent(
+            countryInfo.name
+          )}`
         );
 
-        if (!jobsRes.ok) {
-          throw new Error("Failed to fetch jobs");
+        if (!response.ok) {
+          throw new Error("Failed to fetch country market data");
         }
 
-        const jobsData = await jobsRes.json();
-        const jobsList = Array.isArray(jobsData.jobs) ? jobsData.jobs : [];
+        const data = await response.json();
 
-        setJobs(jobsList);
-
-        const uniqueCompanies = Array.from(
-          new Map(
-            jobsList
-              .filter((job) => job.company)
-              .map((job) => [
-                job.company,
-                {
-                  name: job.company,
-                  industry: job.industry || "General",
-                  location: job.location || countryInfo.name,
-                },
-              ])
-          ).values()
-        );
-
-        setCompanies(uniqueCompanies);
+        setJobs(Array.isArray(data.jobs) ? data.jobs : []);
+        setCompanies(Array.isArray(data.companies) ? data.companies : []);
+        setCandidates(Array.isArray(data.candidates) ? data.candidates : []);
       } catch (error) {
-        console.error("Error fetching jobs:", error);
+        console.error("Error fetching country market:", error);
         setJobs([]);
         setCompanies([]);
-      } finally {
-        setLoadingJobs(false);
-      }
-    };
-
-    const fetchCompanyData = async () => {
-      try {
-        setLoadingCandidates(true);
-
-        const candidatesRes = await fetch(
-          `${API_URL}/api/candidates?country=${encodeURIComponent(countryInfo.name)}`
-        );
-
-        if (!candidatesRes.ok) {
-          throw new Error("Failed to fetch candidates");
-        }
-
-        const candidatesData = await candidatesRes.json();
-        setCandidates(
-          Array.isArray(candidatesData.candidates) ? candidatesData.candidates : []
-        );
-      } catch (error) {
-        console.error("Error fetching candidates:", error);
         setCandidates([]);
       } finally {
-        setLoadingCandidates(false);
+        setLoading(false);
       }
     };
 
-    fetchApplicantData();
-    fetchCompanyData();
+    fetchCountryMarket();
   }, [countryInfo]);
 
-  if (!countryInfo) {
-    return null;
-  }
+  useEffect(() => {
+    setJobsPage(1);
+    setCompaniesPage(1);
+    setCandidatesPage(1);
+  }, [countryInfo, viewerType]);
+
+  const paginate = (items, page) => {
+    const start = (page - 1) * ITEMS_PER_PAGE;
+    return items.slice(start, start + ITEMS_PER_PAGE);
+  };
+
+  const paginatedCompanies = paginate(companies, companiesPage);
+  const paginatedJobs = paginate(jobs, jobsPage);
+  const paginatedCandidates = paginate(candidates, candidatesPage);
+
+  const companiesTotalPages = Math.ceil(companies.length / ITEMS_PER_PAGE);
+  const jobsTotalPages = Math.ceil(jobs.length / ITEMS_PER_PAGE);
+  const candidatesTotalPages = Math.ceil(candidates.length / ITEMS_PER_PAGE);
+
+  if (!countryInfo) return null;
 
   return (
     <>
-      <div className="itss-page">
+      <div className="itss-page itss-country-page">
         <nav className="itss-nav">
-          <div className="itss-brand">International Talent Space Station</div>
+          <Link to="/" className="itss-brand">
+            International Talent Space Station
+          </Link>
+
           <div className="itss-nav-actions">
             <Link className="itss-link" to="/login">
               Sign in
             </Link>
-            <Link className="itss-btn" to="/signup">
+            <Link className="itss-btn itss-btn-small" to="/signup">
               Get Started
             </Link>
           </div>
@@ -134,14 +151,17 @@ function CountryPage() {
             </Link>
 
             <div className="itss-country-title">
+              <span className="itss-country-kicker">Country Talent Market</span>
               <h1 className="itss-title">
                 {countryInfo.flag} {countryInfo.name}
               </h1>
-              <p className="itss-country-description">{countryInfo.description}</p>
+              <p className="itss-country-description">
+                {countryInfo.description}
+              </p>
             </div>
           </div>
 
-            <div className="itss-view-toggle-wrap">
+          <div className="itss-view-toggle-wrap">
             <div className="itss-view-toggle">
               <button
                 type="button"
@@ -153,7 +173,7 @@ function CountryPage() {
                 <span className="itss-toggle-kicker">For Talent</span>
                 <span className="itss-toggle-title">Looking for a job</span>
                 <span className="itss-toggle-text">
-                  Browse hiring companies and open roles
+                  Browse hiring companies and open roles.
                 </span>
               </button>
 
@@ -167,223 +187,270 @@ function CountryPage() {
                 <span className="itss-toggle-kicker">For Employers</span>
                 <span className="itss-toggle-title">I am hiring</span>
                 <span className="itss-toggle-text">
-                  Explore candidates and local talent pools
+                  Explore candidates and local talent pools.
                 </span>
               </button>
             </div>
           </div>
 
           <div className="itss-country-content">
-            <div className="itss-country-info">
-              <div className="itss-info-card">
-                <h3>Key Cities</h3>
-                <div className="itss-city-grid">
-                  {countryInfo.keyCities.map((city, idx) => (
-                    <div key={`${city}-${idx}`} className="itss-city-item">
-                      {city}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="itss-info-card">
-                <h3>Top Industries</h3>
-                <div className="itss-industry-grid">
-                  {countryInfo.topIndustries.map((industry, idx) => (
-                    <div key={`${industry}-${idx}`} className="itss-industry-item">
-                      {industry}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="itss-info-card">
-                <h3>Talent Highlights</h3>
-                <p className="itss-talent-highlights">{countryInfo.talentHighlights}</p>
-              </div>
-
-              <div className="itss-info-card">
-                <h3>Talent Pool</h3>
-                <div className="itss-industry-grid">
-                  {countryInfo.talentPool.map((talent, idx) => (
-                    <div key={`${talent}-${idx}`} className="itss-industry-item">
-                      {talent}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="itss-info-card">
-                <h3>Need to Knows</h3>
-                <ul className="itss-need-list">
-                  {countryInfo.needToKnows.map((item, idx) => (
-                    <li key={`${item}-${idx}`} className="itss-need-item">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="itss-info-card">
-                <h3>Market Snapshot</h3>
-                <div className="itss-market-grid">
-                  <div className="itss-market-item">
-                    <span className="itss-market-label">Timezone</span>
-                    <span className="itss-market-value">
-                      {countryInfo.marketInfo.timezone}
-                    </span>
-                  </div>
-                  <div className="itss-market-item">
-                    <span className="itss-market-label">Language</span>
-                    <span className="itss-market-value">
-                      {countryInfo.marketInfo.language}
-                    </span>
-                  </div>
-                  <div className="itss-market-item">
-                    <span className="itss-market-label">Hiring Outlook</span>
-                    <span className="itss-market-value">
-                      {countryInfo.marketInfo.hiringOutlook}
-                    </span>
-                  </div>
-                  <div className="itss-market-item">
-                    <span className="itss-market-label">Employment Types</span>
-                    <span className="itss-market-value">
-                      {countryInfo.marketInfo.commonEmploymentTypes.join(", ")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="itss-info-card">
-                <h3>Salary Snapshot</h3>
-                <div className="itss-salary-table">
-                  <div className="itss-salary-head">
-                    <span>Role</span>
-                    <span>Typical Range</span>
-                    <span>Availability</span>
-                  </div>
-
-                  {countryInfo.salarySnapshot.map((item, idx) => (
-                    <div key={`${item.role || idx}-${idx}`} className="itss-salary-row">
-                      <span>{item.role}</span>
-                      <span>{item.range}</span>
-                      <span>{item.availability}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="itss-country-jobs">
+            <main className="itss-country-main">
               {viewerType === "applicant" ? (
                 <>
-                  <div className="itss-jobs-header">
-                    <h2>Hiring Companies in {countryInfo.name}</h2>
-                    <Link className="itss-btn" to="/signup">
-                      Create Profile
-                    </Link>
-                  </div>
+                  <section className="itss-section-block">
+                    <div className="itss-jobs-header">
+                      <div>
+                        <h2>Hiring Companies in {countryInfo.name}</h2>
+                        <p>
+                          {companies.length} companies currently listed in this
+                          market.
+                        </p>
+                      </div>
 
-                  {loadingJobs ? (
-                    <div className="itss-loading">Loading companies and jobs...</div>
-                  ) : (
-                    <>
-                      {companies.length > 0 ? (
+                      <Link className="itss-btn" to="/signup">
+                        Create Profile
+                      </Link>
+                    </div>
+
+                    {loading ? (
+                      <div className="itss-loading">
+                        Loading companies and jobs...
+                      </div>
+                    ) : companies.length > 0 ? (
+                      <>
                         <div className="itss-jobs-grid">
-                          {companies.map((company, idx) => (
-                            <div key={`${company.name || idx}-${idx}`} className="itss-job-card">
-                              <h3>{company.name}</h3>
-                              <p className="itss-job-company">{company.industry}</p>
-                              <p className="itss-job-location">{company.location}</p>
+                          {paginatedCompanies.map((company, index) => (
+                            <article
+                              key={company.id || `${company.name}-${index}`}
+                              className="itss-listing-card"
+                            >
+                              <div className="itss-listing-top">
+                                <div className="itss-listing-logo">
+                                  {company.logo ? (
+                                    <img
+                                      src={company.logo}
+                                      alt={company.name || "Company logo"}
+                                    />
+                                  ) : (
+                                    <span>
+                                      {company.name
+                                        ?.charAt(0)
+                                        ?.toUpperCase() || "C"}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div>
+                                  <h3>{company.name || "Company"}</h3>
+                                  <p>{company.industry || "Industry not set"}</p>
+                                </div>
+                              </div>
+
+                              <div className="itss-listing-meta">
+                                <span>
+                                  {company.city
+                                    ? `${company.city}, ${
+                                        company.country || countryInfo.name
+                                      }`
+                                    : company.country || countryInfo.name}
+                                </span>
+                                <span>{company.size || "Size not set"}</span>
+                                <span>{company.job_count || 0} open roles</span>
+                              </div>
+
                               <Link className="itss-job-link" to="/signup">
                                 Explore Opportunities
                               </Link>
-                            </div>
+                            </article>
                           ))}
                         </div>
-                      ) : (
-                        <div className="itss-no-jobs">
-                          <h3>No hiring companies listed yet</h3>
-                          <p>Check back soon for employers actively hiring in {countryInfo.name}.</p>
-                        </div>
-                      )}
 
-                      <div className="itss-jobs-header" style={{ marginTop: "20px" }}>
-                        <h2>Available Jobs in {countryInfo.name}</h2>
+                        <Pagination
+                          currentPage={companiesPage}
+                          totalPages={companiesTotalPages}
+                          onPageChange={setCompaniesPage}
+                        />
+                      </>
+                    ) : (
+                      <div className="itss-no-jobs">
+                        <h3>No hiring companies listed yet</h3>
+                        <p>
+                          Check back soon for employers actively hiring in{" "}
+                          {countryInfo.name}.
+                        </p>
                       </div>
+                    )}
+                  </section>
 
-                      {jobs.length > 0 ? (
+                  <section className="itss-section-block">
+                    <div className="itss-jobs-header">
+                      <div>
+                        <h2>Available Jobs in {countryInfo.name}</h2>
+                        <p>{jobs.length} open roles available.</p>
+                      </div>
+                    </div>
+
+                    {loading ? (
+                      <div className="itss-loading">Loading jobs...</div>
+                    ) : jobs.length > 0 ? (
+                      <>
                         <div className="itss-jobs-grid">
-                          {jobs.map((job) => (
-                            <div key={job.id || job._id} className="itss-job-card">
-                              <h3>{job.title}</h3>
-                              <p className="itss-job-company">{job.company}</p>
+                          {paginatedJobs.map((job) => (
+                            <article
+                              key={job.id || job._id}
+                              className="itss-job-card"
+                            >
+                              <h3>{job.title || "Untitled Role"}</h3>
+
+                              <p className="itss-job-company">
+                                {job.company_name || "Company not listed"}
+                              </p>
+
                               <p className="itss-job-location">
                                 {job.location || countryInfo.name}
                               </p>
-                              <p className="itss-job-type">{job.type || "Full-time"}</p>
-                              {job.salary && <p className="itss-job-type">{job.salary}</p>}
+
+                              <p className="itss-job-type">
+                                {job.employment_type || "Full-time"} •{" "}
+                                {job.work_mode || "Remote"}
+                              </p>
+
+                              {job.salary_range && (
+                                <p className="itss-job-salary">
+                                  {job.salary_range}
+                                </p>
+                              )}
+
                               <Link
                                 className="itss-job-link"
                                 to={`/login?job=${job.id || job._id}`}
                               >
                                 Apply / View Details
                               </Link>
-                            </div>
+                            </article>
                           ))}
                         </div>
-                      ) : (
-                        <div className="itss-no-jobs">
-                          <h3>No jobs available yet</h3>
-                          <p>There are currently no live roles in {countryInfo.name}.</p>
-                        </div>
-                      )}
-                    </>
-                  )}
+
+                        <Pagination
+                          currentPage={jobsPage}
+                          totalPages={jobsTotalPages}
+                          onPageChange={setJobsPage}
+                        />
+                      </>
+                    ) : (
+                      <div className="itss-no-jobs">
+                        <h3>No jobs available yet</h3>
+                        <p>
+                          There are currently no live roles in{" "}
+                          {countryInfo.name}.
+                        </p>
+                      </div>
+                    )}
+                  </section>
                 </>
               ) : (
-                <>
+                <section className="itss-section-block">
                   <div className="itss-jobs-header">
-                    <h2>Available Talent in {countryInfo.name}</h2>
+                    <div>
+                      <h2>Available Talent in {countryInfo.name}</h2>
+                      <p>
+                        {candidates.length} candidate profiles available for
+                        employers.
+                      </p>
+                    </div>
+
                     <Link className="itss-btn" to="/signup">
                       Post a Job
                     </Link>
                   </div>
 
-                  {loadingCandidates ? (
-                    <div className="itss-loading">Loading candidate profiles...</div>
-                  ) : candidates.length > 0 ? (
-                    <div className="itss-jobs-grid">
-                      {candidates.map((candidate) => (
-                        <div
-                          key={candidate.id || candidate._id}
-                          className="itss-job-card"
-                        >
-                          <h3>{candidate.name || "Candidate Profile"}</h3>
-                          <p className="itss-job-company">
-                            {candidate.title || "Professional"}
-                          </p>
-                          <p className="itss-job-location">
-                            {candidate.country || countryInfo.name}
-                          </p>
-                          <p className="itss-job-type">
-                            {Array.isArray(candidate.skills)
-                              ? candidate.skills.join(", ")
-                              : candidate.skills || "Skills available on profile"}
-                          </p>
-                          <Link className="itss-job-link" to="/login">
-                            View Candidate
-                          </Link>
-                        </div>
-                      ))}
+                  {loading ? (
+                    <div className="itss-loading">
+                      Loading candidate profiles...
                     </div>
+                  ) : candidates.length > 0 ? (
+                    <>
+                      <div className="itss-jobs-grid">
+                        {paginatedCandidates.map((candidate) => (
+                          <article
+                            key={candidate.id || candidate._id}
+                            className="itss-listing-card"
+                          >
+                            <div className="itss-listing-top">
+                              <div className="itss-listing-logo">
+                                {candidate.profile_image ? (
+                                  <img
+                                    src={candidate.profile_image}
+                                    alt={candidate.name || "Candidate"}
+                                  />
+                                ) : (
+                                  <span>
+                                    {candidate.name
+                                      ?.charAt(0)
+                                      ?.toUpperCase() || "T"}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div>
+                                <h3>{candidate.name || "Candidate Profile"}</h3>
+                                <p>
+                                  {candidate.professional_title ||
+                                    "Professional"}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="itss-listing-meta">
+                              <span>
+                                {candidate.city
+                                  ? `${candidate.city}, ${
+                                      candidate.country || countryInfo.name
+                                    }`
+                                  : candidate.country || countryInfo.name}
+                              </span>
+
+                              <span>
+                                {candidate.years_of_experience
+                                  ? `${candidate.years_of_experience} years experience`
+                                  : "Experience not set"}
+                              </span>
+
+                              <span>
+                                {candidate.preferred_work_mode ||
+                                  candidate.work_mode ||
+                                  "Work mode open"}
+                              </span>
+                            </div>
+
+                            <p className="itss-listing-skills">
+                              {Array.isArray(candidate.skills)
+                                ? candidate.skills.join(", ")
+                                : candidate.skills ||
+                                  "Skills available on profile"}
+                            </p>
+
+                            <Link className="itss-job-link" to="/login">
+                              View Candidate
+                            </Link>
+                          </article>
+                        ))}
+                      </div>
+
+                      <Pagination
+                        currentPage={candidatesPage}
+                        totalPages={candidatesTotalPages}
+                        onPageChange={setCandidatesPage}
+                      />
+                    </>
                   ) : (
                     <div className="itss-no-jobs">
                       <h3>No candidate profiles available yet</h3>
                       <p>
-                        Talent profiles for {countryInfo.name} will appear here as
-                        candidates join the platform.
+                        Talent profiles for {countryInfo.name} will appear here
+                        as candidates join the platform.
                       </p>
+
                       <div className="itss-hero-actions">
                         <Link className="itss-btn" to="/signup">
                           Post a Job
@@ -394,9 +461,105 @@ function CountryPage() {
                       </div>
                     </div>
                   )}
-                </>
+                </section>
               )}
-            </div>
+            </main>
+
+            <aside className="itss-country-info">
+              <div className="itss-info-card">
+                <h3>Key Cities</h3>
+                <div className="itss-chip-grid">
+                  {countryInfo.keyCities.map((city, index) => (
+                    <span key={`${city}-${index}`} className="itss-chip">
+                      {city}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="itss-info-card">
+                <h3>Top Industries</h3>
+                <div className="itss-chip-grid">
+                  {countryInfo.topIndustries.map((industry, index) => (
+                    <span key={`${industry}-${index}`} className="itss-chip">
+                      {industry}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="itss-info-card">
+                <h3>Talent Highlights</h3>
+                <p className="itss-card-text">
+                  {countryInfo.talentHighlights}
+                </p>
+              </div>
+
+              <div className="itss-info-card">
+                <h3>Talent Pool</h3>
+                <div className="itss-chip-grid">
+                  {countryInfo.talentPool.map((talent, index) => (
+                    <span key={`${talent}-${index}`} className="itss-chip">
+                      {talent}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="itss-info-card">
+                <h3>Need to Knows</h3>
+                <ul className="itss-need-list">
+                  {countryInfo.needToKnows.map((item, index) => (
+                    <li key={`${item}-${index}`}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="itss-info-card">
+                <h3>Market Snapshot</h3>
+
+                <div className="itss-market-grid">
+                  <div className="itss-market-item">
+                    <span>Timezone</span>
+                    <strong>{countryInfo.marketInfo.timezone}</strong>
+                  </div>
+
+                  <div className="itss-market-item">
+                    <span>Language</span>
+                    <strong>{countryInfo.marketInfo.language}</strong>
+                  </div>
+
+                  <div className="itss-market-item">
+                    <span>Hiring Outlook</span>
+                    <strong>{countryInfo.marketInfo.hiringOutlook}</strong>
+                  </div>
+
+                  <div className="itss-market-item">
+                    <span>Employment Types</span>
+                    <strong>
+                      {countryInfo.marketInfo.commonEmploymentTypes.join(", ")}
+                    </strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="itss-info-card">
+                <h3>Salary Snapshot</h3>
+
+                <div className="itss-salary-table">
+                  {countryInfo.salarySnapshot.map((item, index) => (
+                    <div
+                      key={`${item.role || "salary"}-${index}`}
+                      className="itss-salary-row"
+                    >
+                      <span>{item.role}</span>
+                      <strong>{item.range}</strong>
+                      <em>{item.availability}</em>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </aside>
           </div>
         </motion.section>
       </div>

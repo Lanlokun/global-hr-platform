@@ -58,6 +58,9 @@ const candidateManagementRoutes = require("./routes/candidateManagementRoutes");
 const employerRoutes = require("./routes/employerRoutes");
 
 
+const publicRoutes = require("./routes/publicRoutes");
+app.use("/api/public", publicRoutes);
+
 app.get("/", (req, res) => {
   res.send("Global HR Platform API running");
 });
