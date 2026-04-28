@@ -7,6 +7,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://global-hr-platform.vercel.app",
   process.env.FRONTEND_URL,
 ].filter(Boolean);
 
@@ -21,9 +22,6 @@ const corsOptions = {
         origin
       );
 
-    console.log("Request origin:", origin);
-    console.log("Allowed origins:", allowedOrigins);
-
     if (isExplicitlyAllowed || isVercelPreview) {
       return callback(null, true);
     }
@@ -37,10 +35,8 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-
-// Core middleware first
+// Core middleware
 app.use(cors(corsOptions));
-app.options("/{*splat}", cors(corsOptions));
 app.use(express.json());
 
 // Static files
@@ -56,14 +52,13 @@ const applicationRoutes = require("./routes/applicationRoutes");
 const authRoutes = require("./routes/authRoutes");
 const candidateManagementRoutes = require("./routes/candidateManagementRoutes");
 const employerRoutes = require("./routes/employerRoutes");
-
-
 const publicRoutes = require("./routes/publicRoutes");
-app.use("/api/public", publicRoutes);
 
 app.get("/", (req, res) => {
   res.send("Global HR Platform API running");
 });
+
+app.use("/api/public", publicRoutes);
 app.use("/api/employer", employerRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/profile", userProfileRoutes);
@@ -74,13 +69,14 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/candidates", candidateManagementRoutes);
 
-// Optional 404 catch-all
-app.all("/{*splat}", (req, res) => {
+// 404 catch-all
+app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });
 });
 
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+  console.log("Allowed origins:", allowedOrigins);
 });
