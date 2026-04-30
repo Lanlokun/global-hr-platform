@@ -342,3 +342,19 @@
 .itss-reset-page .itss-reset-login-button:hover {
   color: #ffffff;
 }
+
+.itss-wechat-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background: #07c160;
+  color: white;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.itss-wechat-btn:hover {
+  background: #06ad56;
+}

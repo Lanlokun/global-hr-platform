@@ -1,18 +1,28 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
+
 import AuthInput from "../../components/auth/AuthInput";
 import AuthButton from "../../components/auth/AuthButton";
 import AuthFooter from "../../components/auth/AuthFooter";
+import LanguageSwitcher from "../../components/ui/LanguageSwitcher";
+import { useLanguage } from "../../context/LanguageContext";
+import { useNavigate } from "react-router-dom";
+
 import "../../components/auth/itss-auth.css";
 
 function ForgotPassword() {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
   const handleSubmit = () => {
-    setMessage("Password reset link sent. Check your email.");
+    setMessage(t("passwordResetSent"));
   };
+
+  setTimeout(() => navigate("/login"), 1500);
 
   return (
     <div className="itss-auth-page">
@@ -25,38 +35,37 @@ function ForgotPassword() {
         </Link>
 
         <div className="itss-auth-nav-actions">
+          <LanguageSwitcher />
+
           <Link className="itss-auth-nav-link" to="/login">
-            Sign in
+            {t("signIn")}
           </Link>
         </div>
       </nav>
 
       <div className="itss-auth-shell">
-        {/* LEFT SIDE */}
         <div className="itss-auth-left">
-          <div className="itss-auth-badge">Account recovery</div>
+          <div className="itss-auth-badge">{t("accountRecovery")}</div>
 
           <h1 className="itss-auth-title">
-            Reset your password securely
+            {t("forgotHeroTitle")}
           </h1>
 
           <p className="itss-auth-subtitle">
-            Enter your email address and we will send you a secure link to reset
-            your password and regain access to your account.
+            {t("forgotHeroSubtitle")}
           </p>
 
           <div className="itss-auth-feature-list">
-            <div className="itss-auth-feature">Secure recovery process</div>
-            <div className="itss-auth-feature">Fast account access restoration</div>
-            <div className="itss-auth-feature">Protected identity verification</div>
+            <div className="itss-auth-feature">{t("secureRecoveryProcess")}</div>
+            <div className="itss-auth-feature">{t("fastAccessRestoration")}</div>
+            <div className="itss-auth-feature">{t("protectedIdentityVerification")}</div>
           </div>
         </div>
 
-        {/* RIGHT CARD */}
         <div className="itss-auth-card">
           <div className="itss-auth-card-header">
-            <h2>Forgot password</h2>
-            <p>We will send a reset link to your email.</p>
+            <h2>{t("forgotPassword")}</h2>
+            <p>{t("forgotCardSubtitle")}</p>
           </div>
 
           {message && (
@@ -66,21 +75,21 @@ function ForgotPassword() {
           )}
 
           <AuthInput
-            label="Email"
+            label={t("email")}
             type="email"
-            placeholder="you@example.com"
+            placeholder={t("emailExample")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             icon={<Mail size={18} />}
           />
 
           <AuthButton onClick={handleSubmit}>
-            Send reset link
+            {t("sendResetLink")}
           </AuthButton>
 
           <AuthFooter
-            text="Remembered your password?"
-            linkText="Back to login"
+            text={t("rememberedPassword")}
+            linkText={t("backToLogin")}
             to="/login"
           />
         </div>

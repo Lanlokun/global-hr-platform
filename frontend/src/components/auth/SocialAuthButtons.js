@@ -1,7 +1,10 @@
 import { FcGoogle } from "react-icons/fc";
 import { FaLinkedin } from "react-icons/fa";
 
+import { useLanguage } from "../../context/LanguageContext";
+
 function SocialAuthButtons() {
+  const { t } = useLanguage();
   return (
     <div className="auth-socials">
       <button className="auth-social-btn" type="button">
@@ -12,6 +15,15 @@ function SocialAuthButtons() {
         <FaLinkedin size={18} />
         LinkedIn
       </button>
+      <button
+        className="itss-wechat-btn"
+        onClick={() => {
+          window.location.href = `${process.env.REACT_APP_API_URL}/api/auth/wechat`;
+        }}
+      >
+        {t("continueWithWeChat")}
+      </button>
+
     </div>
   );
 }

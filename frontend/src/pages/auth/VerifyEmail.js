@@ -1,9 +1,14 @@
 import { Link, useNavigate } from "react-router-dom";
+
 import AuthButton from "../../components/auth/AuthButton";
+import LanguageSwitcher from "../../components/ui/LanguageSwitcher";
+import { useLanguage } from "../../context/LanguageContext";
+
 import "../../components/auth/itss-auth.css";
 
 function VerifyEmail() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   return (
     <div className="itss-auth-page">
@@ -16,54 +21,60 @@ function VerifyEmail() {
         </Link>
 
         <div className="itss-auth-nav-actions">
+          <LanguageSwitcher />
+
           <Link className="itss-auth-nav-link" to="/login">
-            Sign in
+            {t("signIn")}
           </Link>
         </div>
       </nav>
 
       <div className="itss-auth-shell">
         <div className="itss-auth-left">
-          <div className="itss-auth-badge">Account verification</div>
+          <div className="itss-auth-badge">{t("accountVerification")}</div>
+
           <h1 className="itss-auth-title">
-            Verify your email to activate your account
+            {t("verifyEmailHeroTitle")}
           </h1>
+
           <p className="itss-auth-subtitle">
-            We sent a verification link to your email address. Confirm your email
-            to continue exploring opportunities and hiring across Africa through
-            International Talent Space Station.
+            {t("verifyEmailHeroSubtitle")}
           </p>
 
           <div className="itss-auth-feature-list">
-            <div className="itss-auth-feature">Secure account activation</div>
-            <div className="itss-auth-feature">Trusted employer and talent access</div>
-            <div className="itss-auth-feature">Pan-African workforce discovery</div>
+            <div className="itss-auth-feature">
+              {t("secureAccountActivation")}
+            </div>
+            <div className="itss-auth-feature">
+              {t("trustedEmployerTalentAccess")}
+            </div>
+            <div className="itss-auth-feature">
+              {t("panAfricanWorkforceDiscovery")}
+            </div>
           </div>
         </div>
 
         <div className="itss-auth-card">
           <div className="itss-auth-card-header">
-            <h2>Check your inbox</h2>
-            <p>Complete verification to unlock your account.</p>
+            <h2>{t("checkYourInbox")}</h2>
+            <p>{t("verifyEmailCardSubtitle")}</p>
           </div>
 
           <div className="itss-verify-note">
-            Please check your inbox and click the verification link to activate
-            your account. Once verified, you can sign in and continue to your
-            dashboard.
+            {t("verifyEmailNote")}
           </div>
 
           <div className="itss-verify-actions">
-            <AuthButton onClick={() => alert("Verification email resent")}>
-              Resend email
+            <AuthButton onClick={() => alert(t("verificationEmailResent"))}>
+              {t("resendEmail")}
             </AuthButton>
 
             <div className="itss-verify-divider">
-              <span>or</span>
+              <span>{t("or")}</span>
             </div>
 
             <AuthButton variant="secondary" onClick={() => navigate("/login")}>
-              Login now
+              {t("loginNow")}
             </AuthButton>
           </div>
         </div>

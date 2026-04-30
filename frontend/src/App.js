@@ -16,10 +16,13 @@ import AdminCompanies from "./pages/admin/AdminCompanies";
 import AdminJobs from "./pages/admin/AdminJobs";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminCandidates from "./pages/admin/AdminCandidates";
+import { LanguageProvider } from "./context/LanguageContext";
+
 
 function App() {
   return (
     <>
+      <LanguageProvider>
       <Toaster position="top-right" />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -46,6 +49,7 @@ function App() {
           }
         />
       </Routes>
+      </LanguageProvider>
     </>
   );
 }

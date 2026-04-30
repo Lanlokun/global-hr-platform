@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useLanguage } from "../context/LanguageContext";
 
 import EmployerOverview from "./employer/EmployerOverview";
 import EmployerCompany from "./employer/EmployerCompany";
@@ -13,6 +14,7 @@ import CandidateApplications from "./candidate/CandidateApplications";
 import CandidateProfile from "./candidate/CandidateProfile";
 
 function Dashboard() {
+  const { t } = useLanguage();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   if (user.role === "employer") {
@@ -43,7 +45,7 @@ function Dashboard() {
     return <Navigate to="/admin" replace />;
   }
 
-  return <div>No dashboard available</div>;
+  return <div>{t("noDashboard") || "No dashboard available"}</div>;
 }
 
 export default Dashboard;

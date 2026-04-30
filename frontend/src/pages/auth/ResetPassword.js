@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { Lock } from "lucide-react";
+
 import AuthLayout from "../../components/auth/AuthLayout";
 import PasswordInput from "../../components/auth/PasswordInput";
 import AuthButton from "../../components/auth/AuthButton";
 
+import { useLanguage } from "../../context/LanguageContext";
+
 function ResetPassword() {
+  const { t } = useLanguage();
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -14,23 +19,23 @@ function ResetPassword() {
     setSuccess(false);
 
     if (!password || !confirmPassword) {
-      setMessage("Please fill all fields");
+      setMessage(t("fillAllFields"));
       return;
     }
 
     if (password !== confirmPassword) {
-      setMessage("Passwords do not match");
+      setMessage(t("passwordsDoNotMatch"));
       return;
     }
 
     setSuccess(true);
-    setMessage("Password reset successful. You can now log in.");
+    setMessage(t("passwordResetSuccess"));
   };
 
   return (
     <AuthLayout
-      title="Reset password"
-      subtitle="Create a new secure password for your account."
+      title={t("resetPassword")}
+      subtitle={t("resetPasswordSubtitle")}
     >
       {message && (
         <div className={`auth-alert ${success ? "success" : "error"}`}>
@@ -39,22 +44,24 @@ function ResetPassword() {
       )}
 
       <PasswordInput
-        label="New password"
+        label={t("newPassword")}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter new password"
+        placeholder={t("enterNewPassword")}
         icon={<Lock size={18} />}
       />
 
       <PasswordInput
-        label="Confirm password"
+        label={t("confirmPassword")}
         value={confirmPassword}
         onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="Confirm new password"
+        placeholder={t("confirmNewPassword")}
         icon={<Lock size={18} />}
       />
 
-      <AuthButton onClick={handleReset}>Reset password</AuthButton>
+      <AuthButton onClick={handleReset}>
+        {t("resetPassword")}
+      </AuthButton>
     </AuthLayout>
   );
 }
