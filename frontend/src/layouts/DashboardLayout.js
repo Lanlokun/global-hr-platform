@@ -19,11 +19,17 @@ import {
   Settings,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+
+import { useLanguage } from "../context/LanguageContext";
+import LanguageSwitcher from "../components/ui/LanguageSwitcher";
+
 import "./../components/ui/dashboard.css";
 
 function DashboardLayout({ title, subtitle, children }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const { t } = useLanguage();
 
   const user = useMemo(() => {
     try {
@@ -42,12 +48,14 @@ function DashboardLayout({ title, subtitle, children }) {
   const navClass = ({ isActive }) =>
     `dashboard-nav-item ${isActive ? "active" : ""}`;
 
+  /* ================= TRANSLATED LABELS ================= */
+
   const workspaceLabel =
     user.role === "admin"
-      ? "Admin Workspace"
+      ? t("adminWorkspace")
       : user.role === "employer"
-      ? "Company Workspace"
-      : "Candidate Workspace";
+      ? t("companyWorkspace")
+      : t("candidateWorkspace");
 
   const firstName =
     user?.first_name ||
@@ -67,28 +75,28 @@ function DashboardLayout({ title, subtitle, children }) {
   /* ================= NAV ================= */
 
   const candidateNav = [
-    { to: "/dashboard", label: "Overview", icon: <LayoutDashboard size={18} />, end: true },
-    { to: "/dashboard/opportunities", label: "Opportunities", icon: <Briefcase size={18} />, badge: "New" },
-    { to: "/dashboard/applications", label: "Applications", icon: <FileText size={18} /> },
-    { to: "/dashboard/profile", label: "Profile", icon: <UserCircle2 size={18} /> },
+    { to: "/dashboard", label: t("overview"), icon: <LayoutDashboard size={18} />, end: true },
+    { to: "/dashboard/opportunities", label: t("opportunities"), icon: <Briefcase size={18} />, badge: "New" },
+    { to: "/dashboard/applications", label: t("applications"), icon: <FileText size={18} /> },
+    { to: "/dashboard/profile", label: t("profile"), icon: <UserCircle2 size={18} /> },
   ];
 
   const employerNav = [
-    { to: "/dashboard", label: "Overview", icon: <LayoutDashboard size={18} />, end: true },
-    { to: "/dashboard/company", label: "My Company", icon: <Building2 size={18} /> },
-    { to: "/dashboard/jobs", label: "Jobs", icon: <Briefcase size={18} /> },
-    { to: "/dashboard/applicants", label: "Applicants", icon: <FileText size={18} /> },
-    { to: "/dashboard/talent", label: "Talent Directory", icon: <Users size={18} /> },
-    { to: "/dashboard/settings", label: "Settings", icon: <Settings size={18} /> },
+    { to: "/dashboard", label: t("overview"), icon: <LayoutDashboard size={18} />, end: true },
+    { to: "/dashboard/company", label: t("myCompany"), icon: <Building2 size={18} /> },
+    { to: "/dashboard/jobs", label: t("jobs"), icon: <Briefcase size={18} /> },
+    { to: "/dashboard/applicants", label: t("applicants"), icon: <FileText size={18} /> },
+    { to: "/dashboard/talent", label: t("talentDirectory"), icon: <Users size={18} /> },
+    { to: "/dashboard/settings", label: t("settings"), icon: <Settings size={18} /> },
   ];
 
   const adminNav = [
-    { to: "/admin", label: "Overview", icon: <LayoutDashboard size={18} />, end: true },
-    { to: "/admin/users", label: "Users", icon: <UserCircle2 size={18} /> },
-    { to: "/admin/companies", label: "Companies", icon: <Building2 size={18} /> },
-    { to: "/admin/jobs", label: "Jobs", icon: <Briefcase size={18} /> },
-    { to: "/admin/applications", label: "Applications", icon: <FileText size={18} /> },
-    { to: "/admin/candidates", label: "Candidates", icon: <Users size={18} /> },
+    { to: "/admin", label: t("overview"), icon: <LayoutDashboard size={18} />, end: true },
+    { to: "/admin/users", label: t("users"), icon: <UserCircle2 size={18} /> },
+    { to: "/admin/companies", label: t("companies"), icon: <Building2 size={18} /> },
+    { to: "/admin/jobs", label: t("jobs"), icon: <Briefcase size={18} /> },
+    { to: "/admin/applications", label: t("applications"), icon: <FileText size={18} /> },
+    { to: "/admin/candidates", label: t("candidates"), icon: <Users size={18} /> },
   ];
 
   const navItems =
@@ -100,10 +108,10 @@ function DashboardLayout({ title, subtitle, children }) {
 
   const searchPlaceholder =
     user.role === "admin"
-      ? "Search users, companies, jobs..."
+      ? t("searchPlaceholderAdmin")
       : user.role === "employer"
-      ? "Search jobs, applicants, talent..."
-      : "Search jobs, applications...";
+      ? t("searchPlaceholderEmployer")
+      : t("searchPlaceholderCandidate");
 
   return (
     <div className="dashboard-shell">
@@ -116,7 +124,6 @@ function DashboardLayout({ title, subtitle, children }) {
             </div>
 
             <div className="dashboard-brand-copy">
-              {/* 🔥 BRAND UPDATED */}
               <h2>SGET International Talent Space Station</h2>
               <p>
                 {user.role === "admin"
@@ -141,7 +148,10 @@ function DashboardLayout({ title, subtitle, children }) {
           </div>
 
           <div>
-            <span className="dashboard-workspace-label">Active Workspace</span>
+            <span className="dashboard-workspace-label">
+              {t("activeWorkspace")}
+            </span>
+
             <strong className="dashboard-workspace-title">
               {workspaceLabel}
             </strong>
@@ -158,7 +168,9 @@ function DashboardLayout({ title, subtitle, children }) {
 
         {/* ================= NAV ================= */}
         <div className="dashboard-nav-section">
-          <span className="dashboard-nav-section-title">Navigation</span>
+          <span className="dashboard-nav-section-title">
+            {t("navigation") || "Navigation"}
+          </span>
 
           <nav className="dashboard-nav">
             {navItems.map((item) => (
@@ -202,7 +214,7 @@ function DashboardLayout({ title, subtitle, children }) {
 
             <button className="dashboard-logout" onClick={logout}>
               <LogOut size={16} />
-              Logout
+              {t("logout")}
             </button>
           </div>
         </div>
@@ -229,7 +241,7 @@ function DashboardLayout({ title, subtitle, children }) {
 
             <div className="dashboard-page-heading">
               <div className="dashboard-breadcrumbs">
-                <span>{user.role === "admin" ? "Admin" : "Dashboard"}</span>
+                <span>{user.role === "admin" ? t("admin") : t("dashboard")}</span>
                 <ChevronRight size={14} />
                 <span>{formattedPageName}</span>
               </div>
@@ -244,6 +256,9 @@ function DashboardLayout({ title, subtitle, children }) {
               <Search size={16} />
               <input type="text" placeholder={searchPlaceholder} />
             </div>
+
+            {/* 🔥 LANGUAGE SWITCHER */}
+            <LanguageSwitcher />
 
             <button className="dashboard-icon-button">
               <HelpCircle size={18} />

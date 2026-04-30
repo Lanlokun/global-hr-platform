@@ -6,9 +6,14 @@ import PasswordInput from "../../components/auth/PasswordInput";
 import AuthButton from "../../components/auth/AuthButton";
 import AuthFooter from "../../components/auth/AuthFooter";
 import "../../components/auth/itss-auth.css";
+import { useLanguage } from "../../context/LanguageContext";
+import LanguageSwitcher from "../../components/ui/LanguageSwitcher";
+
 
 function Signup() {
+
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [form, setForm] = useState({
     name: "",
@@ -28,16 +33,19 @@ function Signup() {
     if (!form.name.trim()) {
       newErrors.name =
         form.role === "employer"
-          ? "Company name is required"
-          : "Full name is required";
+          ? t("companyNameRequired")
+          : t("fullNameRequired");
     }
 
-    if (!form.email.trim()) newErrors.email = "Email is required";
-    if (!form.password.trim()) newErrors.password = "Password is required";
-    if (form.password && form.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    if (!form.email.trim()) newErrors.email = t("emailRequired");
+
+    if (!form.password.trim()) {
+      newErrors.password = t("passwordRequired");
+    } else if (form.password.length < 6) {
+      newErrors.password = t("passwordMinLength");
     }
-    if (!form.country.trim()) newErrors.country = "Country is required";
+
+    if (!form.country.trim()) newErrors.country = t("countryRequired");
 
     return newErrors;
   };
@@ -54,7 +62,7 @@ function Signup() {
       await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/signup`, form);
       navigate("/verify-email");
     } catch (error) {
-      setMessage(error.response?.data?.error || "Signup failed");
+      setMessage(error.response?.data?.error || t("signupFailed"));
     } finally {
       setLoading(false);
     }
@@ -74,44 +82,49 @@ function Signup() {
 
   return (
     <div className="itss-auth-page">
-      <div className="itss-auth-glow itss-auth-glow-1"></div>
-      <div className="itss-auth-glow itss-auth-glow-2"></div>
-
       <nav className="itss-auth-nav">
         <Link to="/" className="itss-auth-brand">
           International Talent Space Station
         </Link>
 
-        <div className="itss-auth-nav-actions">
+       <div className="itss-auth-nav-actions">
+          <LanguageSwitcher />
+
           <Link className="itss-auth-nav-link" to="/login">
-            Sign in
+            {t("signIn")}
           </Link>
         </div>
       </nav>
 
       <div className="itss-auth-shell">
         <div className="itss-auth-left">
-          <div className="itss-auth-badge">Pan-African talent access</div>
+          <div className="itss-auth-badge">{t("panAfricanAccess")}</div>
+
           <h1 className="itss-auth-title">
-            Join International Talent Space Station
+            {t("signupHeroTitle")}
           </h1>
+
           <p className="itss-auth-subtitle">
-            Create your account to connect companies with talent across Africa
-            through one secure, modern platform for hiring and workforce
-            discovery.
+            {t("signupHeroSubtitle")}
           </p>
 
           <div className="itss-auth-feature-list">
-            <div className="itss-auth-feature">Talent discovery across Africa</div>
-            <div className="itss-auth-feature">Company and individual access</div>
-            <div className="itss-auth-feature">Secure onboarding and hiring workflows</div>
+            <div className="itss-auth-feature">
+              {t("signupFeature1")}
+            </div>
+            <div className="itss-auth-feature">
+              {t("signupFeature2")}
+            </div>
+            <div className="itss-auth-feature">
+              {t("signupFeature3")}
+            </div>
           </div>
         </div>
 
         <div className="itss-auth-card">
           <div className="itss-auth-card-header">
-            <h2>Create account</h2>
-            <p>Choose how you want to join the platform.</p>
+            <h2>{t("createAccount")}</h2>
+            <p>{t("signupCardSubtitle")}</p>
           </div>
 
           {message && <p className="itss-auth-message">{message}</p>}
@@ -124,7 +137,7 @@ function Signup() {
               }`}
               onClick={() => setRole("candidate")}
             >
-              Individual
+              {t("individual")}
             </button>
 
             <button
@@ -134,15 +147,17 @@ function Signup() {
               }`}
               onClick={() => setRole("employer")}
             >
-              Company
+              {t("company")}
             </button>
           </div>
 
           <AuthInput
-            label={form.role === "employer" ? "Company name" : "Full name"}
+            label={form.role === "employer" ? t("companyName") : t("fullName")}
             name="name"
             placeholder={
-              form.role === "employer" ? "International Talent Ltd" : "Ma Shifu"
+              form.role === "employer"
+                ? t("companyNamePlaceholder")
+                : t("fullNamePlaceholder")
             }
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -150,26 +165,26 @@ function Signup() {
           />
 
           <AuthInput
-            label="Email"
+            label={t("email")}
             name="email"
             type="email"
-            placeholder="you@example.com"
+            placeholder={t("emailExample")}
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             error={errors.email}
           />
 
           <PasswordInput
-            label="Password"
+            label={t("password")}
             name="password"
-            placeholder="Create a strong password"
+            placeholder={t("passwordCreate")}
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
             error={errors.password}
           />
 
           <AuthInput
-            label="Country"
+            label={t("country")}
             name="country"
             placeholder={form.role === "employer" ? "Kenya" : "Japan"}
             value={form.country}
@@ -178,12 +193,12 @@ function Signup() {
           />
 
           <AuthButton onClick={handleSignup} loading={loading}>
-            Create account
+            {t("createAccount")}
           </AuthButton>
 
           <AuthFooter
-            text="Already have an account?"
-            linkText="Sign in"
+            text={t("alreadyHaveAccount")}
+            linkText={t("signIn")}
             to="/login"
           />
         </div>
@@ -191,5 +206,6 @@ function Signup() {
     </div>
   );
 }
+
 
 export default Signup;
