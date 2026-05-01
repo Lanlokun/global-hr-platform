@@ -15,9 +15,12 @@ export const translations = {
     companies: "Companies",
     candidates: "Candidates",
     logout: "Logout",
+    employerWorkspaceDesc: "Manage your company, jobs, applicants, and discover talent.",
 
     applicationStatusChangedTo: "application status changed to",
     for: "for",
+
+    brandSubtitle: "Connecting companies to talent across Africa.",
 
     jobCreatedNotification: "was successfully published.",
     jobUpdatedNotification: "was successfully updated.",
@@ -1114,6 +1117,8 @@ export const translations = {
     page: "第",
     of: "页 / 共",
 
+    brandSubtitle: "连接企业与非洲人才。",
+
     candidateProfileSubtitle:
     "逐步完善您的资料，打造专业、完整、适合招聘方查看的个人档案。",
     basicInfo: "基本信息",
@@ -1513,6 +1518,7 @@ export const translations = {
     websiteLabel: "网站",
     addressLabel: "地址",
     companyDescriptionLabel: "公司介绍",
+    jobsCountLabel: "职位",
 
     addressPlaceholder: "办公室地址",
     companyDescriptionPlaceholder: "介绍您的公司、使命、服务和招聘文化。",
@@ -1666,6 +1672,7 @@ export const translations = {
     settings: "设置",
     settingsSubtitle: "管理团队权限、通知以及工作区配置",
     employerWorkspace: "雇主工作区",
+    employerWorkspaceDesc: "管理公司信息、职位、候选人，并发现优秀人才。",
 
     workspaceSettings: "工作区设置",
     workspaceSettingsSubtitle: "管理公司工作区信息和招聘默认配置",
