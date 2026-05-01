@@ -16,28 +16,30 @@ import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
+import { useLanguage } from "../../context/LanguageContext";
 
 function EmployerCompany() {
+  const { t } = useLanguage();
+
   const [company, setCompany] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
 
-
   const emptyForm = {
-  name: "",
-  industry: "",
-  country: "",
-  city: "",
-  address: "",
-  description: "",
-  website: "",
-  logo: "",
-  size: "",
-  founded_year: "",
-};
+    name: "",
+    industry: "",
+    country: "",
+    city: "",
+    address: "",
+    description: "",
+    website: "",
+    logo: "",
+    size: "",
+    founded_year: "",
+  };
 
-const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(emptyForm);
 
   const authHeaders = useMemo(
     () => ({
@@ -49,41 +51,41 @@ const [form, setForm] = useState(emptyForm);
   );
 
   const handleLogoUpload = async (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
 
-  if (!allowed.includes(file.type)) {
-    toast.error("Please upload a JPG, PNG, or WEBP image");
-    return;
-  }
+    if (!allowed.includes(file.type)) {
+      toast.error(t("invalidImageFormat"));
+      return;
+    }
 
-  try {
-    setUploadingLogo(true);
+    try {
+      setUploadingLogo(true);
 
-    const data = new FormData();
-    data.append("image", file);
+      const data = new FormData();
+      data.append("image", file);
 
-    const res = await axios.post(
-      `${process.env.REACT_APP_API_URL}/api/uploads/company-logo`,
-      data,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/uploads/company-logo`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
-    handleChange("logo", res.data.url);
-    toast.success("Company logo uploaded");
-  } catch (error) {
-    toast.error(error.response?.data?.error || "Failed to upload logo");
-  } finally {
-    setUploadingLogo(false);
-  }
-};
+      handleChange("logo", res.data.url);
+      toast.success(t("logoUploadSuccess"));
+    } catch (error) {
+      toast.error(error.response?.data?.error || t("logoUploadError"));
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
 
   const fetchCompany = useCallback(async () => {
     try {
@@ -109,9 +111,9 @@ const [form, setForm] = useState(emptyForm);
         setIsEditing(true);
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to load company");
+      toast.error(error.response?.data?.error || t("loadCompanyError"));
     }
-  }, [authHeaders]);
+  }, [authHeaders, t]);
 
   useEffect(() => {
     fetchCompany();
@@ -126,7 +128,7 @@ const [form, setForm] = useState(emptyForm);
 
   const saveCompany = async () => {
     if (!form.name.trim()) {
-      toast.error("Company name is required");
+      toast.error(t("companyNameRequired"));
       return;
     }
 
@@ -139,7 +141,7 @@ const [form, setForm] = useState(emptyForm);
 
         setCompany(updatedCompany);
         setIsEditing(false);
-        toast.success("Company profile updated");
+        toast.success(t("companyUpdated"));
       } else {
         const res = await api.post("/api/employer/company", form, authHeaders);
         const createdCompany = res.data.company || res.data;
@@ -153,25 +155,25 @@ const [form, setForm] = useState(emptyForm);
           JSON.stringify({ ...user, company_id: createdCompany.id })
         );
 
-        toast.success("Company profile created");
+        toast.success(t("companyCreated"));
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to save company");
+      toast.error(error.response?.data?.error || t("saveCompanyError"));
     } finally {
       setSaving(false);
     }
   };
 
-const completionItems = [
-  { label: "Company name", complete: Boolean(form.name) },
-  { label: "Industry", complete: Boolean(form.industry) },
-  { label: "Country", complete: Boolean(form.country) },
-  { label: "City", complete: Boolean(form.city) },
-  { label: "Description", complete: Boolean(form.description) },
-  { label: "Website", complete: Boolean(form.website) },
-  { label: "Company size", complete: Boolean(form.size) },
-  { label: "Founded year", complete: Boolean(form.founded_year) },
-];
+  const completionItems = [
+    { label: t("checkCompanyName"), complete: Boolean(form.name) },
+    { label: t("checkIndustry"), complete: Boolean(form.industry) },
+    { label: t("checkCountry"), complete: Boolean(form.country) },
+    { label: t("checkCity"), complete: Boolean(form.city) },
+    { label: t("checkDescription"), complete: Boolean(form.description) },
+    { label: t("checkWebsite"), complete: Boolean(form.website) },
+    { label: t("checkCompanySize"), complete: Boolean(form.size) },
+    { label: t("checkFoundedYear"), complete: Boolean(form.founded_year) },
+  ];
 
   const completedCount = completionItems.filter((item) => item.complete).length;
   const completionPercent = Math.round(
@@ -180,15 +182,15 @@ const completionItems = [
 
   return (
     <DashboardLayout
-      title="Company Profile"
-      subtitle="Manage your organization identity, hiring presence, and employer information."
+      title={t("companyProfile")}
+      subtitle={t("companyProfileSubtitle")}
     >
       <PageHeader
         action={
           company && !isEditing ? (
             <Button onClick={() => setIsEditing(true)}>
               <Pencil size={16} />
-              Update Profile
+              {t("updateProfile")}
             </Button>
           ) : null
         }
@@ -200,26 +202,30 @@ const completionItems = [
             {company ? (
               <div style={styles.profileHero}>
                 {company.logo ? (
-                  <img src={company.logo} alt={company.name} style={styles.companyLogoImage} />
-                  ) : (
-                    <div style={styles.logoBox}>
-                      {company.name?.charAt(0)?.toUpperCase() || "C"}
-                    </div>
-                  )}
+                  <img
+                    src={company.logo}
+                    alt={company.name}
+                    style={styles.companyLogoImage}
+                  />
+                ) : (
+                  <div style={styles.logoBox}>
+                    {company.name?.charAt(0)?.toUpperCase() || "C"}
+                  </div>
+                )}
 
                 <div style={{ flex: 1 }}>
-                  <p style={styles.label}>Employer Organization</p>
+                  <p style={styles.label}>{t("employerOrganization")}</p>
                   <h2 style={styles.companyName}>{company.name}</h2>
 
                   <div style={styles.metaRow}>
                     <span style={styles.metaItem}>
                       <BriefcaseBusiness size={16} />
-                      {company.industry || "Industry not added"}
+                      {company.industry || t("industryNotAdded")}
                     </span>
 
                     <span style={styles.metaItem}>
                       <Globe2 size={16} />
-                      {company.country || "Country not added"}
+                      {company.country || t("countryNotAdded")}
                     </span>
                   </div>
                 </div>
@@ -229,10 +235,11 @@ const completionItems = [
                 <div style={styles.emptyIcon}>
                   <Building2 size={28} />
                 </div>
-                <h2 style={styles.companyName}>Create your company profile</h2>
+                <h2 style={styles.companyName}>
+                  {t("createCompanyProfile")}
+                </h2>
                 <p style={styles.emptyText}>
-                  Add your company details so you can publish jobs, review
-                  candidates, and build a trusted employer presence.
+                  {t("createCompanyProfileDesc")}
                 </p>
               </div>
             )}
@@ -241,112 +248,153 @@ const completionItems = [
           <div style={{ height: 18 }} />
 
           {company && !isEditing && (
-            <Card title="Company Details" subtitle="Full employer profile information.">
+            <Card
+              title={t("companyDetails")}
+              subtitle={t("companyDetailsSubtitle")}
+            >
               <div style={styles.detailsGrid}>
-                <DetailItem label="Company Name" value={company.name || "Not provided"} />
-                <DetailItem label="Industry" value={company.industry || "Not provided"} />
-                <DetailItem label="Country" value={company.country || "Not provided"} />
-                <DetailItem label="City" value={company.city || "Not provided"} />
-                <DetailItem label="Company Size" value={company.size || "Not provided"} />
-                <DetailItem label="Founded Year" value={company.founded_year || "Not provided"} />
-                <DetailItem label="Website" value={company.website || "Not provided"} />
-                <DetailItem label="Address" value={company.address || "Not provided"} />
+                <DetailItem
+                  label={t("companyName")}
+                  value={company.name || t("notProvided")}
+                />
+                <DetailItem
+                  label={t("industry")}
+                  value={company.industry || t("notProvided")}
+                />
+                <DetailItem
+                  label={t("country")}
+                  value={company.country || t("notProvided")}
+                />
+                <DetailItem
+                  label={t("city")}
+                  value={company.city || t("notProvided")}
+                />
+                <DetailItem
+                  label={t("companySize")}
+                  value={company.size || t("notProvided")}
+                />
+                <DetailItem
+                  label={t("foundedYear")}
+                  value={company.founded_year || t("notProvided")}
+                />
+                <DetailItem
+                  label={t("website")}
+                  value={company.website || t("notProvided")}
+                />
+                <DetailItem
+                  label={t("address")}
+                  value={company.address || t("notProvided")}
+                />
               </div>
 
               <div style={{ height: 16 }} />
 
               <div style={styles.descriptionBox}>
-                <p>Company Description</p>
-                <strong>{company.description || "No description provided."}</strong>
+                <p>{t("companyDescription")}</p>
+                <strong>{company.description || t("noDescription")}</strong>
               </div>
             </Card>
           )}
 
           {isEditing && (
             <Card
-              title={company ? "Update Company Profile" : "Create Company Profile"}
-              subtitle="Keep this information accurate. It helps candidates understand your organization."
+              title={
+                company
+                  ? t("updateCompanyProfile")
+                  : t("createCompanyProfileTitle")
+              }
+              subtitle={t("companyFormSubtitle")}
             >
               <div style={styles.formGrid}>
                 <Input
-                  label="Company name"
+                  label={t("companyNameLabel")}
                   placeholder="AfriTalent Solutions"
                   value={form.name}
                   onChange={(e) => handleChange("name", e.target.value)}
                 />
 
                 <Input
-                  label="Industry"
+                  label={t("industryLabel")}
                   placeholder="HR Technology"
                   value={form.industry}
                   onChange={(e) => handleChange("industry", e.target.value)}
                 />
 
                 <Input
-                  label="Country"
+                  label={t("countryLabel")}
                   placeholder="Nigeria"
                   value={form.country}
                   onChange={(e) => handleChange("country", e.target.value)}
                 />
 
                 <Input
-                  label="City"
+                  label={t("cityLabel")}
                   placeholder="Lagos"
                   value={form.city}
                   onChange={(e) => handleChange("city", e.target.value)}
                 />
 
                 <Input
-                  label="Company size"
+                  label={t("companySizeLabel")}
                   placeholder="11-50"
                   value={form.size}
                   onChange={(e) => handleChange("size", e.target.value)}
                 />
 
                 <Input
-                  label="Founded year"
+                  label={t("foundedYearLabel")}
                   type="number"
                   placeholder="2022"
                   value={form.founded_year}
-                  onChange={(e) => handleChange("founded_year", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("founded_year", e.target.value)
+                  }
                 />
 
                 <Input
-                  label="Website"
+                  label={t("websiteLabel")}
                   placeholder="https://company.com"
                   value={form.website}
                   onChange={(e) => handleChange("website", e.target.value)}
                 />
 
                 <div>
-                <label style={styles.fieldLabel}>Company logo</label>
+                  <label style={styles.fieldLabel}>{t("companyLogo")}</label>
 
-                <div style={styles.logoUploadBox}>
-                  {form.logo ? (
-                    <img src={form.logo} alt="Company logo" style={styles.logoPreview} />
-                  ) : (
-                    <div style={styles.logoPlaceholder}>
-                      {form.name?.charAt(0)?.toUpperCase() || "C"}
+                  <div style={styles.logoUploadBox}>
+                    {form.logo ? (
+                      <img
+                        src={form.logo}
+                        alt={t("companyLogo")}
+                        style={styles.logoPreview}
+                      />
+                    ) : (
+                      <div style={styles.logoPlaceholder}>
+                        {form.name?.charAt(0)?.toUpperCase() || "C"}
+                      </div>
+                    )}
+
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                      />
+                      <p style={styles.uploadHelp}>
+                        {uploadingLogo
+                          ? t("uploadingLogo")
+                          : t("uploadLogoHelp")}
+                      </p>
                     </div>
-                  )}
-
-                  <div>
-                    <input type="file" accept="image/*" onChange={handleLogoUpload} />
-                    <p style={styles.uploadHelp}>
-                      {uploadingLogo
-                        ? "Uploading logo..."
-                        : "Upload JPG, PNG, or WEBP company logo"}
-                    </p>
                   </div>
                 </div>
-              </div>
               </div>
 
               <div style={{ height: 14 }} />
 
               <Input
-                label="Address"
-                placeholder="Office address"
+                label={t("addressLabel")}
+                placeholder={t("addressPlaceholder")}
                 value={form.address}
                 onChange={(e) => handleChange("address", e.target.value)}
               />
@@ -354,57 +402,64 @@ const completionItems = [
               <div style={{ height: 14 }} />
 
               <Input
-                label="Company description"
+                label={t("companyDescriptionLabel")}
                 as="textarea"
                 rows={5}
-                placeholder="Describe your company, mission, services, and hiring culture."
+                placeholder={t("companyDescriptionPlaceholder")}
                 value={form.description}
                 onChange={(e) => handleChange("description", e.target.value)}
               />
 
               <div style={styles.formActions}>
-              {company && (
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setForm({
-                      name: company.name || "",
-                      industry: company.industry || "",
-                      country: company.country || "",
-                      city: company.city || "",
-                      address: company.address || "",
-                      description: company.description || "",
-                      website: company.website || "",
-                      logo: company.logo || "",
-                      size: company.size || "",
-                      founded_year: company.founded_year || "",
-                    });
-                  }}
-                >
-                  Cancel
-                </Button>
-              )}
+                {company && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setForm({
+                        name: company.name || "",
+                        industry: company.industry || "",
+                        country: company.country || "",
+                        city: company.city || "",
+                        address: company.address || "",
+                        description: company.description || "",
+                        website: company.website || "",
+                        logo: company.logo || "",
+                        size: company.size || "",
+                        founded_year: company.founded_year || "",
+                      });
+                    }}
+                  >
+                    {t("cancel")}
+                  </Button>
+                )}
 
-        <Button onClick={saveCompany} disabled={saving || uploadingLogo}>
-          {company ? <Save size={16} /> : <PlusCircle size={16} />}
-          {saving
-            ? "Saving..."
-            : company
-            ? "Save Changes"
-            : "Create Company"}
-        </Button>
-      </div>
+                <Button onClick={saveCompany} disabled={saving || uploadingLogo}>
+                  {company ? <Save size={16} /> : <PlusCircle size={16} />}
+                  {saving
+                    ? t("saving")
+                    : company
+                    ? t("saveChanges")
+                    : t("createCompany")}
+                </Button>
+              </div>
             </Card>
           )}
         </div>
 
         <div style={styles.sideColumn}>
-          <Card title="Profile Strength" subtitle="Improve your employer profile.">
+          <Card
+            title={t("profileStrength")}
+            subtitle={t("profileStrengthSubtitle")}
+          >
             <div style={styles.progressHeader}>
-              <strong>{completionPercent}% complete</strong>
-              <span>{completedCount}/{completionItems.length}</span>
+              <strong>
+                {completionPercent}% {t("complete")}
+              </strong>
+              <span>
+                {completedCount}/{completionItems.length}
+              </span>
             </div>
 
             <div style={styles.progressTrack}>
@@ -433,11 +488,20 @@ const completionItems = [
 
           <div style={{ height: 18 }} />
 
-          <Card title="Employer Tools" subtitle="Next steps after setup.">
+          <Card
+            title={t("employerTools")}
+            subtitle={t("employerToolsSubtitle")}
+          >
             <div style={styles.toolList}>
-              <ToolItem title="Post jobs" text="Create job openings for this company." />
-              <ToolItem title="Review candidates" text="Manage applications and shortlisted talent." />
-              <ToolItem title="Build visibility" text="Keep your company details clear and trusted." />
+              <ToolItem title={t("postJobs")} text={t("postJobsDesc")} />
+              <ToolItem
+                title={t("reviewCandidates")}
+                text={t("reviewCandidatesDesc")}
+              />
+              <ToolItem
+                title={t("buildVisibility")}
+                text={t("buildVisibilityDesc")}
+              />
             </div>
           </Card>
         </div>
@@ -482,79 +546,66 @@ const styles = {
     alignItems: "center",
     gap: 20,
   },
-
-
-
   formGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-  gap: 14,
-},
-
-descriptionBox: {
-  padding: 16,
-  border: "1px solid #e5e7eb",
-  borderRadius: 18,
-  background: "#fafafa",
-},
-
-
-fieldLabel: {
-  display: "block",
-  fontWeight: 700,
-  marginBottom: 8,
-  color: "#111827",
-},
-
-logoUploadBox: {
-  display: "flex",
-  alignItems: "center",
-  gap: 14,
-  padding: 14,
-  borderRadius: 16,
-  border: "1px solid #e5e7eb",
-  background: "#f9fafb",
-},
-
-logoPreview: {
-  width: 72,
-  height: 72,
-  borderRadius: 18,
-  objectFit: "cover",
-  border: "1px solid #e5e7eb",
-  background: "#fff",
-},
-
-logoPlaceholder: {
-  width: 72,
-  height: 72,
-  borderRadius: 18,
-  background: "linear-gradient(135deg, #111827, #2563eb)",
-  color: "#fff",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontWeight: 800,
-  fontSize: 26,
-},
-
-uploadHelp: {
-  margin: "8px 0 0",
-  color: "#6b7280",
-  fontSize: 13,
-},
-
-companyLogoImage: {
-  width: 82,
-  height: 82,
-  borderRadius: 24,
-  objectFit: "cover",
-  border: "1px solid #e5e7eb",
-  background: "#fff",
-  boxShadow: "0 16px 30px rgba(15, 23, 42, 0.12)",
-},
-
-
+    display: "grid",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    gap: 14,
+  },
+  descriptionBox: {
+    padding: 16,
+    border: "1px solid #e5e7eb",
+    borderRadius: 18,
+    background: "#fafafa",
+  },
+  fieldLabel: {
+    display: "block",
+    fontWeight: 700,
+    marginBottom: 8,
+    color: "#111827",
+  },
+  logoUploadBox: {
+    display: "flex",
+    alignItems: "center",
+    gap: 14,
+    padding: 14,
+    borderRadius: 16,
+    border: "1px solid #e5e7eb",
+    background: "#f9fafb",
+  },
+  logoPreview: {
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    objectFit: "cover",
+    border: "1px solid #e5e7eb",
+    background: "#fff",
+  },
+  logoPlaceholder: {
+    width: 72,
+    height: 72,
+    borderRadius: 18,
+    background: "linear-gradient(135deg, #111827, #2563eb)",
+    color: "#fff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 800,
+    fontSize: 26,
+  },
+  uploadHelp: {
+    margin: "8px 0 0",
+    color: "#6b7280",
+    fontSize: 13,
+  },
+  companyLogoImage: {
+    width: 82,
+    height: 82,
+    borderRadius: 24,
+    objectFit: "cover",
+    border: "1px solid #e5e7eb",
+    background: "#fff",
+    boxShadow: "0 16px 30px rgba(15, 23, 42, 0.12)",
+  },
   logoBox: {
     width: 82,
     height: 82,

@@ -20,8 +20,11 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Badge from "../../components/ui/Badge";
+import { useLanguage } from "../../context/LanguageContext";
 
 function EmployerSettings() {
+  const { t } = useLanguage();
+
   const [inviteForm, setInviteForm] = useState({
     name: "",
     email: "",
@@ -68,48 +71,48 @@ function EmployerSettings() {
     () => [
       {
         role: "Owner",
-        description: "Full workspace control.",
+        description: t("ownerRoleDesc"),
         permissions: [
-          "Manage company profile",
-          "Create and delete jobs",
-          "Review all applicants",
-          "Invite team members",
-          "Manage permissions",
-          "Access billing and security",
+          t("permissionManageCompanyProfile"),
+          t("permissionCreateDeleteJobs"),
+          t("permissionReviewAllApplicants"),
+          t("permissionInviteTeamMembers"),
+          t("permissionManagePermissions"),
+          t("permissionAccessBillingSecurity"),
         ],
       },
       {
         role: "Admin",
-        description: "Can manage most hiring operations.",
+        description: t("adminRoleDesc"),
         permissions: [
-          "Manage jobs",
-          "Review applicants",
-          "Invite recruiters",
-          "Update company profile",
+          t("permissionManageJobs"),
+          t("permissionReviewApplicants"),
+          t("permissionInviteRecruiters"),
+          t("permissionUpdateCompanyProfile"),
         ],
       },
       {
         role: "Recruiter",
-        description: "Can manage candidates and applications.",
+        description: t("recruiterRoleDesc"),
         permissions: [
-          "View applicants",
-          "Update application status",
-          "Add recruiter notes",
-          "Browse talent directory",
+          t("permissionViewApplicants"),
+          t("permissionUpdateApplicationStatus"),
+          t("permissionAddRecruiterNotes"),
+          t("permissionBrowseTalentDirectory"),
         ],
       },
       {
         role: "Hiring Manager",
-        description: "Can review candidates for assigned roles.",
+        description: t("hiringManagerRoleDesc"),
         permissions: [
-          "View assigned jobs",
-          "Review applicants",
-          "Score candidates",
-          "Leave interview feedback",
+          t("permissionViewAssignedJobs"),
+          t("permissionReviewApplicants"),
+          t("permissionScoreCandidates"),
+          t("permissionLeaveInterviewFeedback"),
         ],
       },
     ],
-    []
+    [t]
   );
 
   const updateWorkspace = (field, value) => {
@@ -121,7 +124,7 @@ function EmployerSettings() {
 
   const inviteMember = () => {
     if (!inviteForm.email.trim()) {
-      toast.error("Email is required");
+      toast.error(t("emailRequired"));
       return;
     }
 
@@ -130,7 +133,7 @@ function EmployerSettings() {
     );
 
     if (exists) {
-      toast.error("This team member already exists");
+      toast.error(t("teamMemberExists"));
       return;
     }
 
@@ -138,7 +141,7 @@ function EmployerSettings() {
       ...prev,
       {
         id: Date.now(),
-        name: inviteForm.name || "Pending user",
+        name: inviteForm.name || t("pendingUser"),
         email: inviteForm.email,
         role: inviteForm.role,
         status: "Invited",
@@ -151,42 +154,39 @@ function EmployerSettings() {
       role: "Recruiter",
     });
 
-    toast.success("Team invitation added");
+    toast.success(t("teamInvitationAdded"));
   };
 
   const removeMember = (id) => {
     setTeamMembers((prev) => prev.filter((member) => member.id !== id));
-    toast.success("Team member removed");
+    toast.success(t("teamMemberRemoved"));
   };
 
   const saveSettings = () => {
-    toast.success("Workspace settings saved");
+    toast.success(t("workspaceSettingsSaved"));
   };
 
   return (
-    <DashboardLayout
-      title="Settings"
-      subtitle="Manage team access, permissions, notifications, and workspace preferences."
-    >
+    <DashboardLayout title={t("settings")} subtitle={t("settingsSubtitle")}>
       <PageHeader
-        action={<Badge variant="default">Employer Workspace</Badge>}
+        action={<Badge variant="default">{t("employerWorkspace")}</Badge>}
       />
 
       <div style={styles.grid}>
         <div style={styles.main}>
           <Card
-            title="Workspace Settings"
-            subtitle="Control your company workspace identity and hiring defaults."
+            title={t("workspaceSettings")}
+            subtitle={t("workspaceSettingsSubtitle")}
           >
             <SectionHeader
               icon={<Building2 size={20} />}
-              title="Company Workspace"
-              text="Basic workspace information used across your employer dashboard."
+              title={t("companyWorkspace")}
+              text={t("companyWorkspaceDesc")}
             />
 
             <div style={styles.formGrid}>
               <Input
-                label="Workspace name"
+                label={t("workspaceName")}
                 placeholder="AfriTalent Solutions"
                 value={workspace.workspace_name}
                 onChange={(e) =>
@@ -195,14 +195,14 @@ function EmployerSettings() {
               />
 
               <Input
-                label="Company website"
+                label={t("companyWebsite")}
                 placeholder="https://company.com"
                 value={workspace.website}
                 onChange={(e) => updateWorkspace("website", e.target.value)}
               />
 
               <Input
-                label="Default hiring country"
+                label={t("defaultHiringCountry")}
                 placeholder="Nigeria"
                 value={workspace.default_country}
                 onChange={(e) =>
@@ -211,8 +211,8 @@ function EmployerSettings() {
               />
 
               <Input
-                label="Company size"
-                placeholder="11-50 employees"
+                label={t("companySize")}
+                placeholder={t("companySizePlaceholder")}
                 value={workspace.company_size}
                 onChange={(e) =>
                   updateWorkspace("company_size", e.target.value)
@@ -224,8 +224,8 @@ function EmployerSettings() {
 
             <SectionHeader
               icon={<Bell size={20} />}
-              title="Notifications"
-              text="Choose what your hiring team should be alerted about."
+              title={t("notifications")}
+              text={t("notificationsDesc")}
             />
 
             <div style={styles.preferenceList}>
@@ -234,8 +234,8 @@ function EmployerSettings() {
                 onChange={(value) =>
                   updateWorkspace("new_application_alerts", value)
                 }
-                title="New application alerts"
-                text="Notify the team when a candidate applies to one of your jobs."
+                title={t("newApplicationAlerts")}
+                text={t("newApplicationAlertsDesc")}
               />
 
               <Preference
@@ -243,15 +243,15 @@ function EmployerSettings() {
                 onChange={(value) =>
                   updateWorkspace("status_update_alerts", value)
                 }
-                title="Candidate status updates"
-                text="Notify team members when an application status changes."
+                title={t("candidateStatusUpdates")}
+                text={t("candidateStatusUpdatesDesc")}
               />
 
               <Preference
                 checked={workspace.weekly_summary}
                 onChange={(value) => updateWorkspace("weekly_summary", value)}
-                title="Weekly hiring summary"
-                text="Receive a weekly overview of jobs, applicants, and hiring activity."
+                title={t("weeklyHiringSummary")}
+                text={t("weeklyHiringSummaryDesc")}
               />
             </div>
 
@@ -259,16 +259,16 @@ function EmployerSettings() {
 
             <SectionHeader
               icon={<Lock size={20} />}
-              title="Security and Visibility"
-              text="Control access and public visibility for this employer workspace."
+              title={t("securityAndVisibility")}
+              text={t("securityAndVisibilityDesc")}
             />
 
             <div style={styles.preferenceList}>
               <Preference
                 checked={workspace.public_profile}
                 onChange={(value) => updateWorkspace("public_profile", value)}
-                title="Public employer profile"
-                text="Allow candidates to see your company profile and active jobs."
+                title={t("publicEmployerProfile")}
+                text={t("publicEmployerProfileDesc")}
               />
 
               <Preference
@@ -276,33 +276,30 @@ function EmployerSettings() {
                 onChange={(value) =>
                   updateWorkspace("two_factor_required", value)
                 }
-                title="Require two-factor authentication"
-                text="Require team members to use stronger account protection."
+                title={t("requireTwoFactor")}
+                text={t("requireTwoFactorDesc")}
               />
             </div>
 
             <div style={styles.actions}>
-              <Button variant="secondary">Cancel</Button>
-              <Button onClick={saveSettings}>Save Settings</Button>
+              <Button variant="secondary">{t("cancel")}</Button>
+              <Button onClick={saveSettings}>{t("saveSettings")}</Button>
             </div>
           </Card>
 
           <div style={{ height: 20 }} />
 
-          <Card
-            title="Team Members"
-            subtitle="Invite and manage people who can access this employer workspace."
-          >
+          <Card title={t("teamMembers")} subtitle={t("teamMembersSubtitle")}>
             <SectionHeader
               icon={<UserPlus size={20} />}
-              title="Invite Team Member"
-              text="Add recruiters, admins, and hiring managers to your workspace."
+              title={t("inviteTeamMember")}
+              text={t("inviteTeamMemberDesc")}
             />
 
             <div style={styles.inviteGrid}>
               <Input
-                label="Name"
-                placeholder="Team member name"
+                label={t("name")}
+                placeholder={t("teamMemberNamePlaceholder")}
                 value={inviteForm.name}
                 onChange={(e) =>
                   setInviteForm({ ...inviteForm, name: e.target.value })
@@ -310,7 +307,7 @@ function EmployerSettings() {
               />
 
               <Input
-                label="Email"
+                label={t("email")}
                 type="email"
                 placeholder="name@company.com"
                 value={inviteForm.email}
@@ -320,23 +317,23 @@ function EmployerSettings() {
               />
 
               <Input
-                label="Role"
+                label={t("role")}
                 as="select"
                 value={inviteForm.role}
                 onChange={(e) =>
                   setInviteForm({ ...inviteForm, role: e.target.value })
                 }
                 options={[
-                  { value: "Admin", label: "Admin" },
-                  { value: "Recruiter", label: "Recruiter" },
-                  { value: "Hiring Manager", label: "Hiring Manager" },
+                  { value: "Admin", label: t("admin") },
+                  { value: "Recruiter", label: t("recruiter") },
+                  { value: "Hiring Manager", label: t("hiringManager") },
                 ]}
               />
 
               <div style={styles.inviteButtonWrap}>
                 <Button onClick={inviteMember}>
                   <UserPlus size={16} />
-                  Invite
+                  {t("invite")}
                 </Button>
               </div>
             </div>
@@ -356,16 +353,17 @@ function EmployerSettings() {
                   <Badge
                     variant={member.status === "Active" ? "success" : "warning"}
                   >
-                    {member.status}
+                    {t(member.status.toLowerCase())}
                   </Badge>
 
-                  <Badge variant="default">{member.role}</Badge>
+                  <Badge variant="default">{t(roleKey(member.role))}</Badge>
 
                   {member.role !== "Owner" && (
                     <button
                       type="button"
                       style={styles.iconButton}
                       onClick={() => removeMember(member.id)}
+                      aria-label={t("removeTeamMember")}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -378,8 +376,8 @@ function EmployerSettings() {
           <div style={{ height: 20 }} />
 
           <Card
-            title="Role Permissions"
-            subtitle="Understand what each workspace role can access."
+            title={t("rolePermissions")}
+            subtitle={t("rolePermissionsSubtitle")}
           >
             <div style={styles.permissionsGrid}>
               {rolePermissions.map((role) => (
@@ -387,7 +385,7 @@ function EmployerSettings() {
                   <div style={styles.permissionHeader}>
                     <KeyRound size={18} />
                     <div>
-                      <strong>{role.role}</strong>
+                      <strong>{t(roleKey(role.role))}</strong>
                       <p>{role.description}</p>
                     </div>
                   </div>
@@ -404,38 +402,55 @@ function EmployerSettings() {
         </div>
 
         <div style={styles.side}>
-          <Card title="Workspace Status" subtitle="Current setup overview.">
+          <Card
+            title={t("workspaceStatus")}
+            subtitle={t("workspaceStatusSubtitle")}
+          >
             <div style={styles.statusBox}>
               <ShieldCheck size={28} />
               <div>
-                <strong>Active workspace</strong>
-                <p>Your employer account is ready to manage hiring.</p>
+                <strong>{t("activeWorkspace")}</strong>
+                <p>{t("activeWorkspaceDesc")}</p>
               </div>
             </div>
 
             <div style={styles.statList}>
-              <Stat label="Workspace" value={workspace.workspace_name} />
-              <Stat label="Team Members" value={teamMembers.length} />
-              <Stat label="Access Level" value="Company-level" />
-              <Stat label="Security" value="Standard" />
+              <Stat label={t("workspace")} value={workspace.workspace_name} />
+              <Stat label={t("teamMembers")} value={teamMembers.length} />
+              <Stat label={t("accessLevel")} value={t("companyLevel")} />
+              <Stat label={t("security")} value={t("standard")} />
             </div>
           </Card>
 
           <div style={{ height: 18 }} />
 
-          <Card title="Settings Areas" subtitle="What you can manage here.">
+          <Card title={t("settingsAreas")} subtitle={t("settingsAreasSubtitle")}>
             <div style={styles.featureList}>
-              <Feature icon={<Users size={18} />} title="Team members" />
-              <Feature icon={<Lock size={18} />} title="Role permissions" />
-              <Feature icon={<Mail size={18} />} title="Notifications" />
-              <Feature icon={<Globe2 size={18} />} title="Public visibility" />
-              <Feature icon={<Settings2 size={18} />} title="Workspace defaults" />
+              <Feature icon={<Users size={18} />} title={t("teamMembers")} />
+              <Feature icon={<Lock size={18} />} title={t("rolePermissions")} />
+              <Feature icon={<Mail size={18} />} title={t("notifications")} />
+              <Feature icon={<Globe2 size={18} />} title={t("publicVisibility")} />
+              <Feature
+                icon={<Settings2 size={18} />}
+                title={t("workspaceDefaults")}
+              />
             </div>
           </Card>
         </div>
       </div>
     </DashboardLayout>
   );
+}
+
+function roleKey(role) {
+  const map = {
+    Owner: "owner",
+    Admin: "admin",
+    Recruiter: "recruiter",
+    "Hiring Manager": "hiringManager",
+  };
+
+  return map[role] || role;
 }
 
 function SectionHeader({ icon, title, text }) {

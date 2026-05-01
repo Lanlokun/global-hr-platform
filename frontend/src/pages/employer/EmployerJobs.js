@@ -22,8 +22,11 @@ import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Badge from "../../components/ui/Badge";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import { useLanguage } from "../../context/LanguageContext";
 
 function EmployerJobs() {
+  const { t } = useLanguage();
+
   const [jobs, setJobs] = useState([]);
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -54,20 +57,23 @@ function EmployerJobs() {
 
   const [form, setForm] = useState(emptyForm);
 
-  const authHeaders = {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  };
+  const authHeaders = useMemo(
+    () => ({
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }),
+    []
+  );
 
   const fetchJobs = useCallback(async () => {
     try {
       const res = await api.get("/api/jobs/my", authHeaders);
       setJobs(res.data);
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to load jobs");
+      toast.error(error.response?.data?.error || t("loadJobsError"));
     }
-  }, []);
+  }, [authHeaders, t]);
 
   useEffect(() => {
     fetchJobs();
@@ -113,7 +119,7 @@ function EmployerJobs() {
 
   const saveJob = async () => {
     if (!form.title.trim()) {
-      toast.error("Job title is required");
+      toast.error(t("jobTitleRequired"));
       return;
     }
 
@@ -126,17 +132,21 @@ function EmployerJobs() {
       };
 
       if (editingJob) {
-        await api.put(`/api/employer/jobs/${editingJob.id}`, payload, authHeaders);
-        toast.success("Job updated");
+        await api.put(
+          `/api/employer/jobs/${editingJob.id}`,
+          payload,
+          authHeaders
+        );
+        toast.success(t("jobUpdated"));
       } else {
         await api.post("/api/employer/jobs", payload, authHeaders);
-        toast.success("Job created");
+        toast.success(t("jobCreated"));
       }
 
       closeModal();
       fetchJobs();
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to save job");
+      toast.error(error.response?.data?.error || t("saveJobError"));
     }
   };
 
@@ -146,10 +156,10 @@ function EmployerJobs() {
     try {
       await api.delete(`/api/employer/jobs/${deleteTarget.id}`, authHeaders);
       setDeleteTarget(null);
-      toast.success("Job deleted");
+      toast.success(t("jobDeleted"));
       fetchJobs();
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to delete job");
+      toast.error(error.response?.data?.error || t("deleteJobError"));
     }
   };
 
@@ -173,28 +183,27 @@ function EmployerJobs() {
 
   const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
 
-    const paginatedJobs = useMemo(() => {
-      const start = (currentPage - 1) * jobsPerPage;
-      return filteredJobs.slice(start, start + jobsPerPage);
-    }, [filteredJobs, currentPage]);
+  const paginatedJobs = useMemo(() => {
+    const start = (currentPage - 1) * jobsPerPage;
+    return filteredJobs.slice(start, start + jobsPerPage);
+  }, [filteredJobs, currentPage]);
 
-    useEffect(() => {
-      setCurrentPage(1);
-    }, [search]);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   return (
-    <DashboardLayout
-      title="Jobs"
-      subtitle="Create and manage company job openings."
-    >
+    <DashboardLayout title={t("jobs")} subtitle={t("jobsSubtitle")}>
       <PageHeader
-        subtitle="Publish roles, update openings, and track applicant activity."
+        subtitle={t("jobsHeaderSubtitle")}
         action={
           <div style={styles.headerActions}>
-            <Badge variant="default">{filteredJobs.length} jobs</Badge>
+            <Badge variant="default">
+              {filteredJobs.length} {t("jobsCountLabel")}
+            </Badge>
             <Button onClick={openCreateModal}>
               <Plus size={16} />
-              Create Job
+              {t("createJob")}
             </Button>
           </div>
         }
@@ -204,7 +213,7 @@ function EmployerJobs() {
         <Search size={18} color="#64748b" />
         <input
           style={styles.searchInput}
-          placeholder="Search by title, location, skill, department, status..."
+          placeholder={t("searchJobsPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -214,9 +223,9 @@ function EmployerJobs() {
         {filteredJobs.length === 0 ? (
           <div style={styles.emptyState}>
             <Briefcase size={44} />
-            <h3>No jobs found</h3>
-            <p>Create your first job or adjust your search.</p>
-            <Button onClick={openCreateModal}>Create Job</Button>
+            <h3>{t("noJobsFound")}</h3>
+            <p>{t("noJobsFoundDesc")}</p>
+            <Button onClick={openCreateModal}>{t("createJob")}</Button>
           </div>
         ) : (
           paginatedJobs.map((job) => (
@@ -225,18 +234,22 @@ function EmployerJobs() {
                 <div style={{ flex: 1 }}>
                   <div style={styles.badgeRow}>
                     <Badge variant={statusVariant(job.status)}>
-                      {job.status || "active"}
+                      {t(job.status || "active")}
                     </Badge>
 
                     <Badge variant={job.remote ? "success" : "default"}>
-                      {job.work_mode || (job.remote ? "Remote" : "On-site")}
+                      {job.work_mode
+                        ? t(workModeKey(job.work_mode))
+                        : job.remote
+                        ? t("remote")
+                        : t("onSite")}
                     </Badge>
                   </div>
 
                   <h3 style={styles.jobTitle}>{job.title}</h3>
 
                   <p style={styles.jobDescription}>
-                    {job.description || "No description added yet."}
+                    {job.description || t("noDescriptionAdded")}
                   </p>
                 </div>
               </div>
@@ -244,27 +257,35 @@ function EmployerJobs() {
               <div style={styles.metaGrid}>
                 <Meta
                   icon={<Building2 size={16} />}
-                  label={job.department || "No department"}
+                  label={job.department || t("noDepartment")}
                 />
                 <Meta
                   icon={<MapPin size={16} />}
-                  label={job.location || "Location not set"}
+                  label={job.location || t("locationNotSet")}
                 />
                 <Meta
                   icon={<Banknote size={16} />}
-                  label={job.salary_range || "Salary open"}
+                  label={job.salary_range || t("salaryOpen")}
                 />
                 <Meta
                   icon={<Briefcase size={16} />}
-                  label={job.employment_type || "Type not set"}
+                  label={
+                    job.employment_type
+                      ? t(employmentTypeKey(job.employment_type))
+                      : t("typeNotSet")
+                  }
                 />
                 <Meta
                   icon={<Clock size={16} />}
-                  label={job.experience_level || "Level not set"}
+                  label={
+                    job.experience_level
+                      ? t(experienceLevelKey(job.experience_level))
+                      : t("levelNotSet")
+                  }
                 />
                 <Meta
                   icon={<Users size={16} />}
-                  label={`${job.application_count || 0} applicants`}
+                  label={`${job.application_count || 0} ${t("applicants")}`}
                 />
               </div>
 
@@ -272,20 +293,22 @@ function EmployerJobs() {
                 <CalendarDays size={16} />
                 <span>
                   {job.expires_at
-                    ? `Deadline: ${new Date(job.expires_at).toLocaleDateString()}`
-                    : "No application deadline set"}
+                    ? `${t("deadline")}: ${new Date(
+                        job.expires_at
+                      ).toLocaleDateString()}`
+                    : t("noApplicationDeadline")}
                 </span>
               </div>
 
-              <SkillTags skills={job.required_skills} />
+              <SkillTags skills={job.required_skills} t={t} />
 
               {job.benefits && (
-                <PreviewBlock title="Benefits" text={job.benefits} />
+                <PreviewBlock title={t("benefits")} text={job.benefits} />
               )}
 
               {job.application_instructions && (
                 <PreviewBlock
-                  title="Application Instructions"
+                  title={t("applicationInstructions")}
                   text={job.application_instructions}
                 />
               )}
@@ -293,12 +316,12 @@ function EmployerJobs() {
               <div style={styles.jobActions}>
                 <Button variant="secondary" onClick={() => openEditModal(job)}>
                   <Pencil size={15} />
-                  Edit
+                  {t("edit")}
                 </Button>
 
                 <Button variant="danger" onClick={() => setDeleteTarget(job)}>
                   <Trash2 size={15} />
-                  Delete
+                  {t("delete")}
                 </Button>
               </div>
             </div>
@@ -306,41 +329,42 @@ function EmployerJobs() {
         )}
       </div>
 
-        {filteredJobs.length > jobsPerPage && (
-  <div style={styles.pagination}>
-    <Button
-      variant="secondary"
-      disabled={currentPage === 1}
-      onClick={() => setCurrentPage((page) => page - 1)}
-    >
-      Previous
-    </Button>
+      {filteredJobs.length > jobsPerPage && (
+        <div style={styles.pagination}>
+          <Button
+            variant="secondary"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((page) => page - 1)}
+          >
+            {t("previous")}
+          </Button>
 
-    <span style={styles.pageInfo}>
-      Page {currentPage} of {totalPages}
-    </span>
+          <span style={styles.pageInfo}>
+            {t("page")} {currentPage} {t("of")} {totalPages}
+          </span>
 
-    <Button
-      variant="secondary"
-      disabled={currentPage === totalPages}
-      onClick={() => setCurrentPage((page) => page + 1)}
-    >
-      Next
-    </Button>
-  </div>
-)}
+          <Button
+            variant="secondary"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+          >
+            {t("next")}
+          </Button>
+        </div>
+      )}
+
       {modalOpen && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
             <div style={styles.modalHeader}>
               <div>
                 <h2 style={styles.modalTitle}>
-                  {editingJob ? "Edit Job" : "Create Job"}
+                  {editingJob ? t("editJob") : t("createJob")}
                 </h2>
                 <p style={styles.modalSubtitle}>
                   {editingJob
-                    ? "Update role details and hiring requirements."
-                    : "Publish a structured role under your company."}
+                    ? t("editJobSubtitle")
+                    : t("createJobSubtitle")}
                 </p>
               </div>
 
@@ -350,8 +374,8 @@ function EmployerJobs() {
             </div>
 
             <Input
-              label="Job title"
-              placeholder="e.g. Senior Frontend Developer"
+              label={t("jobTitle")}
+              placeholder={t("jobTitlePlaceholder")}
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
             />
@@ -359,65 +383,71 @@ function EmployerJobs() {
             <div style={{ height: 14 }} />
 
             <Input
-              label="Description"
-              placeholder="Describe the role, responsibilities, requirements, and expected impact."
+              label={t("description")}
+              placeholder={t("jobDescriptionPlaceholder")}
               as="textarea"
               rows={5}
               value={form.description}
-              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              onChange={(e) =>
+                setForm({ ...form, description: e.target.value })
+              }
             />
 
             <div style={{ height: 14 }} />
 
             <div style={styles.formGrid}>
               <Input
-                label="Department"
-                placeholder="Engineering, Product, HR..."
+                label={t("department")}
+                placeholder={t("departmentPlaceholder")}
                 value={form.department}
-                onChange={(e) => setForm({ ...form, department: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, department: e.target.value })
+                }
               />
 
               <Input
-                label="Location"
-                placeholder="e.g. Lagos, Nigeria"
+                label={t("location")}
+                placeholder={t("jobLocationPlaceholder")}
                 value={form.location}
-                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, location: e.target.value })
+                }
               />
 
               <Input
-                label="Employment type"
+                label={t("employmentType")}
                 as="select"
                 value={form.employment_type}
                 onChange={(e) =>
                   setForm({ ...form, employment_type: e.target.value })
                 }
                 options={[
-                  { value: "Full-time", label: "Full-time" },
-                  { value: "Part-time", label: "Part-time" },
-                  { value: "Contract", label: "Contract" },
-                  { value: "Internship", label: "Internship" },
-                  { value: "Freelance", label: "Freelance" },
+                  { value: "Full-time", label: t("fullTime") },
+                  { value: "Part-time", label: t("partTime") },
+                  { value: "Contract", label: t("contract") },
+                  { value: "Internship", label: t("internship") },
+                  { value: "Freelance", label: t("freelance") },
                 ]}
               />
 
               <Input
-                label="Experience level"
+                label={t("experienceLevel")}
                 as="select"
                 value={form.experience_level}
                 onChange={(e) =>
                   setForm({ ...form, experience_level: e.target.value })
                 }
                 options={[
-                  { value: "Entry-level", label: "Entry-level" },
-                  { value: "Junior", label: "Junior" },
-                  { value: "Mid-level", label: "Mid-level" },
-                  { value: "Senior", label: "Senior" },
-                  { value: "Lead", label: "Lead" },
+                  { value: "Entry-level", label: t("entryLevel") },
+                  { value: "Junior", label: t("junior") },
+                  { value: "Mid-level", label: t("midLevel") },
+                  { value: "Senior", label: t("senior") },
+                  { value: "Lead", label: t("lead") },
                 ]}
               />
 
               <Input
-                label="Work mode"
+                label={t("workMode")}
                 as="select"
                 value={form.work_mode}
                 onChange={(e) => {
@@ -429,30 +459,32 @@ function EmployerJobs() {
                   });
                 }}
                 options={[
-                  { value: "Remote", label: "Remote" },
-                  { value: "Hybrid", label: "Hybrid" },
-                  { value: "On-site", label: "On-site" },
+                  { value: "Remote", label: t("remote") },
+                  { value: "Hybrid", label: t("hybrid") },
+                  { value: "On-site", label: t("onSite") },
                 ]}
               />
 
               <Input
-                label="Job status"
+                label={t("jobStatus")}
                 as="select"
                 value={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.value })}
                 options={[
-                  { value: "active", label: "Active" },
-                  { value: "paused", label: "Paused" },
-                  { value: "closed", label: "Closed" },
-                  { value: "draft", label: "Draft" },
+                  { value: "active", label: t("active") },
+                  { value: "paused", label: t("paused") },
+                  { value: "closed", label: t("closed") },
+                  { value: "draft", label: t("draft") },
                 ]}
               />
 
               <Input
-                label="Currency"
+                label={t("currency")}
                 as="select"
                 value={form.currency}
-                onChange={(e) => setForm({ ...form, currency: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, currency: e.target.value })
+                }
                 options={[
                   { value: "USD", label: "USD" },
                   { value: "EUR", label: "EUR" },
@@ -464,24 +496,28 @@ function EmployerJobs() {
               />
 
               <Input
-                label="Salary min"
+                label={t("salaryMin")}
                 type="number"
                 placeholder="1500"
                 value={form.salary_min}
-                onChange={(e) => setForm({ ...form, salary_min: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, salary_min: e.target.value })
+                }
               />
 
               <Input
-                label="Salary max"
+                label={t("salaryMax")}
                 type="number"
                 placeholder="2500"
                 value={form.salary_max}
-                onChange={(e) => setForm({ ...form, salary_max: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, salary_max: e.target.value })
+                }
               />
 
               <Input
-                label="Salary display"
-                placeholder="e.g. $1,500 - $2,500 monthly"
+                label={t("salaryDisplay")}
+                placeholder={t("salaryDisplayPlaceholder")}
                 value={form.salary_range}
                 onChange={(e) =>
                   setForm({ ...form, salary_range: e.target.value })
@@ -489,18 +525,20 @@ function EmployerJobs() {
               />
 
               <Input
-                label="Application deadline"
+                label={t("applicationDeadline")}
                 type="date"
                 value={form.expires_at}
-                onChange={(e) => setForm({ ...form, expires_at: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, expires_at: e.target.value })
+                }
               />
             </div>
 
             <div style={{ height: 14 }} />
 
             <Input
-              label="Required skills"
-              placeholder="React, TypeScript, REST APIs, CSS"
+              label={t("requiredSkills")}
+              placeholder={t("requiredSkillsPlaceholder")}
               as="textarea"
               rows={3}
               value={form.required_skills}
@@ -512,8 +550,8 @@ function EmployerJobs() {
             <div style={{ height: 14 }} />
 
             <Input
-              label="Benefits"
-              placeholder="Health insurance, paid leave, remote allowance..."
+              label={t("benefits")}
+              placeholder={t("benefitsPlaceholder")}
               as="textarea"
               rows={3}
               value={form.benefits}
@@ -523,13 +561,16 @@ function EmployerJobs() {
             <div style={{ height: 14 }} />
 
             <Input
-              label="Application instructions"
-              placeholder="Attach CV, portfolio, GitHub, or relevant project links."
+              label={t("applicationInstructions")}
+              placeholder={t("applicationInstructionsPlaceholder")}
               as="textarea"
               rows={3}
               value={form.application_instructions}
               onChange={(e) =>
-                setForm({ ...form, application_instructions: e.target.value })
+                setForm({
+                  ...form,
+                  application_instructions: e.target.value,
+                })
               }
             />
 
@@ -537,20 +578,22 @@ function EmployerJobs() {
               <input
                 type="checkbox"
                 checked={form.remote}
-                onChange={(e) => setForm({ ...form, remote: e.target.checked })}
+                onChange={(e) =>
+                  setForm({ ...form, remote: e.target.checked })
+                }
               />
               <div>
-                <strong>Remote-friendly role</strong>
-                <p>Candidates can apply from outside the listed location.</p>
+                <strong>{t("remoteFriendlyRole")}</strong>
+                <p>{t("remoteFriendlyRoleDesc")}</p>
               </div>
             </div>
 
             <div style={styles.modalActions}>
               <Button variant="secondary" onClick={closeModal}>
-                Cancel
+                {t("cancel")}
               </Button>
               <Button onClick={saveJob}>
-                {editingJob ? "Save Changes" : "Publish Job"}
+                {editingJob ? t("saveChanges") : t("publishJob")}
               </Button>
             </div>
           </div>
@@ -559,9 +602,11 @@ function EmployerJobs() {
 
       <ConfirmModal
         open={!!deleteTarget}
-        title="Delete job?"
-        message={`Are you sure you want to delete "${deleteTarget?.title || ""}"?`}
-        confirmText="Delete job"
+        title={t("deleteJobTitle")}
+        message={`${t("deleteJobMessage")} "${
+          deleteTarget?.title || ""
+        }"?`}
+        confirmText={t("deleteJob")}
         onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
@@ -576,6 +621,40 @@ function statusVariant(status) {
   return "default";
 }
 
+function employmentTypeKey(value) {
+  const map = {
+    "Full-time": "fullTime",
+    "Part-time": "partTime",
+    Contract: "contract",
+    Internship: "internship",
+    Freelance: "freelance",
+  };
+
+  return map[value] || value;
+}
+
+function experienceLevelKey(value) {
+  const map = {
+    "Entry-level": "entryLevel",
+    Junior: "junior",
+    "Mid-level": "midLevel",
+    Senior: "senior",
+    Lead: "lead",
+  };
+
+  return map[value] || value;
+}
+
+function workModeKey(value) {
+  const map = {
+    Remote: "remote",
+    Hybrid: "hybrid",
+    "On-site": "onSite",
+  };
+
+  return map[value] || value;
+}
+
 function Meta({ icon, label }) {
   return (
     <div style={styles.metaItem}>
@@ -585,7 +664,7 @@ function Meta({ icon, label }) {
   );
 }
 
-function SkillTags({ skills }) {
+function SkillTags({ skills, t }) {
   const list = skills
     ? skills
         .split(",")
@@ -594,7 +673,7 @@ function SkillTags({ skills }) {
     : [];
 
   if (list.length === 0) {
-    return <p style={styles.noSkills}>No required skills added.</p>;
+    return <p style={styles.noSkills}>{t("noRequiredSkillsAdded")}</p>;
   }
 
   return (
@@ -645,11 +724,11 @@ const styles = {
     background: "transparent",
   },
 
-jobsGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-  gap: 18,
-},
+  jobsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+    gap: 18,
+  },
 
   jobCard: {
     border: "1px solid #e5e7eb",
@@ -830,18 +909,18 @@ jobsGrid: {
   },
 
   pagination: {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: 12,
-  marginTop: 24,
-},
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 24,
+  },
 
-pageInfo: {
-  fontSize: 14,
-  fontWeight: 700,
-  color: "#374151",
-},
+  pageInfo: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: "#374151",
+  },
 
   remoteBox: {
     display: "flex",

@@ -17,8 +17,11 @@ import PageHeader from "../../components/ui/PageHeader";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
+import { useLanguage } from "../../context/LanguageContext";
 
 function EmployerOverview() {
+  const { t } = useLanguage();
+
   const [company, setCompany] = useState(null);
   const [jobs, setJobs] = useState([]);
   const [applicants, setApplicants] = useState([]);
@@ -42,16 +45,19 @@ function EmployerOverview() {
       setApplicants(applicantsRes.data);
     } catch (error) {
       toast.error(
-        error.response?.data?.error || "Failed to load employer overview"
+        error.response?.data?.error || t("failedEmployerOverview")
       );
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const activeJobs = useMemo(() => jobs.filter((job) => job.status !== "closed"), [jobs]);
+  const activeJobs = useMemo(
+    () => jobs.filter((job) => job.status !== "closed"),
+    [jobs]
+  );
 
   const shortlistedApplicants = useMemo(
     () => applicants.filter((item) => item.status === "shortlisted"),
@@ -65,28 +71,31 @@ function EmployerOverview() {
 
   return (
     <DashboardLayout
-      title="Employer Overview"
-      subtitle="Your company hiring workspace."
+      title={t("employerOverview")}
+      subtitle={t("employerOverviewSubtitle")}
     >
       <PageHeader
-        subtitle="Track your company profile, jobs, applicants, and hiring activity."
+        subtitle={t("employerOverviewHeader")}
         action={
           <Badge variant={company ? "success" : "warning"}>
-            {company ? "Company linked" : "Setup needed"}
+            {company ? t("companyLinked") : t("setupNeeded")}
           </Badge>
         }
       />
 
+      {/* HERO */}
       <div style={styles.hero}>
         <div>
-          <p style={styles.eyebrow}>Employer Dashboard</p>
+          <p style={styles.eyebrow}>{t("employerDashboard")}</p>
+
           <h2 style={styles.heroTitle}>
-            {company ? company.name : "Set up your company profile"}
+            {company ? company.name : t("setupCompanyProfile")}
           </h2>
+
           <p style={styles.heroText}>
             {company
-              ? "Manage hiring activity, monitor applicants, and keep your company presence updated."
-              : "Create your company profile first so you can post jobs and manage applicants."}
+              ? t("employerHeroText")
+              : t("employerHeroSetupText")}
           </p>
         </div>
 
@@ -94,84 +103,89 @@ function EmployerOverview() {
           <Link to="/dashboard/company">
             <Button variant="secondary">
               <Building2 size={16} />
-              My Company
+              {t("myCompany")}
             </Button>
           </Link>
 
           <Link to="/dashboard/jobs">
             <Button>
               <Briefcase size={16} />
-              Manage Jobs
+              {t("manageJobs")}
             </Button>
           </Link>
         </div>
       </div>
 
+      {/* STATS */}
       <div style={styles.statsGrid}>
         <StatCard
           icon={<Building2 size={22} />}
-          label="Company"
-          value={company ? company.name : "Not set"}
+          label={t("company")}
+          value={company ? company.name : t("notSet")}
           tone={company ? "success" : "warning"}
         />
 
         <StatCard
           icon={<Briefcase size={22} />}
-          label="Total Jobs"
+          label={t("totalJobs")}
           value={jobs.length}
-          helper={`${activeJobs.length} active`}
+          helper={`${activeJobs.length} ${t("active")}`}
         />
 
         <StatCard
           icon={<Users size={22} />}
-          label="Applicants"
+          label={t("applicants")}
           value={applicants.length}
-          helper={`${pendingApplicants.length} pending`}
+          helper={`${pendingApplicants.length} ${t("pending")}`}
         />
 
         <StatCard
           icon={<TrendingUp size={22} />}
-          label="Shortlisted"
+          label={t("shortlisted")}
           value={shortlistedApplicants.length}
-          helper="Ready for next step"
+          helper={t("readyNextStep")}
         />
       </div>
 
+      {/* CONTENT */}
       <div style={styles.contentGrid}>
-        <Card title="Hiring Pipeline" subtitle="Current applicant status overview.">
+        <Card title={t("hiringPipeline")} subtitle={t("pipelineSubtitle")}>
           <div style={styles.pipelineList}>
-            <PipelineItem label="Pending" value={pendingApplicants.length} />
+            <PipelineItem label={t("pending")} value={pendingApplicants.length} />
             <PipelineItem
-              label="Reviewed"
-              value={applicants.filter((item) => item.status === "reviewed").length}
+              label={t("reviewed")}
+              value={applicants.filter((a) => a.status === "reviewed").length}
             />
-            <PipelineItem label="Shortlisted" value={shortlistedApplicants.length} />
             <PipelineItem
-              label="Rejected"
-              value={applicants.filter((item) => item.status === "rejected").length}
+              label={t("shortlisted")}
+              value={shortlistedApplicants.length}
+            />
+            <PipelineItem
+              label={t("rejected")}
+              value={applicants.filter((a) => a.status === "rejected").length}
             />
           </div>
         </Card>
 
-        <Card title="Quick Actions" subtitle="Common employer tasks.">
+        <Card title={t("quickActions")} subtitle={t("quickActionsSubtitle")}>
           <div style={styles.actionList}>
             <QuickAction
               to="/employer/company"
               icon={<Building2 size={18} />}
-              title="Update company profile"
-              text="Improve your employer presence."
+              title={t("updateCompanyProfile")}
+              text={t("updateCompanyProfileText")}
             />
             <QuickAction
               to="/employer/jobs"
               icon={<Briefcase size={18} />}
-              title="Create or manage jobs"
-              text="Publish roles and update openings."
+              title={t("createManageJobs")}
+              text={t("createManageJobsText")}
             />
             <QuickAction
               to="/employer/applicants"
               icon={<Users size={18} />}
-              title="Review applicants"
-              text="Check candidate profiles and status."
+              title={t("reviewApplicants")}
+              text={t("reviewApplicantsText")}
             />
           </div>
         </Card>
@@ -179,35 +193,35 @@ function EmployerOverview() {
 
       <div style={{ height: 20 }} />
 
-      <Card title="Workspace Health" subtitle="Recommended next steps.">
+      <Card title={t("workspaceHealth")} subtitle={t("workspaceHealthSubtitle")}>
         <div style={styles.healthList}>
           <HealthItem
             complete={Boolean(company)}
-            title="Company profile connected"
+            title={t("companyProfileConnected")}
             text={
               company
-                ? "Your company is linked to this employer account."
-                : "Set up your company profile before publishing jobs."
+                ? t("companyLinkedText")
+                : t("setupCompanyBeforeJobs")
             }
           />
 
           <HealthItem
             complete={jobs.length > 0}
-            title="At least one job posted"
+            title={t("jobPosted")}
             text={
               jobs.length > 0
-                ? "Your company has active hiring activity."
-                : "Create your first job post to start receiving applicants."
+                ? t("activeHiringText")
+                : t("createFirstJob")
             }
           />
 
           <HealthItem
             complete={applicants.length > 0}
-            title="Applicants received"
+            title={t("applicantsReceived")}
             text={
               applicants.length > 0
-                ? "You have candidates to review."
-                : "Applicants will appear here once candidates apply."
+                ? t("candidatesToReview")
+                : t("noApplicantsYet")
             }
           />
         </div>

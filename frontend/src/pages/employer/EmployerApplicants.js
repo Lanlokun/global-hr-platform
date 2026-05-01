@@ -21,8 +21,11 @@ import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
+import { useLanguage } from "../../context/LanguageContext";
 
 function EmployerApplicants() {
+  const { t } = useLanguage();
+
   const [applicants, setApplicants] = useState([]);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,20 +36,23 @@ function EmployerApplicants() {
     status: "",
   });
 
-  const authHeaders = {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  };
+  const authHeaders = useMemo(
+    () => ({
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }),
+    []
+  );
 
   const fetchApplicants = useCallback(async () => {
     try {
       const res = await api.get("/api/employer/applicants", authHeaders);
       setApplicants(res.data);
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to load applicants");
+      toast.error(error.response?.data?.error || t("loadApplicantsError"));
     }
-  }, []);
+  }, [authHeaders, t]);
 
   useEffect(() => {
     fetchApplicants();
@@ -55,14 +61,14 @@ function EmployerApplicants() {
   const updateStatus = async (id, status) => {
     try {
       await api.patch(`/api/applications/${id}/status`, { status }, authHeaders);
-      toast.success("Application status updated");
+      toast.success(t("applicationStatusUpdated"));
       fetchApplicants();
 
       setSelectedApplicant((prev) =>
         prev && prev.id === id ? { ...prev, status } : prev
       );
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to update status");
+      toast.error(error.response?.data?.error || t("updateStatusError"));
     }
   };
 
@@ -106,41 +112,47 @@ function EmployerApplicants() {
 
   return (
     <DashboardLayout
-      title="Applicants"
-      subtitle="Review complete candidate profiles for your job applications."
+      title={t("applicants")}
+      subtitle={t("applicantsSubtitle")}
     >
       <PageHeader
         action={
-          <Badge variant="default">{filteredApplicants.length} applicants</Badge>
+          <Badge variant="default">
+            {filteredApplicants.length} {t("applicants")}
+          </Badge>
         }
       />
 
-        <div style={styles.filterBar}>
-          <div style={styles.searchBox}>
-            <Input
-              label=""
-              placeholder="Search applicants by name, job, skill, or country..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            />
-          </div>
-
-          <div style={styles.statusBox}>
-            <Input
-              label=""
-              as="select"
-              value={filters.status}
-              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              options={[
-                { value: "", label: "All statuses" },
-                { value: "pending", label: "Pending" },
-                { value: "reviewed", label: "Reviewed" },
-                { value: "shortlisted", label: "Shortlisted" },
-                { value: "rejected", label: "Rejected" },
-              ]}
-            />
-          </div>
+      <div style={styles.filterBar}>
+        <div style={styles.searchBox}>
+          <Input
+            label=""
+            placeholder={t("searchApplicantsPlaceholder")}
+            value={filters.search}
+            onChange={(e) =>
+              setFilters({ ...filters, search: e.target.value })
+            }
+          />
         </div>
+
+        <div style={styles.statusBox}>
+          <Input
+            label=""
+            as="select"
+            value={filters.status}
+            onChange={(e) =>
+              setFilters({ ...filters, status: e.target.value })
+            }
+            options={[
+              { value: "", label: t("allStatuses") },
+              { value: "pending", label: t("pending") },
+              { value: "reviewed", label: t("reviewed") },
+              { value: "shortlisted", label: t("shortlisted") },
+              { value: "rejected", label: t("rejected") },
+            ]}
+          />
+        </div>
+      </div>
 
       <div style={{ height: 20 }} />
 
@@ -149,8 +161,8 @@ function EmployerApplicants() {
           <Card>
             <div style={styles.emptyState}>
               <UserCircle2 size={42} />
-              <h3>No applicants found</h3>
-              <p>Try changing your search or status filter.</p>
+              <h3>{t("noApplicantsFound")}</h3>
+              <p>{t("noApplicantsFoundDesc")}</p>
             </div>
           </Card>
         ) : (
@@ -162,49 +174,53 @@ function EmployerApplicants() {
               onClick={() => setSelectedApplicant(item)}
             >
               <div style={styles.cardTop}>
-                <Avatar applicant={item} />
+                <Avatar applicant={item} t={t} />
 
                 <div style={{ flex: 1 }}>
                   <h3 style={styles.name}>
-                    {item.candidate_name || "Unknown candidate"}
+                    {item.candidate_name || t("unknownCandidate")}
                   </h3>
                   <p style={styles.title}>
-                    {item.professional_title || "Applicant"}
+                    {item.professional_title || t("applicant")}
                   </p>
                 </div>
 
                 <Badge variant={statusVariant(item.status)}>
-                  {item.status || "pending"}
+                  {t(item.status || "pending")}
                 </Badge>
               </div>
 
               <div style={styles.metaList}>
-               <span style={styles.metaItem}>
+                <span style={styles.metaItem}>
                   <Mail size={15} />
-                  <span>{item.candidate_email || "No email"}</span>
+                  <span>{item.candidate_email || t("noEmail")}</span>
                 </span>
 
                 <span style={styles.metaItem}>
                   <Briefcase size={15} />
-                  <span>{item.job_title || "Unknown job"}</span>
+                  <span>{item.job_title || t("unknownJob")}</span>
                 </span>
 
                 <span style={styles.metaItem}>
                   <MapPin size={15} />
-                  <span>{item.country || "Country not set"}</span>
+                  <span>{item.country || t("countryNotSet")}</span>
                 </span>
-
               </div>
 
-            <div style={styles.skillTags}>
-              {(item.skills || "").split(",").map((skill, i) => (
-                <span key={i} style={styles.skillTag}>
-                  {skill.trim()}
-                </span>
-              ))}
-            </div>
+              <div style={styles.skillTags}>
+                {(item.skills || "")
+                  .split(",")
+                  .map((skill) => skill.trim())
+                  .filter(Boolean)
+                  .map((skill, i) => (
+                    <span key={i} style={styles.skillTag}>
+                      {skill}
+                    </span>
+                  ))}
+              </div>
+
               <div style={styles.cardFooter}>
-                <span>View full profile</span>
+                <span>{t("viewFullProfile")}</span>
                 <ExternalLink size={15} />
               </div>
             </button>
@@ -212,19 +228,18 @@ function EmployerApplicants() {
         )}
       </div>
 
-
-        {filteredApplicants.length > applicantsPerPage && (
+      {filteredApplicants.length > applicantsPerPage && (
         <div style={styles.pagination}>
           <Button
             variant="secondary"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((page) => page - 1)}
           >
-            Previous
+            {t("previous")}
           </Button>
 
           <span style={styles.pageInfo}>
-            Page {currentPage} of {totalPages}
+            {t("page")} {currentPage} {t("of")} {totalPages}
           </span>
 
           <Button
@@ -232,23 +247,25 @@ function EmployerApplicants() {
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage((page) => page + 1)}
           >
-            Next
+            {t("next")}
           </Button>
         </div>
       )}
+
       {selectedApplicant && (
         <ApplicantModal
           applicant={selectedApplicant}
           statusVariant={statusVariant}
           updateStatus={updateStatus}
           onClose={() => setSelectedApplicant(null)}
+          t={t}
         />
       )}
     </DashboardLayout>
   );
 }
 
-function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
+function ApplicantModal({ applicant, statusVariant, updateStatus, onClose, t }) {
   const resumeUrl = applicant.resume_url || applicant.application_resume_url;
 
   return (
@@ -256,17 +273,17 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
       <div style={styles.modal}>
         <div style={styles.modalHeader}>
           <div style={styles.modalIdentity}>
-            <Avatar applicant={applicant} large />
+            <Avatar applicant={applicant} large t={t} />
 
             <div>
               <h2 style={styles.modalName}>
-                {applicant.candidate_name || "Unknown candidate"}
+                {applicant.candidate_name || t("unknownCandidate")}
               </h2>
               <p style={styles.modalRole}>
-                {applicant.professional_title || "Applicant"}
+                {applicant.professional_title || t("applicant")}
               </p>
               <p style={styles.modalSubText}>
-                Applied for {applicant.job_title || "Unknown job"}
+                {t("appliedFor")} {applicant.job_title || t("unknownJob")}
               </p>
             </div>
           </div>
@@ -278,7 +295,7 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
 
         <div style={styles.modalStatusRow}>
           <Badge variant={statusVariant(applicant.status)}>
-            {applicant.status || "pending"}
+            {t(applicant.status || "pending")}
           </Badge>
 
           <Input
@@ -286,114 +303,124 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
             value={applicant.status || "pending"}
             onChange={(e) => updateStatus(applicant.id, e.target.value)}
             options={[
-              { value: "pending", label: "Pending" },
-              { value: "reviewed", label: "Reviewed" },
-              { value: "shortlisted", label: "Shortlisted" },
-              { value: "rejected", label: "Rejected" },
+              { value: "pending", label: t("pending") },
+              { value: "reviewed", label: t("reviewed") },
+              { value: "shortlisted", label: t("shortlisted") },
+              { value: "rejected", label: t("rejected") },
             ]}
           />
         </div>
 
-        <Section title="Contact Information" icon={<Phone size={18} />}>
+        <Section title={t("contactInformation")} icon={<Phone size={18} />}>
           <InfoGrid
+            t={t}
             items={[
-              ["Email", applicant.candidate_email],
-              ["Phone", applicant.phone],
-              ["Country", applicant.country],
-              ["City", applicant.city],
-              ["Address", applicant.address],
+              [t("email"), applicant.candidate_email],
+              [t("phone"), applicant.phone],
+              [t("country"), applicant.country],
+              [t("city"), applicant.city],
+              [t("address"), applicant.address],
             ]}
           />
         </Section>
 
-        <Section title="Professional Profile" icon={<Briefcase size={18} />}>
+        <Section title={t("professionalProfile")} icon={<Briefcase size={18} />}>
           <InfoGrid
+            t={t}
             items={[
-              ["Title", applicant.professional_title],
-              ["Years of Experience", applicant.years_of_experience],
-              ["Languages", applicant.languages],
-              ["Skills", applicant.skills],
+              [t("title"), applicant.professional_title],
+              [t("yearsOfExperience"), applicant.years_of_experience],
+              [t("languages"), applicant.languages],
+              [t("skills"), applicant.skills],
             ]}
           />
 
           <div style={{ height: 12 }} />
 
           <TextBlock
-            title="Professional Summary"
+            title={t("professionalSummary")}
             text={applicant.professional_summary}
-            empty="No professional summary provided."
+            empty={t("noProfessionalSummary")}
           />
         </Section>
 
-        <Section title="Job Preferences" icon={<Globe2 size={18} />}>
+        <Section title={t("jobPreferences")} icon={<Globe2 size={18} />}>
           <InfoGrid
+            t={t}
             items={[
-              ["Desired Role", applicant.desired_job_title],
-              ["Employment Type", applicant.preferred_employment_type],
-              ["Work Mode", applicant.preferred_work_mode],
+              [t("desiredRole"), applicant.desired_job_title],
+              [t("employmentType"), applicant.preferred_employment_type],
+              [t("workMode"), applicant.preferred_work_mode],
               [
-                "Expected Salary",
+                t("expectedSalary"),
                 applicant.expected_salary
                   ? `${applicant.salary_currency || ""} ${applicant.expected_salary}`
-                  : "N/A",
+                  : t("notAvailable"),
               ],
-              ["Notice Period", applicant.notice_period],
-              ["Availability", applicant.availability],
-              ["Work Authorization", applicant.work_authorization],
+              [t("noticePeriod"), applicant.notice_period],
+              [t("availability"), applicant.availability],
+              [t("workAuthorization"), applicant.work_authorization],
               [
-                "Willing to Relocate",
-                applicant.willing_to_relocate ? "Yes" : "No",
+                t("willingToRelocate"),
+                applicant.willing_to_relocate ? t("yes") : t("no"),
               ],
             ]}
           />
         </Section>
 
-        <Section title="Experience" icon={<Briefcase size={18} />}>
+        <Section title={t("experience")} icon={<Briefcase size={18} />}>
           <TimelineList
             items={applicant.experience}
-            emptyText="No work experience added."
+            emptyText={t("noWorkExperience")}
             renderItem={(item) => (
               <>
-                <strong>{item.job_title || "Role not specified"}</strong>
-                <p>{item.company || "Company not specified"}</p>
+                <strong>{item.job_title || t("roleNotSpecified")}</strong>
+                <p>{item.company || t("companyNotSpecified")}</p>
                 <p>
-                  {item.start_date || "Start date"} -{" "}
-                  {item.currently_working ? "Present" : item.end_date || "End date"}
+                  {item.start_date || t("startDate")} -{" "}
+                  {item.currently_working
+                    ? t("present")
+                    : item.end_date || t("endDate")}
                 </p>
-                <p>{item.description || "No description provided."}</p>
+                <p>{item.description || t("noDescriptionProvided")}</p>
               </>
             )}
           />
         </Section>
 
-        <Section title="Education" icon={<GraduationCap size={18} />}>
+        <Section title={t("education")} icon={<GraduationCap size={18} />}>
           <TimelineList
             items={applicant.education}
-            emptyText="No education added."
+            emptyText={t("noEducationAdded")}
             renderItem={(item) => (
               <>
-                <strong>{item.degree || "Degree not specified"}</strong>
-                <p>{item.institution || "Institution not specified"}</p>
-                <p>{item.field_of_study || "Field not specified"}</p>
+                <strong>{item.degree || t("degreeNotSpecified")}</strong>
+                <p>{item.institution || t("institutionNotSpecified")}</p>
+                <p>{item.field_of_study || t("fieldNotSpecified")}</p>
                 <p>
-                  {item.start_year || "Start year"} - {item.end_year || "End year"}
+                  {item.start_year || t("startYear")} -{" "}
+                  {item.end_year || t("endYear")}
                 </p>
-                {item.grade && <p>Grade: {item.grade}</p>}
+                {item.grade && (
+                  <p>
+                    {t("grade")}: {item.grade}
+                  </p>
+                )}
                 {item.description && <p>{item.description}</p>}
               </>
             )}
           />
         </Section>
 
-        <Section title="Certifications" icon={<Award size={18} />}>
+        <Section title={t("certifications")} icon={<Award size={18} />}>
           <TimelineList
             items={applicant.certifications}
-            emptyText="No certifications added."
+            emptyText={t("noCertificationsAdded")}
             renderItem={(item) => (
               <>
-                <strong>{item.name || "Certification not specified"}</strong>
-                <p>{item.issuer || "Issuer not specified"}</p>
-                <p>{item.issue_date || "Issue date not set"}</p>
+                <strong>{item.name || t("certificationNotSpecified")}</strong>
+                <p>{item.issuer || t("issuerNotSpecified")}</p>
+                <p>{item.issue_date || t("issueDateNotSet")}</p>
                 {item.credential_url && (
                   <a
                     href={item.credential_url}
@@ -401,7 +428,7 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
                     rel="noreferrer"
                     style={styles.link}
                   >
-                    View credential
+                    {t("viewCredential")}
                   </a>
                 )}
               </>
@@ -409,11 +436,11 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
           />
         </Section>
 
-        <Section title="Application Materials" icon={<FileText size={18} />}>
+        <Section title={t("applicationMaterials")} icon={<FileText size={18} />}>
           <TextBlock
-            title="Cover Letter"
+            title={t("coverLetter")}
             text={applicant.cover_letter}
-            empty="No cover letter submitted."
+            empty={t("noCoverLetterSubmitted")}
           />
 
           <div style={{ height: 12 }} />
@@ -436,7 +463,7 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
             )}
             {resumeUrl && (
               <a href={resumeUrl} target="_blank" rel="noreferrer">
-                Resume
+                {t("resume")}
               </a>
             )}
           </div>
@@ -444,12 +471,12 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
           {!applicant.linkedin_url &&
             !applicant.github_url &&
             !applicant.portfolio_url &&
-            !resumeUrl && <p style={styles.muted}>No links provided.</p>}
+            !resumeUrl && <p style={styles.muted}>{t("noLinksProvided")}</p>}
         </Section>
 
         <div style={styles.modalActions}>
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {t("close")}
           </Button>
         </div>
       </div>
@@ -457,14 +484,14 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose }) {
   );
 }
 
-function Avatar({ applicant, large = false }) {
+function Avatar({ applicant, large = false, t }) {
   const size = large ? 72 : 48;
 
   if (applicant.profile_image) {
     return (
       <img
         src={applicant.profile_image}
-        alt={applicant.candidate_name || "Candidate"}
+        alt={applicant.candidate_name || t("candidate")}
         style={{
           width: size,
           height: size,
@@ -503,13 +530,13 @@ function Section({ title, icon, children }) {
   );
 }
 
-function InfoGrid({ items }) {
+function InfoGrid({ items, t }) {
   return (
     <div style={styles.infoGrid}>
       {items.map(([label, value]) => (
         <div key={label} style={styles.infoBox}>
           <span style={styles.infoLabel}>{label}</span>
-          <strong style={styles.infoValue}>{value || "N/A"}</strong>
+          <strong style={styles.infoValue}>{value || t("notAvailable")}</strong>
         </div>
       ))}
     </div>
@@ -544,11 +571,11 @@ function TextBlock({ title, text, empty }) {
 }
 
 const styles = {
-applicantGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-  gap: 18,
-},
+  applicantGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+    gap: 18,
+  },
   applicantCard: {
     width: "100%",
     textAlign: "left",
@@ -582,47 +609,44 @@ applicantGrid: {
     color: "#6b7280",
     fontSize: 14,
   },
-metaList: {
-  display: "flex",
-  flexDirection: "column",
-  gap: 8,
-  marginTop: 14,
-},
-skillsPreview: {
-  marginTop: 14,
-  padding: 12,
-  borderRadius: 14,
-  background: "#f9fafb",
-  color: "#4b5563",
-  fontSize: 14,
-  lineHeight: 1.5,
-  wordBreak: "break-word",
-},
-
-skillTags: {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 6,
-  marginTop: 10,
-},
-
-skillTag: {
-  padding: "6px 10px",
-  borderRadius: 10,
-  background: "#e5e7eb",
-  fontSize: 12,
-  fontWeight: 600,
-},
-
+  metaList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 8,
+    marginTop: 14,
+  },
+  skillsPreview: {
+    marginTop: 14,
+    padding: 12,
+    borderRadius: 14,
+    background: "#f9fafb",
+    color: "#4b5563",
+    fontSize: 14,
+    lineHeight: 1.5,
+    wordBreak: "break-word",
+  },
+  skillTags: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 10,
+  },
+  skillTag: {
+    padding: "6px 10px",
+    borderRadius: 10,
+    background: "#e5e7eb",
+    fontSize: 12,
+    fontWeight: 600,
+  },
   metaItem: {
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  fontSize: 14,
-  color: "#374151",
-  lineHeight: 1.4,
-  wordBreak: "break-word",
-},
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    fontSize: 14,
+    color: "#374151",
+    lineHeight: 1.4,
+    wordBreak: "break-word",
+  },
   cardFooter: {
     display: "flex",
     justifyContent: "space-between",
@@ -713,73 +737,63 @@ skillTag: {
     marginBottom: 14,
     color: "#111827",
   },
-
   infoGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-  gap: 12,
-},
-
-infoBox: {
-  display: "flex",
-  flexDirection: "column",
-  gap: 6,
-  minHeight: 72,
-  padding: 14,
-  borderRadius: 14,
-  background: "#f9fafb",
-  border: "1px solid #e5e7eb",
-},
-
-filterBar: {
-  display: "grid",
-  gridTemplateColumns: "minmax(0, 1fr) 220px",
-  gap: 12,
-  padding: 14,
-  borderRadius: 18,
-  background: "#fff",
-  border: "1px solid #e5e7eb",
-  boxShadow: "0 10px 25px rgba(15, 23, 42, 0.04)",
-  marginBottom: 20,
-},
-
-searchBox: {
-  minWidth: 0,
-},
-
-statusBox: {
-  minWidth: 180,
-},
-
-pagination: {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: 12,
-  marginTop: 24,
-},
-
-pageInfo: {
-  fontSize: 14,
-  fontWeight: 700,
-  color: "#374151",
-},
-
-
-infoLabel: {
-  fontSize: 12,
-  fontWeight: 700,
-  color: "#6b7280",
-  textTransform: "uppercase",
-  letterSpacing: 0.4,
-},
-
-infoValue: {
-  fontSize: 14,
-  color: "#111827",
-  lineHeight: 1.4,
-  wordBreak: "break-word",
-},
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: 12,
+  },
+  infoBox: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+    minHeight: 72,
+    padding: 14,
+    borderRadius: 14,
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+  },
+  filterBar: {
+    display: "grid",
+    gridTemplateColumns: "minmax(0, 1fr) 220px",
+    gap: 12,
+    padding: 14,
+    borderRadius: 18,
+    background: "#fff",
+    border: "1px solid #e5e7eb",
+    boxShadow: "0 10px 25px rgba(15, 23, 42, 0.04)",
+    marginBottom: 20,
+  },
+  searchBox: {
+    minWidth: 0,
+  },
+  statusBox: {
+    minWidth: 180,
+  },
+  pagination: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 24,
+  },
+  pageInfo: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: "#374151",
+  },
+  infoLabel: {
+    fontSize: 12,
+    fontWeight: 700,
+    color: "#6b7280",
+    textTransform: "uppercase",
+    letterSpacing: 0.4,
+  },
+  infoValue: {
+    fontSize: 14,
+    color: "#111827",
+    lineHeight: 1.4,
+    wordBreak: "break-word",
+  },
   timelineList: {
     display: "grid",
     gap: 12,

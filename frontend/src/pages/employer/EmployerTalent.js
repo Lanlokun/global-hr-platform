@@ -21,8 +21,11 @@ import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
+import { useLanguage } from "../../context/LanguageContext";
 
 function EmployerTalent() {
+  const { t } = useLanguage();
+
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,20 +36,23 @@ function EmployerTalent() {
     country: "",
   });
 
-  const authHeaders = {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-    },
-  };
+  const authHeaders = useMemo(
+    () => ({
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    }),
+    []
+  );
 
   const fetchTalent = useCallback(async () => {
     try {
       const res = await api.get("/api/employer/talent", authHeaders);
       setCandidates(res.data);
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to load talent directory");
+      toast.error(error.response?.data?.error || t("loadTalentError"));
     }
-  }, []);
+  }, [authHeaders, t]);
 
   useEffect(() => {
     fetchTalent();
@@ -84,30 +90,38 @@ function EmployerTalent() {
 
   return (
     <DashboardLayout
-      title="Talent Directory"
-      subtitle="Browse discoverable candidate talent on the platform."
+      title={t("talentDirectory")}
+      subtitle={t("talentDirectorySubtitle")}
     >
       <PageHeader
-        subtitle="Discover candidates beyond your direct applicants."
-        action={<Badge variant="default">{filtered.length} candidates</Badge>}
+        subtitle={t("talentHeaderSubtitle")}
+        action={
+          <Badge variant="default">
+            {filtered.length} {t("candidates")}
+          </Badge>
+        }
       />
 
       <div style={styles.filterBar}>
         <div style={styles.searchBox}>
           <Input
             label=""
-            placeholder="Search by name, title, skill, or email..."
+            placeholder={t("searchTalentPlaceholder")}
             value={filters.search}
-            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            onChange={(e) =>
+              setFilters({ ...filters, search: e.target.value })
+            }
           />
         </div>
 
         <div style={styles.countryBox}>
           <Input
             label=""
-            placeholder="Country"
+            placeholder={t("country")}
             value={filters.country}
-            onChange={(e) => setFilters({ ...filters, country: e.target.value })}
+            onChange={(e) =>
+              setFilters({ ...filters, country: e.target.value })
+            }
           />
         </div>
       </div>
@@ -117,8 +131,8 @@ function EmployerTalent() {
           <Card>
             <div style={styles.emptyState}>
               <UserCircle2 size={42} />
-              <h3>No talent found</h3>
-              <p>Try changing your search or country filter.</p>
+              <h3>{t("noTalentFound")}</h3>
+              <p>{t("noTalentFoundDesc")}</p>
             </div>
           </Card>
         ) : (
@@ -130,45 +144,49 @@ function EmployerTalent() {
               onClick={() => setSelectedCandidate(candidate)}
             >
               <div style={styles.cardTop}>
-                <Avatar candidate={candidate} />
+                <Avatar candidate={candidate} large={false} t={t} />
 
                 <div style={{ flex: 1 }}>
-                  <h3 style={styles.name}>{candidate.name || "N/A"}</h3>
+                  <h3 style={styles.name}>
+                    {candidate.name || t("notAvailable")}
+                  </h3>
                   <p style={styles.title}>
-                    {candidate.professional_title || "Candidate"}
+                    {candidate.professional_title || t("candidate")}
                   </p>
                 </div>
 
                 <Badge variant="default">
-                  {candidate.application_count || 0} apps
+                  {candidate.application_count || 0} {t("applicationsShort")}
                 </Badge>
               </div>
 
               <div style={styles.metaList}>
                 <span style={styles.metaItem}>
                   <Mail size={15} />
-                  <span>{candidate.email || "No email"}</span>
+                  <span>{candidate.email || t("noEmail")}</span>
                 </span>
 
                 <span style={styles.metaItem}>
                   <MapPin size={15} />
-                  <span>{candidate.country || "Country not set"}</span>
+                  <span>{candidate.country || t("countryNotSet")}</span>
                 </span>
 
                 <span style={styles.metaItem}>
                   <Briefcase size={15} />
                   <span>
                     {candidate.years_of_experience
-                      ? `${candidate.years_of_experience} years experience`
-                      : "Experience not set"}
+                      ? `${candidate.years_of_experience} ${t(
+                          "yearsExperience"
+                        )}`
+                      : t("experienceNotSet")}
                   </span>
                 </span>
               </div>
 
-              <SkillTags skills={candidate.skills} />
+              <SkillTags skills={candidate.skills} t={t} />
 
               <div style={styles.cardFooter}>
-                <span>View profile</span>
+                <span>{t("viewProfile")}</span>
                 <ExternalLink size={15} />
               </div>
             </button>
@@ -177,54 +195,57 @@ function EmployerTalent() {
       </div>
 
       {filtered.length > candidatesPerPage && (
-  <div style={styles.pagination}>
-    <Button
-      variant="secondary"
-      disabled={currentPage === 1}
-      onClick={() => setCurrentPage((page) => page - 1)}
-    >
-      Previous
-    </Button>
+        <div style={styles.pagination}>
+          <Button
+            variant="secondary"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((page) => page - 1)}
+          >
+            {t("previous")}
+          </Button>
 
-    <span style={styles.pageInfo}>
-      Page {currentPage} of {totalPages}
-    </span>
+          <span style={styles.pageInfo}>
+            {t("page")} {currentPage} {t("of")} {totalPages}
+          </span>
 
-    <Button
-      variant="secondary"
-      disabled={currentPage === totalPages}
-      onClick={() => setCurrentPage((page) => page + 1)}
-    >
-      Next
-    </Button>
-  </div>
-)}
+          <Button
+            variant="secondary"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((page) => page + 1)}
+          >
+            {t("next")}
+          </Button>
+        </div>
+      )}
 
       {selectedCandidate && (
         <CandidateModal
           candidate={selectedCandidate}
           onClose={() => setSelectedCandidate(null)}
+          t={t}
         />
       )}
     </DashboardLayout>
   );
 }
 
-function CandidateModal({ candidate, onClose }) {
+function CandidateModal({ candidate, onClose, t }) {
   return (
     <div style={styles.modalOverlay}>
       <div style={styles.modal}>
         <div style={styles.modalHeader}>
           <div style={styles.modalIdentity}>
-            <Avatar candidate={candidate} large />
+            <Avatar candidate={candidate} large t={t} />
 
             <div>
-              <h2 style={styles.modalName}>{candidate.name || "Unknown candidate"}</h2>
+              <h2 style={styles.modalName}>
+                {candidate.name || t("unknownCandidate")}
+              </h2>
               <p style={styles.modalRole}>
-                {candidate.professional_title || "Candidate"}
+                {candidate.professional_title || t("candidate")}
               </p>
               <p style={styles.modalSubText}>
-                {candidate.country || "Country not set"}
+                {candidate.country || t("countryNotSet")}
               </p>
             </div>
           </div>
@@ -234,111 +255,126 @@ function CandidateModal({ candidate, onClose }) {
           </button>
         </div>
 
-        <Section title="Contact Information" icon={<Phone size={18} />}>
+        <Section title={t("contactInformation")} icon={<Phone size={18} />}>
           <InfoGrid
+            t={t}
             items={[
-              ["Email", candidate.email],
-              ["Phone", candidate.phone],
-              ["Country", candidate.country],
-              ["City", candidate.city],
-              ["Address", candidate.address],
+              [t("email"), candidate.email],
+              [t("phone"), candidate.phone],
+              [t("country"), candidate.country],
+              [t("city"), candidate.city],
+              [t("address"), candidate.address],
             ]}
           />
         </Section>
 
-        <Section title="Professional Profile" icon={<Briefcase size={18} />}>
+        <Section title={t("professionalProfile")} icon={<Briefcase size={18} />}>
           <InfoGrid
+            t={t}
             items={[
-              ["Title", candidate.professional_title],
-              ["Years of Experience", candidate.years_of_experience],
-              ["Languages", candidate.languages],
-              ["Applications", candidate.application_count || 0],
+              [t("title"), candidate.professional_title],
+              [t("yearsOfExperience"), candidate.years_of_experience],
+              [t("languages"), candidate.languages],
+              [t("applications"), candidate.application_count || 0],
             ]}
           />
 
           <div style={{ height: 12 }} />
 
           <TextBlock
-            title="Professional Summary"
+            title={t("professionalSummary")}
             text={candidate.professional_summary}
-            empty="No professional summary provided."
+            empty={t("noProfessionalSummary")}
           />
 
           <div style={{ height: 12 }} />
 
           <div style={styles.textBlock}>
-            <strong>Skills</strong>
-            <SkillTags skills={candidate.skills} />
+            <strong>{t("skills")}</strong>
+            <SkillTags skills={candidate.skills} t={t} />
           </div>
         </Section>
 
-        <Section title="Job Preferences" icon={<Globe2 size={18} />}>
+        <Section title={t("jobPreferences")} icon={<Globe2 size={18} />}>
           <InfoGrid
+            t={t}
             items={[
-              ["Desired Role", candidate.desired_job_title],
-              ["Employment Type", candidate.preferred_employment_type],
-              ["Work Mode", candidate.preferred_work_mode],
+              [t("desiredRole"), candidate.desired_job_title],
+              [t("employmentType"), candidate.preferred_employment_type],
+              [t("workMode"), candidate.preferred_work_mode],
               [
-                "Expected Salary",
+                t("expectedSalary"),
                 candidate.expected_salary
-                  ? `${candidate.salary_currency || ""} ${candidate.expected_salary}`
-                  : "N/A",
+                  ? `${candidate.salary_currency || ""} ${
+                      candidate.expected_salary
+                    }`
+                  : t("notAvailable"),
               ],
-              ["Notice Period", candidate.notice_period],
-              ["Availability", candidate.availability],
-              ["Work Authorization", candidate.work_authorization],
-              ["Willing to Relocate", candidate.willing_to_relocate ? "Yes" : "No"],
+              [t("noticePeriod"), candidate.notice_period],
+              [t("availability"), candidate.availability],
+              [t("workAuthorization"), candidate.work_authorization],
+              [
+                t("willingToRelocate"),
+                candidate.willing_to_relocate ? t("yes") : t("no"),
+              ],
             ]}
           />
         </Section>
 
-        <Section title="Experience" icon={<Briefcase size={18} />}>
+        <Section title={t("experience")} icon={<Briefcase size={18} />}>
           <TimelineList
             items={candidate.experience}
-            emptyText="No work experience added."
+            emptyText={t("noWorkExperience")}
             renderItem={(item) => (
               <>
-                <strong>{item.job_title || "Role not specified"}</strong>
-                <p>{item.company || "Company not specified"}</p>
+                <strong>{item.job_title || t("roleNotSpecified")}</strong>
+                <p>{item.company || t("companyNotSpecified")}</p>
                 <p>
-                  {item.start_date || "Start date"} -{" "}
-                  {item.currently_working ? "Present" : item.end_date || "End date"}
+                  {item.start_date || t("startDate")} -{" "}
+                  {item.currently_working
+                    ? t("present")
+                    : item.end_date || t("endDate")}
                 </p>
-                <p>{item.description || "No description provided."}</p>
+                <p>{item.description || t("noDescriptionProvided")}</p>
               </>
             )}
           />
         </Section>
 
-        <Section title="Education" icon={<GraduationCap size={18} />}>
+        <Section title={t("education")} icon={<GraduationCap size={18} />}>
           <TimelineList
             items={candidate.education}
-            emptyText="No education added."
+            emptyText={t("noEducationAdded")}
             renderItem={(item) => (
               <>
-                <strong>{item.degree || "Degree not specified"}</strong>
-                <p>{item.institution || "Institution not specified"}</p>
-                <p>{item.field_of_study || "Field not specified"}</p>
+                <strong>{item.degree || t("degreeNotSpecified")}</strong>
+                <p>{item.institution || t("institutionNotSpecified")}</p>
+                <p>{item.field_of_study || t("fieldNotSpecified")}</p>
                 <p>
-                  {item.start_year || "Start year"} - {item.end_year || "End year"}
+                  {item.start_year || t("startYear")} -{" "}
+                  {item.end_year || t("endYear")}
                 </p>
               </>
             )}
           />
         </Section>
 
-        <Section title="Certifications" icon={<Award size={18} />}>
+        <Section title={t("certifications")} icon={<Award size={18} />}>
           <TimelineList
             items={candidate.certifications}
-            emptyText="No certifications added."
+            emptyText={t("noCertificationsAdded")}
             renderItem={(item) => (
               <>
-                <strong>{item.name || "Certification not specified"}</strong>
-                <p>{item.issuer || "Issuer not specified"}</p>
-                <p>{item.issue_date || "Issue date not set"}</p>
+                <strong>{item.name || t("certificationNotSpecified")}</strong>
+                <p>{item.issuer || t("issuerNotSpecified")}</p>
+                <p>{item.issue_date || t("issueDateNotSet")}</p>
                 {item.credential_url && (
-                  <a href={item.credential_url} target="_blank" rel="noreferrer">
-                    View credential
+                  <a
+                    href={item.credential_url}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {t("viewCredential")}
                   </a>
                 )}
               </>
@@ -346,7 +382,7 @@ function CandidateModal({ candidate, onClose }) {
           />
         </Section>
 
-        <Section title="Links and Resume" icon={<FileText size={18} />}>
+        <Section title={t("linksAndResume")} icon={<FileText size={18} />}>
           <div style={styles.linkGrid}>
             {candidate.linkedin_url && (
               <a href={candidate.linkedin_url} target="_blank" rel="noreferrer">
@@ -365,7 +401,7 @@ function CandidateModal({ candidate, onClose }) {
             )}
             {candidate.resume_url && (
               <a href={candidate.resume_url} target="_blank" rel="noreferrer">
-                Resume
+                {t("resume")}
               </a>
             )}
           </div>
@@ -374,13 +410,13 @@ function CandidateModal({ candidate, onClose }) {
             !candidate.github_url &&
             !candidate.portfolio_url &&
             !candidate.resume_url && (
-              <p style={styles.muted}>No professional links provided.</p>
+              <p style={styles.muted}>{t("noProfessionalLinksProvided")}</p>
             )}
         </Section>
 
         <div style={styles.modalActions}>
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {t("close")}
           </Button>
         </div>
       </div>
@@ -388,14 +424,14 @@ function CandidateModal({ candidate, onClose }) {
   );
 }
 
-function Avatar({ candidate, large = false }) {
+function Avatar({ candidate, large = false, t }) {
   const size = large ? 72 : 48;
 
   if (candidate.profile_image) {
     return (
       <img
         src={candidate.profile_image}
-        alt={candidate.name || "Candidate"}
+        alt={candidate.name || t("candidate")}
         style={{
           width: size,
           height: size,
@@ -422,7 +458,7 @@ function Avatar({ candidate, large = false }) {
   );
 }
 
-function SkillTags({ skills }) {
+function SkillTags({ skills, t }) {
   const list = skills
     ? skills
         .split(",")
@@ -431,7 +467,7 @@ function SkillTags({ skills }) {
     : [];
 
   if (list.length === 0) {
-    return <p style={styles.muted}>No skills added.</p>;
+    return <p style={styles.muted}>{t("noSkillsAdded")}</p>;
   }
 
   return (
@@ -457,13 +493,13 @@ function Section({ title, icon, children }) {
   );
 }
 
-function InfoGrid({ items }) {
+function InfoGrid({ items, t }) {
   return (
     <div style={styles.infoGrid}>
       {items.map(([label, value]) => (
         <div key={label} style={styles.infoBox}>
           <span style={styles.infoLabel}>{label}</span>
-          <strong style={styles.infoValue}>{value || "N/A"}</strong>
+          <strong style={styles.infoValue}>{value || t("notAvailable")}</strong>
         </div>
       ))}
     </div>
@@ -515,11 +551,11 @@ const styles = {
   countryBox: {
     minWidth: 180,
   },
-candidateGrid: {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-  gap: 18,
-},
+  candidateGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+    gap: 18,
+  },
   candidateCard: {
     width: "100%",
     textAlign: "left",
@@ -530,20 +566,18 @@ candidateGrid: {
     cursor: "pointer",
     boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
   },
-
   pagination: {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: 12,
-  marginTop: 24,
-},
-
-pageInfo: {
-  fontSize: 14,
-  fontWeight: 700,
-  color: "#374151",
-},
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    marginTop: 24,
+  },
+  pageInfo: {
+    fontSize: 14,
+    fontWeight: 700,
+    color: "#374151",
+  },
   cardTop: {
     display: "flex",
     gap: 14,

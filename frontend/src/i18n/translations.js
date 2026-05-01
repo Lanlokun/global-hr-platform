@@ -26,6 +26,8 @@ export const translations = {
     clearFilters: "Clear Filters",
     paginationNext: "Next",
     paginationPrev: "Previous",
+    jobsCountLabel: "Jobs",
+    benefits: "Benefits",
 
     noDashboard: "No dashboard available",
     activeWorkspace: "Active Workspace",
@@ -199,7 +201,182 @@ export const translations = {
     imageUploaded: "Profile image uploaded",
     imageUploadFailed: "Failed to upload image",
     profileUpdated: "Profile updated successfully",
-    saveProfileError: "Failed to save profile",    
+    saveProfileError: "Failed to save profile",  
+    
+    employerOverview: "Employer Overview",
+    employerOverviewSubtitle: "Your company hiring workspace.",
+    employerOverviewHeader:
+    "Track your company profile, jobs, applicants, and hiring activity.",
+    failedEmployerOverview: "Failed to load employer overview",
+
+    companyLinked: "Company linked",
+    setupNeeded: "Setup needed",
+
+    employerDashboard: "Employer Dashboard",
+    setupCompanyProfile: "Set up your company profile",
+    employerHeroText:
+    "Manage hiring activity, monitor applicants, and keep your company presence updated.",
+    employerHeroSetupText:
+    "Create your company profile first so you can post jobs and manage applicants.",
+
+    manageJobs: "Manage Jobs",
+    notSet: "Not set",
+    totalJobs: "Total Jobs",
+    readyNextStep: "Ready for next step",
+
+    hiringPipeline: "Hiring Pipeline",
+    pipelineSubtitle: "Current applicant status overview.",
+
+    quickActions: "Quick Actions",
+    quickActionsSubtitle: "Common employer tasks.",
+
+    updateCompanyProfile: "Update company profile",
+    updateCompanyProfileText: "Improve your employer presence.",
+
+    createManageJobs: "Create or manage jobs",
+    createManageJobsText: "Publish roles and update openings.",
+
+    reviewApplicants: "Review applicants",
+    reviewApplicantsText: "Check candidate profiles and status.",
+
+    workspaceHealth: "Workspace Health",
+    workspaceHealthSubtitle: "Recommended next steps.",
+
+    companyProfileConnected: "Company profile connected",
+    companyLinkedText: "Your company is linked to this employer account.",
+    setupCompanyBeforeJobs:
+    "Set up your company profile before publishing jobs.",
+
+    // SETTINGS PAGE
+    settings: "Settings",
+    settingsSubtitle: "Manage team access, permissions, notifications, and workspace preferences.",
+    employerWorkspace: "Employer Workspace",
+
+    workspaceSettings: "Workspace Settings",
+    workspaceSettingsSubtitle: "Control your company workspace identity and hiring defaults.",
+
+    companyWorkspace: "Company Workspace",
+    companyWorkspaceDesc: "Basic workspace information used across your employer dashboard.",
+
+    workspaceName: "Workspace name",
+    companyWebsite: "Company website",
+    defaultHiringCountry: "Default hiring country",
+    companySize: "Company size",
+    companySizePlaceholder: "11-50 employees",
+
+    notifications: "Notifications",
+    notificationsDesc: "Choose what your hiring team should be alerted about.",
+
+    newApplicationAlerts: "New application alerts",
+    newApplicationAlertsDesc: "Notify the team when a candidate applies to one of your jobs.",
+
+    candidateStatusUpdates: "Candidate status updates",
+    candidateStatusUpdatesDesc: "Notify team members when an application status changes.",
+
+    weeklyHiringSummary: "Weekly hiring summary",
+    weeklyHiringSummaryDesc: "Receive a weekly overview of jobs, applicants, and hiring activity.",
+
+    securityAndVisibility: "Security and Visibility",
+    securityAndVisibilityDesc: "Control access and public visibility for this employer workspace.",
+
+    publicEmployerProfile: "Public employer profile",
+    publicEmployerProfileDesc: "Allow candidates to see your company profile and active jobs.",
+
+    requireTwoFactor: "Require two-factor authentication",
+    requireTwoFactorDesc: "Require team members to use stronger account protection.",
+
+    saveSettings: "Save Settings",
+    workspaceSettingsSaved: "Workspace settings saved",
+    cancel: "Cancel",
+    applicationInstructions : " Instructions",
+
+    // TEAM
+    teamMembers: "Team Members",
+    teamMembersSubtitle: "Invite and manage people who can access this employer workspace.",
+    inviteTeamMember: "Invite Team Member",
+    inviteTeamMemberDesc: "Add recruiters, admins, and hiring managers to your workspace.",
+
+    name: "Name",
+    email: "Email",
+    role: "Role",
+    invite: "Invite",
+
+    teamMemberNamePlaceholder: "Team member name",
+
+    emailRequired: "Email is required",
+    teamMemberExists: "This team member already exists",
+    pendingUser: "Pending user",
+    teamInvitationAdded: "Team invitation added",
+    teamMemberRemoved: "Team member removed",
+    removeTeamMember: "Remove team member",
+
+    active: "Active",
+    invited: "Invited",
+
+    // ROLES
+    owner: "Owner",
+    admin: "Admin",
+    recruiter: "Recruiter",
+    hiringManager: "Hiring Manager",
+
+    ownerRoleDesc: "Full workspace control.",
+    adminRoleDesc: "Can manage most hiring operations.",
+    recruiterRoleDesc: "Can manage candidates and applications.",
+    hiringManagerRoleDesc: "Can review candidates for assigned roles.",
+
+    // PERMISSIONS
+    permissionManageCompanyProfile: "Manage company profile",
+    permissionCreateDeleteJobs: "Create and delete jobs",
+    permissionReviewAllApplicants: "Review all applicants",
+    permissionInviteTeamMembers: "Invite team members",
+    permissionManagePermissions: "Manage permissions",
+    permissionAccessBillingSecurity: "Access billing and security",
+
+    permissionManageJobs: "Manage jobs",
+    permissionReviewApplicants: "Review applicants",
+    permissionInviteRecruiters: "Invite recruiters",
+    permissionUpdateCompanyProfile: "Update company profile",
+
+    permissionViewApplicants: "View applicants",
+    permissionUpdateApplicationStatus: "Update application status",
+    permissionAddRecruiterNotes: "Add recruiter notes",
+    permissionBrowseTalentDirectory: "Browse talent directory",
+
+    permissionViewAssignedJobs: "View assigned jobs",
+    permissionScoreCandidates: "Score candidates",
+    permissionLeaveInterviewFeedback: "Leave interview feedback",
+
+    // ROLE PERMISSIONS SECTION
+    rolePermissions: "Role Permissions",
+    rolePermissionsSubtitle: "Understand what each workspace role can access.",
+
+    // STATUS
+    workspaceStatus: "Workspace Status",
+    workspaceStatusSubtitle: "Current setup overview.",
+
+    activeWorkspace: "Active workspace",
+    activeWorkspaceDesc: "Your employer account is ready to manage hiring.",
+
+    workspace: "Workspace",
+    accessLevel: "Access Level",
+    companyLevel: "Company-level",
+    security: "Security",
+    standard: "Standard",
+
+    // FEATURES
+    settingsAreas: "Settings Areas",
+    settingsAreasSubtitle: "What you can manage here.",
+
+    publicVisibility: "Public visibility",
+    workspaceDefaults: "Workspace defaults",
+
+    jobPosted: "At least one job posted",
+    activeHiringText: "Your company has active hiring activity.",
+    createFirstJob: "Create your first job post to start receiving applicants.",
+
+    applicantsReceived: "Applicants received",
+    candidatesToReview: "You have candidates to review.",
+    noApplicantsYet: "Applicants will appear here once candidates apply.",
 
     companiesListed: "companies listed in",
     loadingCompanies: "Loading companies...",
@@ -340,6 +517,209 @@ export const translations = {
     resendEmail: "Resend email",
     or: "or",
     loginNow: "Login now",
+
+    companyProfile: "Company Profile",
+    companyProfileSubtitle:
+    "Manage your organization identity, hiring presence, and employer information.",
+    updateProfile: "Update Profile",
+
+    jobs: "Jobs",
+    jobsSubtitle: "Create and manage company job openings.",
+    jobsHeaderSubtitle: "Publish roles, update openings, and track applicant activity.",
+
+    createJob: "Create Job",
+    edit: "Edit",
+    delete: "Delete",
+
+    noJobs: "No jobs found",
+    noJobsDesc: "Create your first job or adjust your search.",
+
+    searchJobsPlaceholder: "Search by title, location, skill, department, status...",
+
+    jobTitleRequired: "Job title is required",
+    jobCreated: "Job created",
+    jobUpdated: "Job updated",
+    saveJobError: "Failed to save job",
+    loadJobsError: "Failed to load jobs",
+
+    deleteJob: "Delete job?",
+    deleteJobConfirm: "Are you sure you want to delete this job?",
+
+    noDescription: "No description added yet.",
+    noLocation: "Location not set",
+    salaryOpen: "Salary open",
+    applicants: "applicants",
+
+    createCompanyProfile: "Create your company profile",
+    createCompanyProfileDesc:
+    "Add your company details so you can publish jobs, review candidates, and build a trusted employer presence.",
+
+    employerOrganization: "Employer Organization",
+    industryNotAdded: "Industry not added",
+    countryNotAdded: "Country not added",
+
+    companyDetails: "Company Details",
+    companyDetailsSubtitle: "Full employer profile information.",
+
+    companyName: "Company Name",
+    industry: "Industry",
+    country: "Country",
+    city: "City",
+    companySize: "Company Size",
+    foundedYear: "Founded Year",
+    website: "Website",
+    address: "Address",
+    notProvided: "Not provided",
+
+    companyDescription: "Company Description",
+    noDescription: "No description provided.",
+
+    updateCompanyProfile: "Update Company Profile",
+    createCompanyProfileTitle: "Create Company Profile",
+    companyFormSubtitle:
+    "Keep this information accurate. It helps candidates understand your organization.",
+
+    companyNameLabel: "Company name",
+    industryLabel: "Industry",
+    countryLabel: "Country",
+    cityLabel: "City",
+    companySizeLabel: "Company size",
+    foundedYearLabel: "Founded year",
+    websiteLabel: "Website",
+    addressLabel: "Address",
+    companyDescriptionLabel: "Company description",
+
+    addressPlaceholder: "Office address",
+    companyDescriptionPlaceholder:
+    "Describe your company, mission, services, and hiring culture.",
+
+    companyLogo: "Company logo",
+    uploadLogoHelp: "Upload JPG, PNG, or WEBP company logo",
+    uploadingLogo: "Uploading logo...",
+
+    cancel: "Cancel",
+    saveChanges: "Save Changes",
+    saving: "Saving...",
+    createCompany: "Create Company",
+
+    applicants: "Applicants",
+    applicantsSubtitle: "Review complete candidate profiles for your job applications.",
+    loadApplicantsError: "Failed to load applicants",
+    applicationStatusUpdated: "Application status updated",
+    updateStatusError: "Failed to update status",
+
+    searchApplicantsPlaceholder: "Search applicants by name, job, skill, or country...",
+    allStatuses: "All statuses",
+
+    pending: "Pending",
+    reviewed: "Reviewed",
+    shortlisted: "Shortlisted",
+    rejected: "Rejected",
+
+    noApplicantsFound: "No applicants found",
+    noApplicantsFoundDesc: "Try changing your search or status filter.",
+
+    unknownCandidate: "Unknown candidate",
+    applicant: "Applicant",
+    candidate: "Candidate",
+    noEmail: "No email",
+    unknownJob: "Unknown job",
+    countryNotSet: "Country not set",
+    viewFullProfile: "View full profile",
+
+    appliedFor: "Applied for",
+    contactInformation: "Contact Information",
+    professionalProfile: "Professional Profile",
+    jobPreferences: "Job Preferences",
+    experience: "Experience",
+    education: "Education",
+    certifications: "Certifications",
+    applicationMaterials: "Application Materials",
+
+    email: "Email",
+    phone: "Phone",
+    title: "Title",
+    yearsOfExperience: "Years of Experience",
+    languages: "Languages",
+    skills: "Skills",
+    professionalSummary: "Professional Summary",
+    noProfessionalSummary: "No professional summary provided.",
+
+    desiredRole: "Desired Role",
+    expectedSalary: "Expected Salary",
+    noticePeriod: "Notice Period",
+    availability: "Availability",
+    workAuthorization: "Work Authorization",
+    willingToRelocate: "Willing to Relocate",
+    yes: "Yes",
+    no: "No",
+    notAvailable: "N/A",
+
+    noWorkExperience: "No work experience added.",
+    roleNotSpecified: "Role not specified",
+    companyNotSpecified: "Company not specified",
+    startDate: "Start date",
+    endDate: "End date",
+    present: "Present",
+    noDescriptionProvided: "No description provided.",
+
+    noEducationAdded: "No education added.",
+    degreeNotSpecified: "Degree not specified",
+    institutionNotSpecified: "Institution not specified",
+    fieldNotSpecified: "Field not specified",
+    startYear: "Start year",
+    endYear: "End year",
+    grade: "Grade",
+
+    noCertificationsAdded: "No certifications added.",
+    certificationNotSpecified: "Certification not specified",
+    issuerNotSpecified: "Issuer not specified",
+    issueDateNotSet: "Issue date not set",
+    viewCredential: "View credential",
+
+    coverLetter: "Cover Letter",
+    noCoverLetterSubmitted: "No cover letter submitted.",
+    resume: "Resume",
+    noLinksProvided: "No links provided.",
+    close: "Close",
+    previous: "Previous",
+    next: "Next",
+    page: "Page",
+    of: "of",
+
+    companyNameRequired: "Company name is required",
+    logoUploadSuccess: "Company logo uploaded",
+    logoUploadError: "Failed to upload logo",
+    invalidImageFormat: "Please upload a JPG, PNG, or WEBP image",
+    loadCompanyError: "Failed to load company",
+    saveCompanyError: "Failed to save company",
+    companyUpdated: "Company profile updated",
+    companyCreated: "Company profile created",
+
+    profileStrength: "Profile Strength",
+    profileStrengthSubtitle: "Improve your employer profile.",
+    complete: "complete",
+
+    checkCompanyName: "Company name",
+    checkIndustry: "Industry",
+    checkCountry: "Country",
+    checkCity: "City",
+    checkDescription: "Description",
+    checkWebsite: "Website",
+    checkCompanySize: "Company size",
+    checkFoundedYear: "Founded year",
+
+    employerTools: "Employer Tools",
+    employerToolsSubtitle: "Next steps after setup.",
+
+    postJobs: "Post jobs",
+    postJobsDesc: "Create job openings for this company.",
+
+    reviewCandidates: "Review candidates",
+    reviewCandidatesDesc: "Manage applications and shortlisted talent.",
+
+    buildVisibility: "Build visibility",
+    buildVisibilityDesc: "Keep your company details clear and trusted.",
 
     candidateOverview: "Candidate Overview",
     candidateOverviewSubtitle:
@@ -497,6 +877,22 @@ export const translations = {
     withdrawApplicationMessage:
     'Are you sure you want to withdraw your application for "{{job}}"? This action cannot be undone.',
     thisJob: "this job",
+
+    talentDirectory: "Talent Directory",
+    talentDirectorySubtitle: "Browse discoverable candidate talent on the platform.",
+    talentHeaderSubtitle: "Discover candidates beyond your direct applicants.",
+
+    candidates: "candidates",
+    noTalentFound: "No talent found",
+    noTalentFoundDesc: "Try changing your search or country filter.",
+
+    searchTalentPlaceholder: "Search by name, title, skill, or email...",
+
+    viewProfile: "View profile",
+    yearsExperience: "years experience",
+    experienceNotSet: "Experience not set",
+
+    loadTalentError: "Failed to load talent directory",
 
 
     countryDescriptions: {
@@ -852,7 +1248,8 @@ export const translations = {
     emailRequired: "请输入邮箱",
     passwordRequired: "请输入密码",
     loginFailed: "登录失败",
-
+    benefits: "福利",
+    
     candidateOverview: "候选人概览",
     candidateOverviewSubtitle: "帮助您了解市场机会并发现下一个合适职位。",
     softwareEngineer: "软件工程师",
@@ -1008,6 +1405,390 @@ export const translations = {
     applicationSubmitted: "申请已提交",
     applicationFailed: "申请失败",
     defaultCoverLetter: "我对该职位很感兴趣。",
+
+    employerOverview: "企业概览",
+    employerOverviewSubtitle: "您的公司招聘工作区",
+    employerOverviewHeader: "跟踪公司资料、职位、申请人及招聘活动",
+    failedEmployerOverview: "加载企业概览失败",
+
+    companyLinked: "公司已绑定",
+    setupNeeded: "需要设置",
+
+    companyProfile: "公司资料",
+    companyProfileSubtitle: "管理您的公司信息、招聘形象和雇主资料",
+    updateProfile: "更新资料",
+
+    createCompanyProfile: "创建公司资料",
+    createCompanyProfileDesc:
+    "添加公司信息，以便发布职位、查看候选人，并建立可信的雇主形象。",
+
+    employerOrganization: "雇主组织",
+    industryNotAdded: "未填写行业",
+    countryNotAdded: "未填写国家",
+
+    companyDetails: "公司详情",
+    companyDetailsSubtitle: "完整的雇主信息。",
+
+    companyName: "公司名称",
+    industry: "行业",
+    country: "国家",
+    city: "城市",
+    companySize: "公司规模",
+    foundedYear: "成立年份",
+    website: "网站",
+    address: "地址",
+    notProvided: "未填写",
+
+    jobs: "职位",
+    jobsSubtitle: "创建和管理公司职位",
+    jobsHeaderSubtitle: "发布职位，更新招聘信息，并跟踪申请情况",
+
+    createJob: "创建职位",
+    edit: "编辑",
+    delete: "删除",
+
+    noJobs: "暂无职位",
+    noJobsDesc: "创建第一个职位或调整搜索条件",
+
+    searchJobsPlaceholder: "按职位、地点、技能、部门或状态搜索...",
+
+    jobTitleRequired: "请输入职位名称",
+    jobCreated: "职位创建成功",
+    jobUpdated: "职位已更新",
+    saveJobError: "保存职位失败",
+    loadJobsError: "加载职位失败",
+
+    deleteJob: "删除职位？",
+    deleteJobConfirm: "确定要删除这个职位吗？",
+
+    noDescription: "暂无职位描述",
+    noLocation: "未设置地点",
+    salaryOpen: "薪资面议",
+    applicants: "申请人",
+
+    companyDescription: "公司介绍",
+    noDescription: "暂无公司介绍。",
+
+    updateCompanyProfile: "更新公司资料",
+    createCompanyProfileTitle: "创建公司资料",
+    companyFormSubtitle: "请确保信息准确，有助于候选人了解您的公司。",
+
+    companyNameLabel: "公司名称",
+    industryLabel: "行业",
+    countryLabel: "国家",
+    cityLabel: "城市",
+    companySizeLabel: "公司规模",
+    foundedYearLabel: "成立年份",
+    websiteLabel: "网站",
+    addressLabel: "地址",
+    companyDescriptionLabel: "公司介绍",
+
+    addressPlaceholder: "办公室地址",
+    companyDescriptionPlaceholder: "介绍您的公司、使命、服务和招聘文化。",
+
+    companyLogo: "公司Logo",
+    uploadLogoHelp: "上传 JPG、PNG 或 WEBP 格式的公司Logo",
+    uploadingLogo: "正在上传Logo...",
+
+    cancel: "取消",
+    saveChanges: "保存更改",
+    saving: "保存中...",
+    createCompany: "创建公司",
+
+    applicants: "申请人",
+    applicantsSubtitle: "查看职位申请中的完整候选人资料。",
+    loadApplicantsError: "加载申请人失败",
+    applicationStatusUpdated: "申请状态已更新",
+    updateStatusError: "更新状态失败",
+
+    searchApplicantsPlaceholder: "按姓名、职位、技能或国家搜索申请人...",
+    allStatuses: "全部状态",
+
+    pending: "待处理",
+    reviewed: "已查看",
+    shortlisted: "已入围",
+    rejected: "已拒绝",
+
+    noApplicantsFound: "未找到申请人",
+    noApplicantsFoundDesc: "请尝试更改搜索内容或状态筛选。",
+
+    unknownCandidate: "未知候选人",
+    applicant: "申请人",
+    candidate: "候选人",
+    noEmail: "无邮箱",
+    unknownJob: "未知职位",
+    countryNotSet: "未设置国家",
+    viewFullProfile: "查看完整资料",
+
+    appliedFor: "申请职位",
+    contactInformation: "联系信息",
+    professionalProfile: "职业资料",
+    jobPreferences: "求职偏好",
+    experience: "工作经历",
+    education: "教育经历",
+    certifications: "证书",
+    applicationMaterials: "申请材料",
+
+    email: "邮箱",
+    phone: "电话",
+    title: "职位/头衔",
+    yearsOfExperience: "工作年限",
+    languages: "语言",
+    skills: "技能",
+    professionalSummary: "职业简介",
+    noProfessionalSummary: "暂无职业简介。",
+
+    desiredRole: "期望职位",
+    expectedSalary: "期望薪资",
+    noticePeriod: "通知期",
+    availability: "可入职时间",
+    workAuthorization: "工作许可",
+    willingToRelocate: "愿意搬迁",
+    yes: "是",
+    no: "否",
+    notAvailable: "暂无",
+
+    noWorkExperience: "暂无工作经历。",
+    roleNotSpecified: "未填写职位",
+    companyNotSpecified: "未填写公司",
+    startDate: "开始日期",
+    endDate: "结束日期",
+    present: "至今",
+    noDescriptionProvided: "暂无描述。",
+
+    noEducationAdded: "暂无教育经历。",
+    degreeNotSpecified: "未填写学位",
+    institutionNotSpecified: "未填写学校",
+    fieldNotSpecified: "未填写专业",
+    startYear: "开始年份",
+    endYear: "结束年份",
+    grade: "成绩",
+
+    noCertificationsAdded: "暂无证书。",
+    certificationNotSpecified: "未填写证书名称",
+    issuerNotSpecified: "未填写颁发机构",
+    issueDateNotSet: "未设置颁发日期",
+    viewCredential: "查看证书",
+
+    coverLetter: "求职信",
+    noCoverLetterSubmitted: "未提交求职信。",
+    resume: "简历",
+    noLinksProvided: "未提供链接。",
+    close: "关闭",
+    previous: "上一页",
+    next: "下一页",
+    page: "第",
+    of: "页，共",
+
+    companyNameRequired: "请输入公司名称",
+    logoUploadSuccess: "公司Logo上传成功",
+    logoUploadError: "Logo上传失败",
+    invalidImageFormat: "请上传 JPG、PNG 或 WEBP 格式图片",
+    loadCompanyError: "加载公司信息失败",
+    saveCompanyError: "保存公司信息失败",
+    companyUpdated: "公司资料已更新",
+    companyCreated: "公司资料已创建",
+
+    profileStrength: "资料完善度",
+    profileStrengthSubtitle: "完善您的雇主资料。",
+    complete: "已完成",
+
+    checkCompanyName: "公司名称",
+    checkIndustry: "行业",
+    checkCountry: "国家",
+    checkCity: "城市",
+    checkDescription: "公司介绍",
+    checkWebsite: "网站",
+    checkCompanySize: "公司规模",
+    checkFoundedYear: "成立年份",
+
+    employerTools: "雇主工具",
+    employerToolsSubtitle: "完成设置后的下一步。",
+
+    postJobs: "发布职位",
+    postJobsDesc: "为公司创建招聘职位。",
+
+    reviewCandidates: "查看候选人",
+    reviewCandidatesDesc: "管理申请和筛选人才。",
+
+    buildVisibility: "提升曝光",
+    buildVisibilityDesc: "保持公司信息清晰可信。",
+
+    talentDirectory: "人才库",
+    talentDirectorySubtitle: "浏览平台上的候选人资源",
+    talentHeaderSubtitle: "发现更多潜在候选人",
+
+    candidates: "候选人",
+    noTalentFound: "未找到人才",
+    noTalentFoundDesc: "请尝试更改搜索或国家筛选",
+
+    searchTalentPlaceholder: "按姓名、职位、技能或邮箱搜索...",
+
+    viewProfile: "查看资料",
+    yearsExperience: "年经验",
+    experienceNotSet: "未填写经验",
+
+    // SETTINGS PAGE
+    settings: "设置",
+    settingsSubtitle: "管理团队权限、通知以及工作区配置",
+    employerWorkspace: "雇主工作区",
+
+    workspaceSettings: "工作区设置",
+    workspaceSettingsSubtitle: "管理公司工作区信息和招聘默认配置",
+
+    companyWorkspace: "公司工作区",
+    companyWorkspaceDesc: "用于整个雇主后台的基本信息",
+
+    workspaceName: "工作区名称",
+    companyWebsite: "公司网站",
+    defaultHiringCountry: "默认招聘国家",
+    companySize: "公司规模",
+    companySizePlaceholder: "11-50人",
+
+    notifications: "通知",
+    notificationsDesc: "选择需要通知团队的内容",
+
+    newApplicationAlerts: "新申请提醒",
+    newApplicationAlertsDesc: "当候选人申请职位时通知团队",
+
+    candidateStatusUpdates: "状态更新提醒",
+    candidateStatusUpdatesDesc: "当申请状态发生变化时通知团队",
+
+    weeklyHiringSummary: "每周招聘总结",
+    weeklyHiringSummaryDesc: "每周接收职位和申请数据概览",
+
+    securityAndVisibility: "安全与可见性",
+    securityAndVisibilityDesc: "控制访问权限和公开可见性",
+
+    publicEmployerProfile: "公开公司资料",
+    publicEmployerProfileDesc: "允许候选人查看公司信息和职位",
+
+    requireTwoFactor: "启用双重认证",
+    requireTwoFactorDesc: "要求团队成员使用更安全的登录方式",
+
+    saveSettings: "保存设置",
+    workspaceSettingsSaved: "设置已保存",
+    cancel: "取消",
+
+    // TEAM
+    teamMembers: "团队成员",
+    teamMembersSubtitle: "管理可以访问该工作区的成员",
+    inviteTeamMember: "邀请成员",
+    inviteTeamMemberDesc: "添加招聘人员、管理员和经理",
+
+    name: "姓名",
+    email: "邮箱",
+    role: "角色",
+    invite: "邀请",
+
+    teamMemberNamePlaceholder: "成员姓名",
+
+    emailRequired: "请输入邮箱",
+    teamMemberExists: "该成员已存在",
+    pendingUser: "待确认用户",
+    teamInvitationAdded: "邀请已发送",
+    teamMemberRemoved: "成员已移除",
+    removeTeamMember: "移除成员",
+
+    active: "已激活",
+    invited: "已邀请",
+
+    // ROLES
+    owner: "所有者",
+    admin: "管理员",
+    recruiter: "招聘人员",
+    hiringManager: "招聘经理",
+
+    ownerRoleDesc: "拥有全部权限",
+    adminRoleDesc: "可管理大部分招聘流程",
+    recruiterRoleDesc: "可管理候选人和申请",
+    hiringManagerRoleDesc: "可评估候选人",
+
+    // PERMISSIONS
+    permissionManageCompanyProfile: "管理公司资料",
+    permissionCreateDeleteJobs: "创建和删除职位",
+    permissionReviewAllApplicants: "查看所有申请",
+    permissionInviteTeamMembers: "邀请团队成员",
+    permissionManagePermissions: "管理权限",
+    permissionAccessBillingSecurity: "访问账单和安全设置",
+
+    permissionManageJobs: "管理职位",
+    permissionReviewApplicants: "查看申请",
+    permissionInviteRecruiters: "邀请招聘人员",
+    permissionUpdateCompanyProfile: "更新公司信息",
+
+    permissionViewApplicants: "查看申请人",
+    permissionUpdateApplicationStatus: "更新申请状态",
+    permissionAddRecruiterNotes: "添加备注",
+    permissionBrowseTalentDirectory: "浏览人才库",
+
+    permissionViewAssignedJobs: "查看分配职位",
+    permissionScoreCandidates: "评估候选人",
+    permissionLeaveInterviewFeedback: "提交面试反馈",
+
+    rolePermissions: "角色权限",
+    rolePermissionsSubtitle: "了解不同角色的权限",
+
+    workspaceStatus: "工作区状态",
+    workspaceStatusSubtitle: "当前配置概览",
+
+    activeWorkspace: "工作区已激活",
+    activeWorkspaceDesc: "您的账户已准备好进行招聘",
+
+    workspace: "工作区",
+    accessLevel: "访问级别",
+    companyLevel: "公司级",
+    security: "安全",
+    standard: "标准",
+
+    settingsAreas: "设置范围",
+    settingsAreasSubtitle: "可管理的内容",
+
+    publicVisibility: "公开可见性",
+    workspaceDefaults: "默认设置",
+
+    loadTalentError: "加载人才库失败",
+
+    employerDashboard: "企业仪表盘",
+    setupCompanyProfile: "请先创建公司资料",
+    employerHeroText: "管理招聘活动、查看申请人并维护公司形象",
+    employerHeroSetupText: "请先创建公司资料，然后发布职位并管理申请人",
+
+    manageJobs: "管理职位",
+    notSet: "未设置",
+    totalJobs: "职位总数",
+    readyNextStep: "准备进入下一阶段",
+
+    hiringPipeline: "招聘流程",
+    pipelineSubtitle: "当前申请人状态概览",
+
+    quickActions: "快捷操作",
+    quickActionsSubtitle: "常用企业操作",
+
+    updateCompanyProfile: "更新公司资料",
+    updateCompanyProfileText: "提升企业形象",
+
+    createManageJobs: "创建或管理职位",
+    createManageJobsText: "发布职位并更新招聘信息",
+
+    reviewApplicants: "查看申请人",
+    reviewApplicantsText: "查看候选人资料和状态",
+
+    workspaceHealth: "工作区健康",
+    workspaceHealthSubtitle: "建议的下一步操作",
+    applicationInstructions: "申请说明",
+
+    companyProfileConnected: "公司资料已连接",
+    companyLinkedText: "您的公司已绑定到该账户",
+    setupCompanyBeforeJobs: "发布职位前请先创建公司资料",
+
+    jobPosted: "已发布职位",
+    activeHiringText: "公司正在招聘中",
+    createFirstJob: "发布第一个职位以开始接收申请",
+
+    applicantsReceived: "已收到申请",
+    candidatesToReview: "您有候选人可以查看",
+    noApplicantsYet: "申请人将在有人申请后显示",
 
     countryNames: {
     morocco: "摩洛哥",
