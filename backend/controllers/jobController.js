@@ -1,5 +1,12 @@
 const db = require("../config/db");
+const {
+  notifyAllCandidates,
+  createNotification,
+} = require("../services/notificationService");
 
+// =======================
+// GET EMPLOYER JOBS
+// =======================
 exports.getMyJobs = async (req, res) => {
   try {
     const result = await db.query(
@@ -22,6 +29,9 @@ exports.getMyJobs = async (req, res) => {
   }
 };
 
+// =======================
+// CREATE JOB + NOTIFY CANDIDATES
+// =======================
 exports.createMyJob = async (req, res) => {
   const {
     title,
@@ -47,7 +57,9 @@ exports.createMyJob = async (req, res) => {
     const companyId = req.user.company_id;
 
     if (!companyId) {
-      return res.status(400).json({ error: "Employer is not linked to a company" });
+      return res
+        .status(400)
+        .json({ error: "Employer is not linked to a company" });
     }
 
     const result = await db.query(
@@ -100,12 +112,25 @@ exports.createMyJob = async (req, res) => {
       ]
     );
 
-    res.json(result.rows[0]);
+    const createdJob = result.rows[0];
+
+    // 🔔 Notify all candidates
+    await notifyAllCandidates({
+      title: "New job available",
+      message: `${createdJob.title} is now open for applications.`,
+      type: "info",
+      actionUrl: "/dashboard/opportunities",
+    });
+
+    res.json(createdJob);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// =======================
+// PUBLIC JOBS
+// =======================
 exports.getPublicJobs = async (req, res) => {
   try {
     const result = await db.query(`
@@ -127,6 +152,9 @@ exports.getPublicJobs = async (req, res) => {
   }
 };
 
+// =======================
+// UPDATE JOB + NOTIFY EMPLOYER
+// =======================
 exports.updateMyJob = async (req, res) => {
   const { id } = req.params;
 
@@ -202,15 +230,31 @@ exports.updateMyJob = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Job not found or not owned by your company" });
+      return res
+        .status(404)
+        .json({ error: "Job not found or not owned by your company" });
     }
 
-    res.json(result.rows[0]);
+    const updatedJob = result.rows[0];
+
+    // 🔔 Notify employer
+    await createNotification({
+      userId: req.user.id,
+      title: "Job updated",
+      message: `${updatedJob.title} was successfully updated.`,
+      type: "info",
+      actionUrl: "/dashboard/jobs",
+    });
+
+    res.json(updatedJob);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// =======================
+// DELETE JOB + NOTIFY EMPLOYER
+// =======================
 exports.deleteMyJob = async (req, res) => {
   const { id } = req.params;
 
@@ -220,14 +264,27 @@ exports.deleteMyJob = async (req, res) => {
       DELETE FROM jobs
       WHERE id = $1
         AND company_id = $2
-      RETURNING id
+      RETURNING *
       `,
       [id, req.user.company_id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Job not found or not owned by your company" });
+      return res
+        .status(404)
+        .json({ error: "Job not found or not owned by your company" });
     }
+
+    const deletedJob = result.rows[0];
+
+    // 🔔 Notify employer
+    await createNotification({
+      userId: req.user.id,
+      title: "Job deleted",
+      message: `${deletedJob.title} was removed from your company workspace.`,
+      type: "warning",
+      actionUrl: "/dashboard/jobs",
+    });
 
     res.json({ message: "Job deleted successfully" });
   } catch (err) {

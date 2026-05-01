@@ -16,6 +16,18 @@ export const translations = {
     candidates: "Candidates",
     logout: "Logout",
 
+    applicationStatusChangedTo: "application status changed to",
+    for: "for",
+
+    jobCreatedNotification: "was successfully published.",
+    jobUpdatedNotification: "was successfully updated.",
+    jobDeletedNotification: "was removed from your jobs.",
+
+    notifications: "Notifications",
+    noNotifications: "No notifications yet.",
+    jobCreatedNotification: "A new job has been published successfully.",
+    jobDeletedNotification: "A job was deleted from your company workspace.",
+
     loading: "Loading...",
     error: "Something went wrong",
     retry: "Retry",
@@ -419,6 +431,10 @@ export const translations = {
     rememberedPassword: "Remembered your password?",
     backToLogin: "Back to login",
 
+    companyLogoUploadedNotification: "Your company logo was uploaded successfully.",
+    companyUpdatedNotification: "Your company profile information was updated.",
+    companyCreatedNotification: "Your company profile was created successfully.",
+
     allRightsReserved: "All rights reserved",
     continueWithGoogle: "Continue with Google",
     continueWithLinkedIn: "Continue with LinkedIn",
@@ -435,6 +451,17 @@ export const translations = {
 
     individual: "Individual",
     company: "Company",
+
+    unreadNotifications: "unread",
+    allCaughtUp: "All caught up",
+    new: "New",
+    open: "Open",
+
+
+    teamMember: "Team member",
+    teamInvitationNotification: "was invited to your employer workspace.",
+    teamMemberRemovedNotification: "was removed from your employer workspace.",
+    workspaceSettingsSavedNotification: "Your workspace preferences were saved successfully.",
 
     fullName: "Full name",
     companyName: "Company name",
@@ -1249,7 +1276,11 @@ export const translations = {
     passwordRequired: "请输入密码",
     loginFailed: "登录失败",
     benefits: "福利",
-    
+   
+    jobCreatedNotification: "已成功发布。",
+    jobUpdatedNotification: "已成功更新。",
+    jobDeletedNotification: "已被删除。",
+        
     candidateOverview: "候选人概览",
     candidateOverviewSubtitle: "帮助您了解市场机会并发现下一个合适职位。",
     softwareEngineer: "软件工程师",
@@ -1529,6 +1560,9 @@ export const translations = {
     certifications: "证书",
     applicationMaterials: "申请材料",
 
+    applicationStatusChangedTo: "申请状态已更新为",
+    for: "职位",
+
     email: "邮箱",
     phone: "电话",
     title: "职位/头衔",
@@ -1647,6 +1681,9 @@ export const translations = {
 
     notifications: "通知",
     notificationsDesc: "选择需要通知团队的内容",
+    noNotifications: "暂无通知",
+    jobCreatedNotification: "新职位已成功发布。",
+    jobDeletedNotification: "职位已从公司工作区删除。",
 
     newApplicationAlerts: "新申请提醒",
     newApplicationAlertsDesc: "当候选人申请职位时通知团队",
@@ -1747,7 +1784,21 @@ export const translations = {
     publicVisibility: "公开可见性",
     workspaceDefaults: "默认设置",
 
+    unreadNotifications: "未读",
+    allCaughtUp: "全部已读",
+    new: "新",
+    open: "打开",
+
+    teamMember: "团队成员",
+    teamInvitationNotification: "已被邀请加入雇主工作区。",
+    teamMemberRemovedNotification: "已从雇主工作区移除。",
+    workspaceSettingsSavedNotification: "工作区设置已成功保存。",
+
     loadTalentError: "加载人才库失败",
+
+    companyLogoUploadedNotification: "公司Logo已成功上传。",
+    companyUpdatedNotification: "公司资料已更新。",
+    companyCreatedNotification: "公司资料已成功创建。",
 
     employerDashboard: "企业仪表盘",
     setupCompanyProfile: "请先创建公司资料",

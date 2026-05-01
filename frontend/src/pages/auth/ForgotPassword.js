@@ -19,10 +19,10 @@ function ForgotPassword() {
   const [message, setMessage] = useState("");
 
   const handleSubmit = () => {
+    setTimeout(() => navigate("/login"), 1500);
     setMessage(t("passwordResetSent"));
   };
 
-  setTimeout(() => navigate("/login"), 1500);
 
   return (
     <div className="itss-auth-page">
