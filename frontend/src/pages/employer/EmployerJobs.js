@@ -62,7 +62,7 @@ function EmployerJobs() {
 
   const fetchJobs = useCallback(async () => {
     try {
-      const res = await api.get("/api/employer/jobs", authHeaders);
+      const res = await api.get("/api/jobs/my", authHeaders);
       setJobs(res.data);
     } catch (error) {
       toast.error(error.response?.data?.error || "Failed to load jobs");

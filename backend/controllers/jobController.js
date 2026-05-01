@@ -106,6 +106,27 @@ exports.createMyJob = async (req, res) => {
   }
 };
 
+exports.getPublicJobs = async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT 
+        j.*,
+        c.name AS company_name,
+        c.logo AS company_logo,
+        c.industry AS company_industry
+      FROM jobs j
+      LEFT JOIN companies c ON c.id = j.company_id
+      WHERE j.status = 'active'
+      ORDER BY j.created_at DESC
+    `);
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("GET /api/jobs error:", err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.updateMyJob = async (req, res) => {
   const { id } = req.params;
 

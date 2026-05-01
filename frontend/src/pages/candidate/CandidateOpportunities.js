@@ -6,8 +6,11 @@ import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import Input from "../../components/ui/Input";
+import { useLanguage } from "../../context/LanguageContext";
 
 function CandidateOpportunities() {
+  const { t } = useLanguage();
+
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
 
@@ -26,7 +29,7 @@ function CandidateOpportunities() {
       const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/jobs`);
       setJobs(res.data);
     } catch {
-      toast.error("Failed to load jobs");
+      toast.error(t("failedToLoadJobs"));
     }
   };
 
@@ -40,11 +43,12 @@ function CandidateOpportunities() {
 
   const applyToJob = async (jobId) => {
     try {
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/applications`,
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/applications`,
         {
           job_id: jobId,
           user_id: user.id,
-          cover_letter: "I am interested in this opportunity.",
+          cover_letter: t("defaultCoverLetter"),
         },
         {
           headers: {
@@ -52,9 +56,11 @@ function CandidateOpportunities() {
           },
         }
       );
-      toast.success("Application submitted");
+      toast.success(t("applicationSubmitted"));
     } catch (error) {
-      toast.error(error.response?.data?.error || "Application failed");
+      toast.error(
+        error.response?.data?.error || t("applicationFailed")
+      );
     }
   };
 
@@ -96,26 +102,16 @@ function CandidateOpportunities() {
 
   return (
     <DashboardLayout
-      title="Opportunities"
-      subtitle="Explore and apply for open roles in a scalable, easy-to-browse layout."
+      title={t("opportunities")}
+      subtitle={t("opportunitiesSubtitle")}
     >
-      <Card
-      >
-        <div
-          className="ui-toolbar"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "12px",
-            alignItems: "end",
-            flexWrap: "wrap",
-            marginBottom: "16px",
-          }}
-        >
-          <div style={{ flex: "1 1 360px", minWidth: "260px" }}>
+      <Card>
+        <div className="ui-toolbar" style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
+          
+          <div style={{ flex: "1 1 360px" }}>
             <Input
-              label="Search"
-              placeholder="Search by title, company, keyword, salary, or job type"
+              label={t("search")}
+              placeholder={t("searchJobsPlaceholder")}
               value={filters.search}
               onChange={(e) =>
                 setFilters({ ...filters, search: e.target.value })
@@ -123,10 +119,10 @@ function CandidateOpportunities() {
             />
           </div>
 
-          <div style={{ flex: "0 1 220px", minWidth: "200px" }}>
+          <div style={{ flex: "0 1 220px" }}>
             <Input
-              label="Location"
-              placeholder="Tokyo, Remote, London..."
+              label={t("location")}
+              placeholder={t("locationPlaceholder")}
               value={filters.location}
               onChange={(e) =>
                 setFilters({ ...filters, location: e.target.value })
@@ -134,10 +130,7 @@ function CandidateOpportunities() {
             />
           </div>
 
-          <label
-            className="auth-checkbox"
-            style={{ marginBottom: "10px", whiteSpace: "nowrap" }}
-          >
+          <label className="auth-checkbox">
             <input
               type="checkbox"
               checked={filters.remoteOnly}
@@ -145,36 +138,23 @@ function CandidateOpportunities() {
                 setFilters({ ...filters, remoteOnly: e.target.checked })
               }
             />
-            Remote only
+            {t("remoteOnly")}
           </label>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "10px",
-            flexWrap: "wrap",
-            marginBottom: "8px",
-          }}
-        >
-          <div style={{ fontSize: "14px", opacity: 0.8 }}>
-            {filteredJobs.length} job{filteredJobs.length === 1 ? "" : "s"} found
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+          <div>
+            {filteredJobs.length} {t("jobsFound", { count: filteredJobs.length })}
           </div>
 
           {(filters.search || filters.location || filters.remoteOnly) && (
             <Button
               variant="secondary"
               onClick={() =>
-                setFilters({
-                  search: "",
-                  location: "",
-                  remoteOnly: false,
-                })
+                setFilters({ search: "", location: "", remoteOnly: false })
               }
             >
-              Clear Filters
+              {t("clearFilters")}
             </Button>
           )}
         </div>
@@ -183,20 +163,20 @@ function CandidateOpportunities() {
       <div style={{ height: 18 }} />
 
       <Card
-        title="Available Jobs"
-        subtitle="Browse open roles in a compact, manageable table."
+        title={t("availableJobs")}
+        subtitle={t("availableJobsSubtitle")}
       >
         <div className="ui-table-wrap">
           <table className="ui-table">
             <thead>
               <tr>
-                <th style={{ width: "60px" }}>#</th>
-                <th>Title</th>
-                <th>Company</th>
-                <th>Location</th>
-                <th>Salary</th>
-                <th>Type</th>
-                <th style={{ width: "140px" }}>Action</th>
+                <th>#</th>
+                <th>{t("title")}</th>
+                <th>{t("company")}</th>
+                <th>{t("location")}</th>
+                <th>{t("salary")}</th>
+                <th>{t("type")}</th>
+                <th>{t("action")}</th>
               </tr>
             </thead>
 
@@ -204,34 +184,35 @@ function CandidateOpportunities() {
               {paginatedJobs.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="ui-table-empty">
-                    No jobs match your current filters.
+                    {t("noJobsMatch")}
                   </td>
                 </tr>
               ) : (
                 paginatedJobs.map((job, index) => {
-                  const rowNumber = (currentPage - 1) * pageSize + index + 1;
+                  const rowNumber =
+                    (currentPage - 1) * pageSize + index + 1;
 
                   return (
                     <tr key={job.id}>
                       <td>{rowNumber}</td>
 
-                      <td>{job.title || "Untitled role"}</td>
+                      <td>{job.title || t("untitledRole")}</td>
 
-                      <td>{job.company_name || "Unknown company"}</td>
+                      <td>{job.company_name || t("unknownCompany")}</td>
 
-                      <td>{job.location || "Not specified"}</td>
+                      <td>{job.location || t("notSpecified")}</td>
 
-                      <td>{job.salary_range || "Not specified"}</td>
+                      <td>{job.salary_range || t("notSpecified")}</td>
 
                       <td>
                         <Badge variant={job.remote ? "success" : "default"}>
-                          {job.remote ? "Remote" : "On-site"}
+                          {job.remote ? t("remote") : t("onSite")}
                         </Badge>
                       </td>
 
                       <td>
                         <Button onClick={() => applyToJob(job.id)}>
-                          Apply
+                          {t("apply")}
                         </Button>
                       </td>
                     </tr>
@@ -242,53 +223,42 @@ function CandidateOpportunities() {
           </table>
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-            marginTop: "16px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div style={{ fontSize: "14px", opacity: 0.8 }}>
-            Showing{" "}
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "16px" }}>
+          <div>
+            {t("showing")}{" "}
             {filteredJobs.length === 0
               ? 0
               : (currentPage - 1) * pageSize + 1}
             {" - "}
-            {Math.min(currentPage * pageSize, filteredJobs.length)} of{" "}
-            {filteredJobs.length} jobs
+            {Math.min(currentPage * pageSize, filteredJobs.length)}{" "}
+            {t("of")} {filteredJobs.length}
           </div>
 
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "8px" }}>
             <Button
               variant="secondary"
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.max(prev - 1, 1))
+              }
               disabled={currentPage === 1}
             >
-              Previous
+              {t("previous")}
             </Button>
 
-            <span
-              style={{
-                fontSize: "14px",
-                minWidth: "90px",
-                textAlign: "center",
-              }}
-            >
-              Page {currentPage} of {totalPages}
+            <span>
+              {t("page")} {currentPage} / {totalPages}
             </span>
 
             <Button
               variant="secondary"
               onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                setCurrentPage((prev) =>
+                  Math.min(prev + 1, totalPages)
+                )
               }
               disabled={currentPage === totalPages}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>

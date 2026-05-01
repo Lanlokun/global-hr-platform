@@ -113,8 +113,7 @@ function LandingPage() {
 
                     return (
                       <Geography
-                        key={geo.rsmKey}
-                        geography={geo}
+                        key={geo.rsmKey || geo.properties?.name || geo.id}                        geography={geo}
                         onClick={() => handleCountryClick(slug)}
                         style={{
                           default: {

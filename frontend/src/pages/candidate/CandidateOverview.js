@@ -4,8 +4,10 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import Card from "../../components/ui/Card";
 import Badge from "../../components/ui/Badge";
 import Button from "../../components/ui/Button";
+import { useLanguage } from "../../context/LanguageContext";
 
 function CandidateOverview() {
+  const { t } = useLanguage();
   const token = localStorage.getItem("token");
 
   let user = {};
@@ -24,16 +26,16 @@ function CandidateOverview() {
     user?.professional_title ||
     user?.title ||
     user?.role ||
-    "Software Engineer";
+    t("softwareEngineer");
 
   const candidateCountry =
-    user?.country || user?.location_country || user?.nationality || "Nigeria";
+    user?.country || user?.location_country || user?.nationality || t("nigeria");
 
   const firstName =
     user?.first_name ||
     user?.name?.split(" ")?.[0] ||
     user?.full_name?.split(" ")?.[0] ||
-    "Candidate";
+    t("candidate");
 
   useEffect(() => {
     const loadData = async () => {
@@ -47,27 +49,19 @@ function CandidateOverview() {
         const jobsData = Array.isArray(jobsRes.data) ? jobsRes.data : [];
         setJobs(jobsData);
 
-        // Optional future endpoints
-        // These are safe placeholders if your backend later supports them.
         try {
           const [marketRes, candidateRes] = await Promise.all([
-            axios.get(
-              `${process.env.REACT_APP_API_URL}/api/market-insights`,
-              {
-                params: {
-                  title: candidateTitle,
-                  country: candidateCountry,
-                },
-              }
-            ),
-            axios.get(
-              `${process.env.REACT_APP_API_URL}/api/candidate-insights`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            ),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/market-insights`, {
+              params: {
+                title: candidateTitle,
+                country: candidateCountry,
+              },
+            }),
+            axios.get(`${process.env.REACT_APP_API_URL}/api/candidate-insights`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }),
           ]);
 
           setMarketStats(marketRes.data || null);
@@ -157,10 +151,7 @@ function CandidateOverview() {
 
     base.forEach((job) => {
       const country =
-        job?.country ||
-        job?.job_country ||
-        job?.location_country ||
-        "Other";
+        job?.country || job?.job_country || job?.location_country || t("other");
       map[country] = (map[country] || 0) + 1;
     });
 
@@ -168,19 +159,17 @@ function CandidateOverview() {
       .map(([country, count]) => ({ country, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 6);
-  }, [jobs, matchingJobs]);
+  }, [jobs, matchingJobs, t]);
 
   const topWageCountries = useMemo(() => {
     if (marketStats?.top_wage_countries?.length) {
       return marketStats.top_wage_countries.slice(0, 5);
     }
 
-    // fallback derived from jobs if salary exists
     const grouped = {};
 
     jobs.forEach((job) => {
-      const country =
-        job?.country || job?.job_country || job?.location_country;
+      const country = job?.country || job?.job_country || job?.location_country;
       const salary =
         Number(job?.salary_max) ||
         Number(job?.salary) ||
@@ -205,11 +194,10 @@ function CandidateOverview() {
   }, [jobs, marketStats]);
 
   const hottestRoles = useMemo(() => {
-    const base = jobs;
     const map = {};
 
-    base.forEach((job) => {
-      const role = job?.title || job?.job_title || job?.category || "Other";
+    jobs.forEach((job) => {
+      const role = job?.title || job?.job_title || job?.category || t("other");
       map[role] = (map[role] || 0) + 1;
     });
 
@@ -217,59 +205,70 @@ function CandidateOverview() {
       .map(([role, count]) => ({ role, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
-  }, [jobs]);
+  }, [jobs, t]);
 
   const candidateRank = useMemo(() => {
     if (candidateStats?.country_rank) return candidateStats.country_rank;
+
     return {
       position: 18,
       total: 240,
       percentile: 93,
-      label: `Top 10% in ${candidateCountry}`,
+      label: t("topTenInMarket").replace("{{country}}", candidateCountry),
     };
-  }, [candidateStats, candidateCountry]);
+  }, [candidateStats, candidateCountry, t]);
 
   const marketHealth = useMemo(() => {
     const base = matchingJobs.length || jobs.length;
-    if (base > 100) return "Strong";
-    if (base > 40) return "Active";
-    return "Emerging";
-  }, [jobs.length, matchingJobs.length]);
+    if (base > 100) return t("strong");
+    if (base > 40) return t("active");
+    return t("emerging");
+  }, [jobs.length, matchingJobs.length, t]);
+
+  const formatMoney = (value) => {
+    const amount = Number(value);
+    if (!amount) return t("salaryNotDisclosed");
+    return `$${amount.toLocaleString()}`;
+  };
 
   return (
     <DashboardLayout
-      title="Candidate Overview"
-      subtitle="Your market intelligence dashboard for discovering where your next best opportunity is."
+      title={t("candidateOverview")}
+      subtitle={t("candidateOverviewSubtitle")}
     >
       <div style={styles.page}>
         <Card>
           <div style={styles.hero}>
             <div style={styles.heroContent}>
-              <span style={styles.eyebrow}>Career intelligence</span>
+              <span style={styles.eyebrow}>{t("careerIntelligence")}</span>
+
               <h2 style={styles.heroTitle}>
-                Welcome back, {firstName}
+                {t("welcomeBack")}, {firstName}
               </h2>
-              <p style={styles.heroSubtitle}>
-                See where your profile is strongest, which markets are hottest,
-                and where your next best-fit roles are emerging across Africa.
-              </p>
+
+              <p style={styles.heroSubtitle}>{t("overviewHeroSubtitle")}</p>
 
               <div style={styles.heroTags}>
                 <Badge variant="default">{candidateTitle}</Badge>
                 <Badge variant="success">{candidateCountry}</Badge>
-                <Badge variant="warning">{marketHealth} market</Badge>
+                <Badge variant="warning">
+                  {marketHealth} {t("market")}
+                </Badge>
               </div>
             </div>
 
             <div style={styles.heroSide}>
               <div style={styles.rankCard}>
-                <span style={styles.rankLabel}>Country ranking</span>
+                <span style={styles.rankLabel}>{t("countryRanking")}</span>
+
                 <strong style={styles.rankValue}>
                   #{candidateRank.position}
                 </strong>
+
                 <p style={styles.rankMeta}>
-                  Out of {candidateRank.total} candidates
+                  {t("outOf")} {candidateRank.total} {t("candidates")}
                 </p>
+
                 <span style={styles.rankFoot}>{candidateRank.label}</span>
               </div>
             </div>
@@ -278,40 +277,40 @@ function CandidateOverview() {
 
         <div style={styles.metricsGrid}>
           <MetricCard
-            title="Matching Jobs"
+            title={t("matchingJobs")}
             value={loading ? "..." : matchingJobs.length}
-            subtitle="Roles aligned with your background"
+            subtitle={t("matchingJobsSubtitle")}
           />
           <MetricCard
-            title="Top Percentile"
+            title={t("topPercentile")}
             value={loading ? "..." : `${candidateRank.percentile}%`}
-            subtitle="Estimated talent standing in your market"
+            subtitle={t("topPercentileSubtitle")}
           />
           <MetricCard
-            title="Remote Roles"
+            title={t("remoteRoles")}
             value={loading ? "..." : remoteVsOnsite.remote}
-            subtitle="Open remote opportunities"
+            subtitle={t("remoteRolesSubtitle")}
           />
           <MetricCard
-            title="Top Wage Market"
+            title={t("topWageMarket")}
             value={
               loading
                 ? "..."
-                : topWageCountries[0]?.country || "Not available"
+                : topWageCountries[0]?.country || t("notAvailable")
             }
-            subtitle="Highest visible wage signal for your profile"
+            subtitle={t("topWageMarketSubtitle")}
           />
         </div>
 
         <div style={styles.mainGrid}>
           <Card
-            title="Top-paying markets"
-            subtitle="Best-paying countries based on visible wage signals for your profile"
+            title={t("topPayingMarkets")}
+            subtitle={t("topPayingMarketsSubtitle")}
           >
             {loading ? (
-              <EmptyMessage text="Loading wage insights..." />
+              <EmptyMessage text={t("loadingWageInsights")} />
             ) : topWageCountries.length === 0 ? (
-              <EmptyMessage text="No salary intelligence available yet." />
+              <EmptyMessage text={t("noSalaryData")} />
             ) : (
               <div style={styles.listStack}>
                 {topWageCountries.map((item, index) => (
@@ -321,9 +320,9 @@ function CandidateOverview() {
                     value={
                       item.avg_salary
                         ? `$${item.avg_salary.toLocaleString()}`
-                        : "High demand"
+                        : t("highDemand")
                     }
-                    meta="Average visible compensation"
+                    meta={t("averageVisibleCompensation")}
                   />
                 ))}
               </div>
@@ -331,27 +330,30 @@ function CandidateOverview() {
           </Card>
 
           <Card
-            title="Work mode demand"
-            subtitle="How the current market splits across remote, onsite, and hybrid roles"
+            title={t("workModeDemand")}
+            subtitle={t("workModeDemandSubtitle")}
           >
             {loading ? (
-              <EmptyMessage text="Loading work mode insights..." />
+              <EmptyMessage text={t("loadingWorkModeInsights")} />
             ) : (
               <div style={styles.modePanel}>
                 <ProgressBar
-                  label="Remote"
+                  label={t("remote")}
                   value={remoteVsOnsite.remotePct}
                   count={remoteVsOnsite.remote}
+                  t={t}
                 />
                 <ProgressBar
-                  label="Hybrid"
+                  label={t("hybrid")}
                   value={remoteVsOnsite.hybridPct}
                   count={remoteVsOnsite.hybrid}
+                  t={t}
                 />
                 <ProgressBar
-                  label="On-site"
+                  label={t("onSite")}
                   value={remoteVsOnsite.onsitePct}
                   count={remoteVsOnsite.onsite}
+                  t={t}
                 />
               </div>
             )}
@@ -360,18 +362,21 @@ function CandidateOverview() {
 
         <div style={styles.mainGrid}>
           <Card
-            title="Job demand by country"
-            subtitle="Country-level demand for roles similar to your profile"
+            title={t("jobDemandByCountry")}
+            subtitle={t("jobDemandByCountrySubtitle")}
           >
             {loading ? (
-              <EmptyMessage text="Loading country distribution..." />
+              <EmptyMessage text={t("loadingCountryDistribution")} />
             ) : jobsByCountry.length === 0 ? (
-              <EmptyMessage text="No country distribution available yet." />
+              <EmptyMessage text={t("noCountryDistribution")} />
             ) : (
               <div style={styles.chartList}>
                 {jobsByCountry.map((item) => {
                   const max = jobsByCountry[0]?.count || 1;
-                  const width = Math.max(12, Math.round((item.count / max) * 100));
+                  const width = Math.max(
+                    12,
+                    Math.round((item.count / max) * 100)
+                  );
 
                   return (
                     <div key={item.country} style={styles.chartRow}>
@@ -380,12 +385,7 @@ function CandidateOverview() {
                         <span style={styles.chartValue}>{item.count}</span>
                       </div>
                       <div style={styles.chartTrack}>
-                        <div
-                          style={{
-                            ...styles.chartBar,
-                            width: `${width}%`,
-                          }}
-                        />
+                        <div style={{ ...styles.chartBar, width: `${width}%` }} />
                       </div>
                     </div>
                   );
@@ -394,22 +394,19 @@ function CandidateOverview() {
             )}
           </Card>
 
-          <Card
-            title="Hottest roles"
-            subtitle="Most active job categories currently visible on the platform"
-          >
+          <Card title={t("hottestRoles")} subtitle={t("hottestRolesSubtitle")}>
             {loading ? (
-              <EmptyMessage text="Loading role demand..." />
+              <EmptyMessage text={t("loadingRoleDemand")} />
             ) : hottestRoles.length === 0 ? (
-              <EmptyMessage text="No role trend data available yet." />
+              <EmptyMessage text={t("noRoleTrendData")} />
             ) : (
               <div style={styles.listStack}>
                 {hottestRoles.map((item) => (
                   <InsightRow
                     key={item.role}
                     title={item.role}
-                    value={`${item.count} roles`}
-                    meta="Current platform demand"
+                    value={`${item.count} ${t("roles")}`}
+                    meta={t("currentPlatformDemand")}
                   />
                 ))}
               </div>
@@ -418,17 +415,15 @@ function CandidateOverview() {
         </div>
 
         <Card
-          title="Newest matching jobs"
-          subtitle="Fresh opportunities aligned with your current background"
+          title={t("newestMatchingJobs")}
+          subtitle={t("newestMatchingJobsSubtitle")}
         >
           {loading ? (
-            <EmptyMessage text="Loading newest opportunities..." />
+            <EmptyMessage text={t("loadingNewestOpportunities")} />
           ) : newestJobs.length === 0 ? (
             <div style={styles.emptyState}>
-              <h3 style={styles.emptyTitle}>No matching jobs yet</h3>
-              <p style={styles.emptyText}>
-                As more relevant roles are published, they will appear here.
-              </p>
+              <h3 style={styles.emptyTitle}>{t("noMatchingJobsYet")}</h3>
+              <p style={styles.emptyText}>{t("noMatchingJobsYetSubtitle")}</p>
             </div>
           ) : (
             <div style={styles.jobsGrid}>
@@ -437,17 +432,18 @@ function CandidateOverview() {
                   <div style={styles.jobTop}>
                     <div>
                       <h4 style={styles.jobTitle}>
-                        {job.title || job.job_title || "Untitled role"}
+                        {job.title || job.job_title || t("untitledRole")}
                       </h4>
                       <p style={styles.jobCompany}>
-                        {job.company_name || job.company || "Unknown company"}
+                        {job.company_name || job.company || t("unknownCompany")}
                       </p>
                     </div>
+
                     <Badge variant="default">
                       {job.work_mode ||
                         job.location_type ||
                         job.job_type ||
-                        "Role"}
+                        t("role")}
                     </Badge>
                   </div>
 
@@ -456,7 +452,7 @@ function CandidateOverview() {
                       {job.country ||
                         job.job_country ||
                         job.location_country ||
-                        "Location not specified"}
+                        t("locationNotSpecified")}
                     </span>
                     <span style={styles.jobMeta}>
                       {formatMoney(
@@ -469,8 +465,8 @@ function CandidateOverview() {
                   </div>
 
                   <div style={styles.jobActions}>
-                    <Button variant="secondary">View Job</Button>
-                    <Button>Apply Now</Button>
+                    <Button variant="secondary">{t("viewJob")}</Button>
+                    <Button>{t("applyNow")}</Button>
                   </div>
                 </div>
               ))}
@@ -479,50 +475,50 @@ function CandidateOverview() {
         </Card>
 
         <div style={styles.mainGrid}>
-          <Card
-            title="Market trend signals"
-            subtitle="Practical insight to help you target the next best move"
-          >
+          <Card title={t("marketTrendSignals")} subtitle={t("marketTrendSignalsSubtitle")}>
             <div style={styles.tipList}>
               <TipItem
-                title="Highest wage visibility"
+                title={t("highestWageVisibility")}
                 text={
                   topWageCountries[0]
-                    ? `${topWageCountries[0].country} currently shows the strongest visible compensation signal for your background.`
-                    : "Compensation data will appear once salary fields are available across more jobs."
+                    ? t("highestWageVisibilityText").replace(
+                        "{{country}}",
+                        topWageCountries[0].country
+                      )
+                    : t("noSalaryInsight")
                 }
               />
               <TipItem
-                title="Best demand pattern"
+                title={t("bestDemandPattern")}
                 text={
                   remoteVsOnsite.remote >= remoteVsOnsite.onsite
-                    ? "Remote roles are highly competitive and worth prioritizing in your search."
-                    : "On-site roles currently have stronger visible demand in this segment."
+                    ? t("remoteDemandTip")
+                    : t("onsiteDemandTip")
                 }
               />
               <TipItem
-                title="Career focus"
-                text={`Your current dashboard is optimized around ${candidateTitle}. Narrowing your profile and featured skills will improve matching quality.`}
+                title={t("careerFocus")}
+                text={t("careerFocusText").replace(
+                  "{{title}}",
+                  candidateTitle
+                )}
               />
             </div>
           </Card>
 
-          <Card
-            title="Recommended next steps"
-            subtitle="Immediate actions to improve candidate visibility and outcomes"
-          >
+          <Card title={t("recommendedNextSteps")} subtitle={t("recommendedNextStepsSubtitle")}>
             <div style={styles.tipList}>
               <TipItem
-                title="Target high-paying markets"
-                text="Prioritize applications in the top-paying countries shown above."
+                title={t("targetHighPayingMarkets")}
+                text={t("targetHighPayingMarketsText")}
               />
               <TipItem
-                title="Optimize for hot roles"
-                text="Adapt your headline, featured skills, and CV to match the hottest categories on the platform."
+                title={t("optimizeForHotRoles")}
+                text={t("optimizeForHotRolesText")}
               />
               <TipItem
-                title="Stay market-responsive"
-                text="Check the newest matching roles frequently and apply early to improve visibility."
+                title={t("stayMarketResponsive")}
+                text={t("stayMarketResponsiveText")}
               />
             </div>
           </Card>
@@ -554,13 +550,13 @@ function InsightRow({ title, value, meta }) {
   );
 }
 
-function ProgressBar({ label, value, count }) {
+function ProgressBar({ label, value, count, t }) {
   return (
     <div style={styles.progressItem}>
       <div style={styles.progressTop}>
         <span style={styles.progressLabel}>{label}</span>
         <span style={styles.progressCount}>
-          {count} roles · {value}%
+          {count} {t("roles")} · {value}%
         </span>
       </div>
       <div style={styles.progressTrack}>
@@ -583,27 +579,15 @@ function EmptyMessage({ text }) {
   return <p style={styles.emptyMessage}>{text}</p>;
 }
 
-function formatMoney(value) {
-  const amount = Number(value);
-  if (!amount) return "Salary not disclosed";
-  return `$${amount.toLocaleString()}`;
-}
-
 const styles = {
-  page: {
-    display: "grid",
-    gap: "20px",
-  },
+  page: { display: "grid", gap: "20px" },
   hero: {
     display: "grid",
     gridTemplateColumns: "minmax(0, 1.6fr) minmax(280px, 0.8fr)",
     gap: "20px",
     alignItems: "stretch",
   },
-  heroContent: {
-    display: "grid",
-    gap: "12px",
-  },
+  heroContent: { display: "grid", gap: "12px" },
   eyebrow: {
     fontSize: "12px",
     textTransform: "uppercase",
@@ -625,16 +609,8 @@ const styles = {
     lineHeight: 1.7,
     color: "#64748b",
   },
-  heroTags: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-    marginTop: "4px",
-  },
-  heroSide: {
-    display: "flex",
-    justifyContent: "stretch",
-  },
+  heroTags: { display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "4px" },
+  heroSide: { display: "flex", justifyContent: "stretch" },
   rankCard: {
     width: "100%",
     border: "1px solid #e2e8f0",
@@ -652,21 +628,9 @@ const styles = {
     color: "#64748b",
     fontWeight: 700,
   },
-  rankValue: {
-    fontSize: "34px",
-    fontWeight: 800,
-    color: "#0f172a",
-  },
-  rankMeta: {
-    margin: 0,
-    fontSize: "14px",
-    color: "#64748b",
-  },
-  rankFoot: {
-    fontSize: "13px",
-    color: "#0f172a",
-    fontWeight: 600,
-  },
+  rankValue: { fontSize: "34px", fontWeight: 800, color: "#0f172a" },
+  rankMeta: { margin: 0, fontSize: "14px", color: "#64748b" },
+  rankFoot: { fontSize: "13px", color: "#0f172a", fontWeight: 600 },
   metricsGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -706,10 +670,7 @@ const styles = {
     gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
     gap: "20px",
   },
-  listStack: {
-    display: "grid",
-    gap: "12px",
-  },
+  listStack: { display: "grid", gap: "12px" },
   insightRow: {
     display: "flex",
     justifyContent: "space-between",
@@ -720,31 +681,16 @@ const styles = {
     borderRadius: "14px",
     background: "#ffffff",
   },
-  insightTitle: {
-    margin: 0,
-    fontSize: "15px",
-    color: "#0f172a",
-    fontWeight: 700,
-  },
-  insightMeta: {
-    margin: "4px 0 0",
-    fontSize: "13px",
-    color: "#64748b",
-  },
+  insightTitle: { margin: 0, fontSize: "15px", color: "#0f172a", fontWeight: 700 },
+  insightMeta: { margin: "4px 0 0", fontSize: "13px", color: "#64748b" },
   insightValue: {
     fontSize: "15px",
     color: "#0f172a",
     fontWeight: 800,
     whiteSpace: "nowrap",
   },
-  modePanel: {
-    display: "grid",
-    gap: "14px",
-  },
-  progressItem: {
-    display: "grid",
-    gap: "8px",
-  },
+  modePanel: { display: "grid", gap: "14px" },
+  progressItem: { display: "grid", gap: "8px" },
   progressTop: {
     display: "flex",
     justifyContent: "space-between",
@@ -752,15 +698,8 @@ const styles = {
     gap: "12px",
     flexWrap: "wrap",
   },
-  progressLabel: {
-    fontSize: "14px",
-    fontWeight: 700,
-    color: "#0f172a",
-  },
-  progressCount: {
-    fontSize: "13px",
-    color: "#64748b",
-  },
+  progressLabel: { fontSize: "14px", fontWeight: 700, color: "#0f172a" },
+  progressCount: { fontSize: "13px", color: "#64748b" },
   progressTrack: {
     height: "10px",
     width: "100%",
@@ -773,30 +712,16 @@ const styles = {
     borderRadius: "999px",
     background: "linear-gradient(90deg, #0f172a 0%, #334155 100%)",
   },
-  chartList: {
-    display: "grid",
-    gap: "14px",
-  },
-  chartRow: {
-    display: "grid",
-    gap: "8px",
-  },
+  chartList: { display: "grid", gap: "14px" },
+  chartRow: { display: "grid", gap: "8px" },
   chartLabelWrap: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     gap: "12px",
   },
-  chartLabel: {
-    fontSize: "14px",
-    color: "#0f172a",
-    fontWeight: 600,
-  },
-  chartValue: {
-    fontSize: "13px",
-    color: "#64748b",
-    fontWeight: 600,
-  },
+  chartLabel: { fontSize: "14px", color: "#0f172a", fontWeight: 600 },
+  chartValue: { fontSize: "13px", color: "#64748b", fontWeight: 600 },
   chartTrack: {
     height: "12px",
     width: "100%",
@@ -828,17 +753,8 @@ const styles = {
     alignItems: "flex-start",
     gap: "12px",
   },
-  jobTitle: {
-    margin: 0,
-    fontSize: "16px",
-    color: "#0f172a",
-    fontWeight: 700,
-  },
-  jobCompany: {
-    margin: "6px 0 0",
-    fontSize: "14px",
-    color: "#64748b",
-  },
+  jobTitle: { margin: 0, fontSize: "16px", color: "#0f172a", fontWeight: 700 },
+  jobCompany: { margin: "6px 0 0", fontSize: "14px", color: "#64748b" },
   jobMetaRow: {
     display: "flex",
     justifyContent: "space-between",
@@ -846,32 +762,16 @@ const styles = {
     gap: "12px",
     flexWrap: "wrap",
   },
-  jobMeta: {
-    fontSize: "13px",
-    color: "#475569",
-    fontWeight: 500,
-  },
-  jobActions: {
-    display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-  },
-  tipList: {
-    display: "grid",
-    gap: "12px",
-  },
+  jobMeta: { fontSize: "13px", color: "#475569", fontWeight: 500 },
+  jobActions: { display: "flex", gap: "10px", flexWrap: "wrap" },
+  tipList: { display: "grid", gap: "12px" },
   tipItem: {
     border: "1px solid #e2e8f0",
     borderRadius: "14px",
     padding: "14px 16px",
     background: "#ffffff",
   },
-  tipTitle: {
-    margin: 0,
-    fontSize: "15px",
-    fontWeight: 700,
-    color: "#0f172a",
-  },
+  tipTitle: { margin: 0, fontSize: "15px", fontWeight: 700, color: "#0f172a" },
   tipText: {
     margin: "6px 0 0",
     fontSize: "14px",
@@ -885,23 +785,14 @@ const styles = {
     borderRadius: "16px",
     background: "#f8fafc",
   },
-  emptyTitle: {
-    margin: 0,
-    fontSize: "18px",
-    color: "#0f172a",
-    fontWeight: 700,
-  },
+  emptyTitle: { margin: 0, fontSize: "18px", color: "#0f172a", fontWeight: 700 },
   emptyText: {
     margin: "8px 0 0",
     fontSize: "14px",
     color: "#64748b",
     lineHeight: 1.6,
   },
-  emptyMessage: {
-    margin: 0,
-    fontSize: "14px",
-    color: "#64748b",
-  },
+  emptyMessage: { margin: 0, fontSize: "14px", color: "#64748b" },
 };
 
 export default CandidateOverview;

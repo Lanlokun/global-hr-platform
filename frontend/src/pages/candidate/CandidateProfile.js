@@ -5,15 +5,16 @@ import Input from "../../components/ui/Input";
 import Card from "../../components/ui/Card";
 import { toast } from "react-hot-toast";
 import axios from "axios";
+import { useLanguage } from "../../context/LanguageContext";
 
 const sectionTabs = [
-  "Basic Info",
-  "Professional",
-  "Experience",
-  "Education",
-  "Certifications",
-  "Preferences",
-  "Links",
+  "basicInfo",
+  "professional",
+  "experience",
+  "education",
+  "certifications",
+  "preferences",
+  "links",
 ];
 
 const gridStyle = {
@@ -71,7 +72,9 @@ const labelStyle = {
 };
 
 function CandidateProfile() {
+  const { t } = useLanguage();
   const token = localStorage.getItem("token");
+
   const [activeSection, setActiveSection] = useState(0);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -79,7 +82,6 @@ function CandidateProfile() {
 
   const initialForm = useMemo(
     () => ({
-      // basic
       name: "",
       email: "",
       phone: "",
@@ -90,19 +92,16 @@ function CandidateProfile() {
       gender: "",
       profile_image: "",
 
-      // professional
       professional_title: "",
       years_of_experience: "",
       professional_summary: "",
       skills: "",
       languages: "",
 
-      // arrays
       experience: [],
       education: [],
       certifications: [],
 
-      // preferences
       desired_job_title: "",
       preferred_employment_type: "",
       preferred_work_mode: "",
@@ -113,7 +112,6 @@ function CandidateProfile() {
       work_authorization: "",
       willing_to_relocate: false,
 
-      // links
       linkedin_url: "",
       github_url: "",
       portfolio_url: "",
@@ -150,9 +148,11 @@ function CandidateProfile() {
   const updateExperience = (index, key, value) => {
     const updated = [...form.experience];
     updated[index][key] = value;
+
     if (key === "currently_working" && value) {
       updated[index].end_date = "";
     }
+
     setForm((prev) => ({ ...prev, experience: updated }));
   };
 
@@ -221,11 +221,15 @@ function CandidateProfile() {
   const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/profile/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+
+      const res = await axios.get(
+        `${process.env.REACT_APP_API_URL}/api/profile/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = res.data || {};
 
@@ -247,7 +251,9 @@ function CandidateProfile() {
         languages: data.languages || "",
         experience: Array.isArray(data.experience) ? data.experience : [],
         education: Array.isArray(data.education) ? data.education : [],
-        certifications: Array.isArray(data.certifications) ? data.certifications : [],
+        certifications: Array.isArray(data.certifications)
+          ? data.certifications
+          : [],
         desired_job_title: data.desired_job_title || "",
         preferred_employment_type: data.preferred_employment_type || "",
         preferred_work_mode: data.preferred_work_mode || "",
@@ -263,11 +269,11 @@ function CandidateProfile() {
         resume_url: data.resume_url || "",
       });
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to load profile");
+      toast.error(error.response?.data?.error || t("loadProfileError"));
     } finally {
       setLoading(false);
     }
-  }, [initialForm, token]);
+  }, [initialForm, token, t]);
 
   useEffect(() => {
     fetchProfile();
@@ -297,13 +303,16 @@ function CandidateProfile() {
   }, [form]);
 
   const validateForm = () => {
-    if (!form.name.trim()) return toast.error("Full name is required"), false;
-    if (!form.email.trim()) return toast.error("Email is required"), false;
-    if (!form.phone.trim()) return toast.error("Phone number is required"), false;
-    if (!form.country.trim()) return toast.error("Country is required"), false;
-    if (!form.professional_title.trim()) return toast.error("Professional title is required"), false;
-    if (!form.professional_summary.trim()) return toast.error("Professional summary is required"), false;
-    if (!form.skills.trim()) return toast.error("Skills are required"), false;
+    if (!form.name.trim()) return toast.error(t("fullNameRequired")), false;
+    if (!form.email.trim()) return toast.error(t("emailRequired")), false;
+    if (!form.phone.trim()) return toast.error(t("phoneRequired")), false;
+    if (!form.country.trim()) return toast.error(t("countryRequired")), false;
+    if (!form.professional_title.trim())
+      return toast.error(t("professionalTitleRequired")), false;
+    if (!form.professional_summary.trim())
+      return toast.error(t("professionalSummaryRequired")), false;
+    if (!form.skills.trim()) return toast.error(t("skillsRequired")), false;
+
     return true;
   };
 
@@ -312,8 +321,9 @@ function CandidateProfile() {
     if (!file) return;
 
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+
     if (!allowed.includes(file.type)) {
-      toast.error("Please upload a JPG, PNG, or WEBP image");
+      toast.error(t("invalidImageType"));
       return;
     }
 
@@ -339,9 +349,9 @@ function CandidateProfile() {
         profile_image: res.data.url,
       }));
 
-      toast.success("Profile image uploaded");
+      toast.success(t("imageUploaded"));
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to upload image");
+      toast.error(error.response?.data?.error || t("imageUploadFailed"));
     } finally {
       setUploadingImage(false);
     }
@@ -374,11 +384,14 @@ function CandidateProfile() {
       );
 
       const existingUser = JSON.parse(localStorage.getItem("user") || "{}");
-      localStorage.setItem("user", JSON.stringify({ ...existingUser, ...res.data }));
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ ...existingUser, ...res.data })
+      );
 
-      toast.success("Profile updated successfully");
+      toast.success(t("profileUpdated"));
     } catch (error) {
-      toast.error(error.response?.data?.error || "Failed to save profile");
+      toast.error(error.response?.data?.error || t("saveProfileError"));
     } finally {
       setSaving(false);
     }
@@ -400,13 +413,14 @@ function CandidateProfile() {
 
   return (
     <DashboardLayout
-      title="Candidate Profile"
-      subtitle="Build a complete, recruiter-ready profile without filling everything at once."
+      title={t("candidateProfile")}
+      subtitle={t("candidateProfileSubtitle")}
     >
-      <Card
-      >
+      <Card>
         {loading ? (
-          <p style={{ margin: 0, color: "#6b7280" }}>Loading profile...</p>
+          <p style={{ margin: 0, color: "#6b7280" }}>
+            {t("loadingProfile")}
+          </p>
         ) : (
           <>
             <div
@@ -430,10 +444,10 @@ function CandidateProfile() {
               >
                 <div>
                   <div style={{ fontWeight: 700, fontSize: "1rem" }}>
-                    Profile completion
+                    {t("profileCompletion")}
                   </div>
                   <div style={{ color: "#6b7280", fontSize: "0.92rem" }}>
-                    A stronger profile helps employers evaluate your fit faster.
+                    {t("profileCompletionHint")}
                   </div>
                 </div>
                 <div style={{ fontWeight: 800, fontSize: "1.1rem" }}>
@@ -475,17 +489,17 @@ function CandidateProfile() {
                   style={tabButtonStyle(activeSection === index)}
                   onClick={() => setActiveSection(index)}
                 >
-                  {index + 1}. {tab}
+                  {index + 1}. {t(tab)}
                 </button>
               ))}
             </div>
 
             {activeSection === 0 && (
               <div>
-                <h3 style={{ marginBottom: 16 }}>Basic Information</h3>
+                <h3 style={{ marginBottom: 16 }}>{t("basicInformation")}</h3>
 
                 <div style={{ marginBottom: 20 }}>
-                  <label style={labelStyle}>Profile image</label>
+                  <label style={labelStyle}>{t("profileImage")}</label>
                   <div
                     style={{
                       display: "flex",
@@ -499,7 +513,7 @@ function CandidateProfile() {
                         form.profile_image ||
                         "https://i.pinimg.com/736x/7e/83/0e/7e830e9c49dee63d546ba2b376523d30.jpg"
                       }
-                      alt="Profile"
+                      alt={t("profileImage")}
                       style={{
                         width: 96,
                         height: 96,
@@ -509,9 +523,21 @@ function CandidateProfile() {
                       }}
                     />
                     <div>
-                      <input type="file" accept="image/*" onChange={handleImageUpload} />
-                      <div style={{ marginTop: 8, color: "#6b7280", fontSize: "0.9rem" }}>
-                        {uploadingImage ? "Uploading image..." : "Upload a professional profile photo"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                      />
+                      <div
+                        style={{
+                          marginTop: 8,
+                          color: "#6b7280",
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        {uploadingImage
+                          ? t("uploadingImage")
+                          : t("uploadProfessionalPhoto")}
                       </div>
                     </div>
                   </div>
@@ -519,54 +545,58 @@ function CandidateProfile() {
 
                 <div style={gridStyle}>
                   <Input
-                    label="Full name"
+                    label={t("fullName")}
                     value={form.name}
                     onChange={(e) => updateField("name", e.target.value)}
                   />
                   <Input
-                    label="Email"
+                    label={t("email")}
                     type="email"
                     value={form.email}
                     onChange={(e) => updateField("email", e.target.value)}
                   />
                   <Input
-                    label="Phone number"
+                    label={t("phone")}
                     value={form.phone}
                     onChange={(e) => updateField("phone", e.target.value)}
                   />
                   <Input
-                    label="Country"
+                    label={t("country")}
                     value={form.country}
                     onChange={(e) => updateField("country", e.target.value)}
                   />
                   <Input
-                    label="City"
+                    label={t("city")}
                     value={form.city}
                     onChange={(e) => updateField("city", e.target.value)}
                   />
                   <Input
-                    label="Address"
+                    label={t("address")}
                     value={form.address}
                     onChange={(e) => updateField("address", e.target.value)}
                   />
                   <Input
-                    label="Date of birth"
+                    label={t("dateOfBirth")}
                     type="date"
                     value={form.date_of_birth}
-                    onChange={(e) => updateField("date_of_birth", e.target.value)}
+                    onChange={(e) =>
+                      updateField("date_of_birth", e.target.value)
+                    }
                   />
                   <div>
-                    <label style={labelStyle}>Gender</label>
+                    <label style={labelStyle}>{t("gender")}</label>
                     <select
                       style={selectStyle}
                       value={form.gender}
                       onChange={(e) => updateField("gender", e.target.value)}
                     >
-                      <option value="">Select gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
+                      <option value="">{t("selectGender")}</option>
+                      <option value="Male">{t("male")}</option>
+                      <option value="Female">{t("female")}</option>
+                      <option value="Other">{t("other")}</option>
+                      <option value="Prefer not to say">
+                        {t("preferNotToSay")}
+                      </option>
                     </select>
                   </div>
                 </div>
@@ -575,42 +605,50 @@ function CandidateProfile() {
 
             {activeSection === 1 && (
               <div>
-                <h3 style={{ marginBottom: 16 }}>Professional Information</h3>
+                <h3 style={{ marginBottom: 16 }}>
+                  {t("professionalInformation")}
+                </h3>
 
                 <div style={gridStyle}>
                   <Input
-                    label="Professional title"
-                    placeholder="Frontend Developer"
+                    label={t("professionalTitle")}
+                    placeholder={t("frontendDeveloperPlaceholder")}
                     value={form.professional_title}
-                    onChange={(e) => updateField("professional_title", e.target.value)}
+                    onChange={(e) =>
+                      updateField("professional_title", e.target.value)
+                    }
                   />
                   <Input
-                    label="Years of experience"
+                    label={t("yearsExperience")}
                     type="number"
                     placeholder="3"
                     value={form.years_of_experience}
-                    onChange={(e) => updateField("years_of_experience", e.target.value)}
+                    onChange={(e) =>
+                      updateField("years_of_experience", e.target.value)
+                    }
                   />
                 </div>
 
                 <div style={{ height: 14 }} />
 
-                <label style={labelStyle}>Professional summary</label>
+                <label style={labelStyle}>{t("professionalSummary")}</label>
                 <textarea
                   style={textareaStyle}
                   rows={5}
-                  placeholder="Summarize your background, strengths, and the kind of value you bring."
+                  placeholder={t("professionalSummaryPlaceholder")}
                   value={form.professional_summary}
-                  onChange={(e) => updateField("professional_summary", e.target.value)}
+                  onChange={(e) =>
+                    updateField("professional_summary", e.target.value)
+                  }
                 />
 
                 <div style={{ height: 14 }} />
 
                 <Input
-                  label="Skills"
+                  label={t("skills")}
                   as="textarea"
                   rows={4}
-                  placeholder="React, Node.js, Python, SQL, Communication, Leadership..."
+                  placeholder={t("skillsPlaceholder")}
                   value={form.skills}
                   onChange={(e) => updateField("skills", e.target.value)}
                 />
@@ -618,8 +656,8 @@ function CandidateProfile() {
                 <div style={{ height: 14 }} />
 
                 <Input
-                  label="Languages"
-                  placeholder="English, French, Arabic"
+                  label={t("languages")}
+                  placeholder={t("languagesPlaceholder")}
                   value={form.languages}
                   onChange={(e) => updateField("languages", e.target.value)}
                 />
@@ -638,13 +676,13 @@ function CandidateProfile() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <h3 style={{ margin: 0 }}>Work Experience</h3>
-                  <Button onClick={addExperience}>Add Experience</Button>
+                  <h3 style={{ margin: 0 }}>{t("workExperience")}</h3>
+                  <Button onClick={addExperience}>{t("addExperience")}</Button>
                 </div>
 
                 {form.experience.length === 0 && (
                   <p style={{ color: "#6b7280" }}>
-                    No work experience added yet.
+                    {t("noWorkExperience")}
                   </p>
                 )}
 
@@ -652,61 +690,85 @@ function CandidateProfile() {
                   <div key={index} style={smallCardStyle}>
                     <div style={gridStyle}>
                       <Input
-                        label="Company"
+                        label={t("company")}
                         value={item.company}
-                        onChange={(e) => updateExperience(index, "company", e.target.value)}
-                      />
-                      <Input
-                        label="Job title"
-                        value={item.job_title}
-                        onChange={(e) => updateExperience(index, "job_title", e.target.value)}
-                      />
-                      <Input
-                        label="Employment type"
-                        placeholder="Full-time"
-                        value={item.employment_type}
                         onChange={(e) =>
-                          updateExperience(index, "employment_type", e.target.value)
+                          updateExperience(index, "company", e.target.value)
                         }
                       />
                       <Input
-                        label="Location"
-                        value={item.location}
-                        onChange={(e) => updateExperience(index, "location", e.target.value)}
+                        label={t("jobTitle")}
+                        value={item.job_title}
+                        onChange={(e) =>
+                          updateExperience(index, "job_title", e.target.value)
+                        }
                       />
                       <Input
-                        label="Start date"
+                        label={t("employmentType")}
+                        placeholder={t("fullTime")}
+                        value={item.employment_type}
+                        onChange={(e) =>
+                          updateExperience(
+                            index,
+                            "employment_type",
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Input
+                        label={t("location")}
+                        value={item.location}
+                        onChange={(e) =>
+                          updateExperience(index, "location", e.target.value)
+                        }
+                      />
+                      <Input
+                        label={t("startDate")}
                         type="date"
                         value={item.start_date}
-                        onChange={(e) => updateExperience(index, "start_date", e.target.value)}
+                        onChange={(e) =>
+                          updateExperience(index, "start_date", e.target.value)
+                        }
                       />
                       <Input
-                        label="End date"
+                        label={t("endDate")}
                         type="date"
                         value={item.end_date}
                         disabled={item.currently_working}
-                        onChange={(e) => updateExperience(index, "end_date", e.target.value)}
+                        onChange={(e) =>
+                          updateExperience(index, "end_date", e.target.value)
+                        }
                       />
                     </div>
 
                     <div style={{ marginTop: 12, marginBottom: 12 }}>
-                      <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 8,
+                        }}
+                      >
                         <input
                           type="checkbox"
                           checked={item.currently_working}
                           onChange={(e) =>
-                            updateExperience(index, "currently_working", e.target.checked)
+                            updateExperience(
+                              index,
+                              "currently_working",
+                              e.target.checked
+                            )
                           }
                         />
-                        I currently work here
+                        {t("currentlyWorkHere")}
                       </label>
                     </div>
 
-                    <label style={labelStyle}>Description</label>
+                    <label style={labelStyle}>{t("description")}</label>
                     <textarea
                       style={textareaStyle}
                       rows={4}
-                      placeholder="Describe responsibilities, achievements, tools, and impact."
+                      placeholder={t("experienceDescriptionPlaceholder")}
                       value={item.description}
                       onChange={(e) =>
                         updateExperience(index, "description", e.target.value)
@@ -715,7 +777,7 @@ function CandidateProfile() {
 
                     <div style={{ marginTop: 12 }}>
                       <Button onClick={() => removeExperience(index)}>
-                        Remove
+                        {t("remove")}
                       </Button>
                     </div>
                   </div>
@@ -735,38 +797,46 @@ function CandidateProfile() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <h3 style={{ margin: 0 }}>Education</h3>
-                  <Button onClick={addEducation}>Add Education</Button>
+                  <h3 style={{ margin: 0 }}>{t("education")}</h3>
+                  <Button onClick={addEducation}>{t("addEducation")}</Button>
                 </div>
 
                 {form.education.length === 0 && (
-                  <p style={{ color: "#6b7280" }}>No education record added yet.</p>
+                  <p style={{ color: "#6b7280" }}>
+                    {t("noEducationRecord")}
+                  </p>
                 )}
 
                 {form.education.map((item, index) => (
                   <div key={index} style={smallCardStyle}>
                     <div style={gridStyle}>
                       <Input
-                        label="Institution"
+                        label={t("institution")}
                         value={item.institution}
                         onChange={(e) =>
                           updateEducation(index, "institution", e.target.value)
                         }
                       />
                       <Input
-                        label="Degree"
+                        label={t("degree")}
                         value={item.degree}
-                        onChange={(e) => updateEducation(index, "degree", e.target.value)}
-                      />
-                      <Input
-                        label="Field of study"
-                        value={item.field_of_study}
                         onChange={(e) =>
-                          updateEducation(index, "field_of_study", e.target.value)
+                          updateEducation(index, "degree", e.target.value)
                         }
                       />
                       <Input
-                        label="Start year"
+                        label={t("fieldOfStudy")}
+                        value={item.field_of_study}
+                        onChange={(e) =>
+                          updateEducation(
+                            index,
+                            "field_of_study",
+                            e.target.value
+                          )
+                        }
+                      />
+                      <Input
+                        label={t("startYear")}
                         type="number"
                         value={item.start_year}
                         onChange={(e) =>
@@ -774,7 +844,7 @@ function CandidateProfile() {
                         }
                       />
                       <Input
-                        label="End year"
+                        label={t("endYear")}
                         type="number"
                         value={item.end_year}
                         onChange={(e) =>
@@ -782,27 +852,35 @@ function CandidateProfile() {
                         }
                       />
                       <Input
-                        label="Grade / CGPA"
+                        label={t("gradeCgpa")}
                         value={item.grade}
-                        onChange={(e) => updateEducation(index, "grade", e.target.value)}
-                      />
-                    </div>
-
-                    <div style={{ marginTop: 12 }}>
-                      <label style={labelStyle}>Description</label>
-                      <textarea
-                        style={textareaStyle}
-                        rows={3}
-                        placeholder="Optional details such as projects, honors, thesis, or distinctions."
-                        value={item.description}
                         onChange={(e) =>
-                          updateEducation(index, "description", e.target.value)
+                          updateEducation(index, "grade", e.target.value)
                         }
                       />
                     </div>
 
                     <div style={{ marginTop: 12 }}>
-                      <Button onClick={() => removeEducation(index)}>Remove</Button>
+                      <label style={labelStyle}>{t("description")}</label>
+                      <textarea
+                        style={textareaStyle}
+                        rows={3}
+                        placeholder={t("educationDescriptionPlaceholder")}
+                        value={item.description}
+                        onChange={(e) =>
+                          updateEducation(
+                            index,
+                            "description",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </div>
+
+                    <div style={{ marginTop: 12 }}>
+                      <Button onClick={() => removeEducation(index)}>
+                        {t("remove")}
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -821,13 +899,15 @@ function CandidateProfile() {
                     flexWrap: "wrap",
                   }}
                 >
-                  <h3 style={{ margin: 0 }}>Certifications</h3>
-                  <Button onClick={addCertification}>Add Certification</Button>
+                  <h3 style={{ margin: 0 }}>{t("certifications")}</h3>
+                  <Button onClick={addCertification}>
+                    {t("addCertification")}
+                  </Button>
                 </div>
 
                 {form.certifications.length === 0 && (
                   <p style={{ color: "#6b7280" }}>
-                    No certifications added yet.
+                    {t("noCertifications")}
                   </p>
                 )}
 
@@ -835,54 +915,70 @@ function CandidateProfile() {
                   <div key={index} style={smallCardStyle}>
                     <div style={gridStyle}>
                       <Input
-                        label="Certification name"
+                        label={t("certificationName")}
                         value={item.name}
                         onChange={(e) =>
                           updateCertification(index, "name", e.target.value)
                         }
                       />
                       <Input
-                        label="Issuer"
+                        label={t("issuer")}
                         value={item.issuer}
                         onChange={(e) =>
                           updateCertification(index, "issuer", e.target.value)
                         }
                       />
                       <Input
-                        label="Issue date"
+                        label={t("issueDate")}
                         type="date"
                         value={item.issue_date}
                         onChange={(e) =>
-                          updateCertification(index, "issue_date", e.target.value)
+                          updateCertification(
+                            index,
+                            "issue_date",
+                            e.target.value
+                          )
                         }
                       />
                       <Input
-                        label="Expiry date"
+                        label={t("expiryDate")}
                         type="date"
                         value={item.expiry_date}
                         onChange={(e) =>
-                          updateCertification(index, "expiry_date", e.target.value)
+                          updateCertification(
+                            index,
+                            "expiry_date",
+                            e.target.value
+                          )
                         }
                       />
                       <Input
-                        label="Credential ID"
+                        label={t("credentialId")}
                         value={item.credential_id}
                         onChange={(e) =>
-                          updateCertification(index, "credential_id", e.target.value)
+                          updateCertification(
+                            index,
+                            "credential_id",
+                            e.target.value
+                          )
                         }
                       />
                       <Input
-                        label="Credential URL"
+                        label={t("credentialUrl")}
                         value={item.credential_url}
                         onChange={(e) =>
-                          updateCertification(index, "credential_url", e.target.value)
+                          updateCertification(
+                            index,
+                            "credential_url",
+                            e.target.value
+                          )
                         }
                       />
                     </div>
 
                     <div style={{ marginTop: 12 }}>
                       <Button onClick={() => removeCertification(index)}>
-                        Remove
+                        {t("remove")}
                       </Button>
                     </div>
                   </div>
@@ -892,18 +988,20 @@ function CandidateProfile() {
 
             {activeSection === 5 && (
               <div>
-                <h3 style={{ marginBottom: 16 }}>Job Preferences</h3>
+                <h3 style={{ marginBottom: 16 }}>{t("jobPreferences")}</h3>
 
                 <div style={gridStyle}>
                   <Input
-                    label="Desired job title"
-                    placeholder="Backend Engineer"
+                    label={t("desiredJobTitle")}
+                    placeholder={t("backendEngineerPlaceholder")}
                     value={form.desired_job_title}
-                    onChange={(e) => updateField("desired_job_title", e.target.value)}
+                    onChange={(e) =>
+                      updateField("desired_job_title", e.target.value)
+                    }
                   />
 
                   <div>
-                    <label style={labelStyle}>Employment type</label>
+                    <label style={labelStyle}>{t("employmentType")}</label>
                     <select
                       style={selectStyle}
                       value={form.preferred_employment_type}
@@ -911,17 +1009,17 @@ function CandidateProfile() {
                         updateField("preferred_employment_type", e.target.value)
                       }
                     >
-                      <option value="">Select employment type</option>
-                      <option value="Full-time">Full-time</option>
-                      <option value="Part-time">Part-time</option>
-                      <option value="Contract">Contract</option>
-                      <option value="Internship">Internship</option>
-                      <option value="Freelance">Freelance</option>
+                      <option value="">{t("selectEmploymentType")}</option>
+                      <option value="Full-time">{t("fullTime")}</option>
+                      <option value="Part-time">{t("partTime")}</option>
+                      <option value="Contract">{t("contract")}</option>
+                      <option value="Internship">{t("internship")}</option>
+                      <option value="Freelance">{t("freelance")}</option>
                     </select>
                   </div>
 
                   <div>
-                    <label style={labelStyle}>Preferred work mode</label>
+                    <label style={labelStyle}>{t("preferredWorkMode")}</label>
                     <select
                       style={selectStyle}
                       value={form.preferred_work_mode}
@@ -929,26 +1027,30 @@ function CandidateProfile() {
                         updateField("preferred_work_mode", e.target.value)
                       }
                     >
-                      <option value="">Select work mode</option>
-                      <option value="On-site">On-site</option>
-                      <option value="Remote">Remote</option>
-                      <option value="Hybrid">Hybrid</option>
+                      <option value="">{t("selectWorkMode")}</option>
+                      <option value="On-site">{t("onSite")}</option>
+                      <option value="Remote">{t("remote")}</option>
+                      <option value="Hybrid">{t("hybrid")}</option>
                     </select>
                   </div>
 
                   <Input
-                    label="Expected salary"
+                    label={t("expectedSalary")}
                     type="number"
                     value={form.expected_salary}
-                    onChange={(e) => updateField("expected_salary", e.target.value)}
+                    onChange={(e) =>
+                      updateField("expected_salary", e.target.value)
+                    }
                   />
 
                   <div>
-                    <label style={labelStyle}>Salary currency</label>
+                    <label style={labelStyle}>{t("salaryCurrency")}</label>
                     <select
                       style={selectStyle}
                       value={form.salary_currency}
-                      onChange={(e) => updateField("salary_currency", e.target.value)}
+                      onChange={(e) =>
+                        updateField("salary_currency", e.target.value)
+                      }
                     >
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
@@ -960,29 +1062,37 @@ function CandidateProfile() {
                   </div>
 
                   <Input
-                    label="Notice period"
-                    placeholder="Immediate / 2 weeks / 1 month"
+                    label={t("noticePeriod")}
+                    placeholder={t("noticePeriodPlaceholder")}
                     value={form.notice_period}
-                    onChange={(e) => updateField("notice_period", e.target.value)}
+                    onChange={(e) =>
+                      updateField("notice_period", e.target.value)
+                    }
                   />
 
                   <Input
-                    label="Availability"
-                    placeholder="Immediately available"
+                    label={t("availability")}
+                    placeholder={t("availabilityPlaceholder")}
                     value={form.availability}
-                    onChange={(e) => updateField("availability", e.target.value)}
+                    onChange={(e) =>
+                      updateField("availability", e.target.value)
+                    }
                   />
 
                   <Input
-                    label="Work authorization"
-                    placeholder="Authorized to work in Nigeria"
+                    label={t("workAuthorization")}
+                    placeholder={t("workAuthorizationPlaceholder")}
                     value={form.work_authorization}
-                    onChange={(e) => updateField("work_authorization", e.target.value)}
+                    onChange={(e) =>
+                      updateField("work_authorization", e.target.value)
+                    }
                   />
                 </div>
 
                 <div style={{ marginTop: 14 }}>
-                  <label style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <label
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
                     <input
                       type="checkbox"
                       checked={form.willing_to_relocate}
@@ -990,7 +1100,7 @@ function CandidateProfile() {
                         updateField("willing_to_relocate", e.target.checked)
                       }
                     />
-                    Willing to relocate
+                    {t("willingToRelocate")}
                   </label>
                 </div>
               </div>
@@ -998,29 +1108,33 @@ function CandidateProfile() {
 
             {activeSection === 6 && (
               <div>
-                <h3 style={{ marginBottom: 16 }}>Professional Links</h3>
+                <h3 style={{ marginBottom: 16 }}>{t("professionalLinks")}</h3>
 
                 <div style={gridStyle}>
                   <Input
-                    label="LinkedIn URL"
+                    label={t("linkedinUrl")}
                     placeholder="https://linkedin.com/in/..."
                     value={form.linkedin_url}
-                    onChange={(e) => updateField("linkedin_url", e.target.value)}
+                    onChange={(e) =>
+                      updateField("linkedin_url", e.target.value)
+                    }
                   />
                   <Input
-                    label="GitHub URL"
+                    label={t("githubUrl")}
                     placeholder="https://github.com/..."
                     value={form.github_url}
                     onChange={(e) => updateField("github_url", e.target.value)}
                   />
                   <Input
-                    label="Portfolio URL"
+                    label={t("portfolioUrl")}
                     placeholder="https://yourportfolio.com"
                     value={form.portfolio_url}
-                    onChange={(e) => updateField("portfolio_url", e.target.value)}
+                    onChange={(e) =>
+                      updateField("portfolio_url", e.target.value)
+                    }
                   />
                   <Input
-                    label="Resume URL"
+                    label={t("resumeUrl")}
                     placeholder="https://.../resume.pdf"
                     value={form.resume_url}
                     onChange={(e) => updateField("resume_url", e.target.value)}
@@ -1039,15 +1153,15 @@ function CandidateProfile() {
               }}
             >
               <Button onClick={prevSection} disabled={activeSection === 0}>
-                Previous
+                {t("previous")}
               </Button>
 
               <div style={{ display: "flex", gap: 12 }}>
                 {activeSection < sectionTabs.length - 1 ? (
-                  <Button onClick={nextSection}>Next</Button>
+                  <Button onClick={nextSection}>{t("next")}</Button>
                 ) : (
                   <Button onClick={saveProfile} disabled={saving}>
-                    {saving ? "Saving..." : "Save Profile"}
+                    {saving ? t("saving") : t("saveProfile")}
                   </Button>
                 )}
               </div>

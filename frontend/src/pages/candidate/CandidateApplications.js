@@ -6,8 +6,10 @@ import Badge from "../../components/ui/Badge";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import ConfirmModal from "../../components/ui/ConfirmModal";
+import { useLanguage } from "../../context/LanguageContext";
 
 function CandidateApplications() {
+  const { t } = useLanguage();
   const token = localStorage.getItem("token");
 
   const user = useMemo(() => {
@@ -60,14 +62,14 @@ function CandidateApplications() {
         setApplications(mine);
       } catch (err) {
         console.error("Failed to load applications:", err);
-        setError("Failed to load applications.");
-        toast.error("Failed to load applications");
+        setError(t("failedToLoadApplications"));
+        toast.error(t("failedToLoadApplications"));
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [token, user?.id]
+    [token, user?.id, t]
   );
 
   useEffect(() => {
@@ -93,13 +95,13 @@ function CandidateApplications() {
         }
       );
 
-      toast.success("Application withdrawn successfully");
+      toast.success(t("applicationWithdrawnSuccess"));
       setWithdrawTarget(null);
       fetchApplications(true);
     } catch (error) {
       console.error("Withdraw failed:", error);
       toast.error(
-        error?.response?.data?.error || "Failed to withdraw application"
+        error?.response?.data?.error || t("failedToWithdrawApplication")
       );
     } finally {
       setWithdrawing(false);
@@ -121,14 +123,26 @@ function CandidateApplications() {
   };
 
   const statusLabel = (status) => {
-    if (!status) return "Pending";
-    return status.charAt(0).toUpperCase() + status.slice(1);
+    const normalized = (status || "pending").toLowerCase();
+
+    switch (normalized) {
+      case "reviewed":
+        return t("reviewed");
+      case "shortlisted":
+        return t("shortlisted");
+      case "rejected":
+        return t("rejected");
+      case "pending":
+      default:
+        return t("pending");
+    }
   };
 
   const formatDate = (value) => {
-    if (!value) return "Not available";
+    if (!value) return t("notAvailable");
+
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "Not available";
+    if (Number.isNaN(date.getTime())) return t("notAvailable");
 
     return date.toLocaleDateString(undefined, {
       year: "numeric",
@@ -152,7 +166,10 @@ function CandidateApplications() {
     });
   }, [applications, search, statusFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredApplications.length / PAGE_SIZE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredApplications.length / PAGE_SIZE)
+  );
 
   const paginatedApplications = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
@@ -162,25 +179,33 @@ function CandidateApplications() {
   const counts = useMemo(() => {
     return {
       all: applications.length,
-      pending: applications.filter((a) => (a.status || "pending").toLowerCase() === "pending").length,
-      reviewed: applications.filter((a) => (a.status || "").toLowerCase() === "reviewed").length,
-      shortlisted: applications.filter((a) => (a.status || "").toLowerCase() === "shortlisted").length,
-      rejected: applications.filter((a) => (a.status || "").toLowerCase() === "rejected").length,
+      pending: applications.filter(
+        (a) => (a.status || "pending").toLowerCase() === "pending"
+      ).length,
+      reviewed: applications.filter(
+        (a) => (a.status || "").toLowerCase() === "reviewed"
+      ).length,
+      shortlisted: applications.filter(
+        (a) => (a.status || "").toLowerCase() === "shortlisted"
+      ).length,
+      rejected: applications.filter(
+        (a) => (a.status || "").toLowerCase() === "rejected"
+      ).length,
     };
   }, [applications]);
 
   return (
     <DashboardLayout
-      title="My Applications"
-      subtitle="Manage, monitor, and track all your submitted applications."
+      title={t("myApplications")}
+      subtitle={t("myApplicationsSubtitle")}
     >
       <div style={styles.page}>
         <Card>
           <div style={styles.toolbarHeader}>
             <div>
-              <h3 style={styles.cardTitle}>Application Tracker</h3>
+              <h3 style={styles.cardTitle}>{t("applicationTracker")}</h3>
               <p style={styles.cardSubtitle}>
-                Search, filter, and manage your application history.
+                {t("applicationTrackerSubtitle")}
               </p>
             </div>
 
@@ -189,14 +214,14 @@ function CandidateApplications() {
               onClick={() => fetchApplications(true)}
               disabled={loading || refreshing}
             >
-              {refreshing ? "Refreshing..." : "Refresh"}
+              {refreshing ? t("refreshing") : t("refresh")}
             </Button>
           </div>
 
           <div style={styles.filterBar}>
             <input
               type="text"
-              placeholder="Search by job title or company"
+              placeholder={t("searchApplicationsPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               style={styles.searchInput}
@@ -207,68 +232,78 @@ function CandidateApplications() {
               onChange={(e) => setStatusFilter(e.target.value)}
               style={styles.selectInput}
             >
-              <option value="all">All statuses</option>
-              <option value="pending">Pending</option>
-              <option value="reviewed">Reviewed</option>
-              <option value="shortlisted">Shortlisted</option>
-              <option value="rejected">Rejected</option>
+              <option value="all">{t("allStatuses")}</option>
+              <option value="pending">{t("pending")}</option>
+              <option value="reviewed">{t("reviewed")}</option>
+              <option value="shortlisted">{t("shortlisted")}</option>
+              <option value="rejected">{t("rejected")}</option>
             </select>
           </div>
 
           <div style={styles.miniStats}>
-            <span style={styles.miniStat}>All: {counts.all}</span>
-            <span style={styles.miniStat}>Pending: {counts.pending}</span>
-            <span style={styles.miniStat}>Reviewed: {counts.reviewed}</span>
-            <span style={styles.miniStat}>Shortlisted: {counts.shortlisted}</span>
-            <span style={styles.miniStat}>Rejected: {counts.rejected}</span>
+            <span style={styles.miniStat}>
+              {t("all")}: {counts.all}
+            </span>
+            <span style={styles.miniStat}>
+              {t("pending")}: {counts.pending}
+            </span>
+            <span style={styles.miniStat}>
+              {t("reviewed")}: {counts.reviewed}
+            </span>
+            <span style={styles.miniStat}>
+              {t("shortlisted")}: {counts.shortlisted}
+            </span>
+            <span style={styles.miniStat}>
+              {t("rejected")}: {counts.rejected}
+            </span>
           </div>
         </Card>
 
         <Card>
           <div style={styles.sectionHeader}>
             <div>
-              <h3 style={styles.cardTitle}>Submitted Applications</h3>
+              <h3 style={styles.cardTitle}>{t("submittedApplications")}</h3>
               <p style={styles.cardSubtitle}>
-                A compact view of all your applications and their progress.
+                {t("submittedApplicationsSubtitle")}
               </p>
             </div>
           </div>
 
           {loading ? (
             <div style={styles.stateBox}>
-              <p style={styles.stateTitle}>Loading applications...</p>
+              <p style={styles.stateTitle}>{t("loadingApplications")}</p>
               <p style={styles.stateSubtext}>
-                Please wait while your submitted applications are retrieved.
+                {t("loadingApplicationsSubtitle")}
               </p>
             </div>
           ) : error ? (
             <div style={styles.stateBox}>
-              <p style={styles.stateTitle}>Could not load applications</p>
+              <p style={styles.stateTitle}>{t("couldNotLoadApplications")}</p>
               <p style={styles.stateSubtext}>{error}</p>
               <div style={{ marginTop: "12px" }}>
                 <Button variant="primary" onClick={() => fetchApplications()}>
-                  Try Again
+                  {t("tryAgain")}
                 </Button>
               </div>
             </div>
           ) : filteredApplications.length === 0 ? (
             <div style={styles.emptyState}>
               <div style={styles.emptyIcon}>📂</div>
-              <h3 style={styles.emptyTitle}>No matching applications</h3>
+              <h3 style={styles.emptyTitle}>{t("noMatchingApplications")}</h3>
               <p style={styles.emptyText}>
-                Try changing your filters or apply for a new role to see it here.
+                {t("noMatchingApplicationsSubtitle")}
               </p>
             </div>
           ) : (
             <>
               <div style={styles.tableWrap}>
                 <div style={styles.tableHeader}>
-                  <span>Role</span>
-                  <span>Company</span>
-                  <span>Applied</span>
-                  <span>Updated</span>
-                  <span>Status</span>
-                  <span>Action</span>
+                  <span>{t("role")}</span>
+                  <span>{t("company")}</span>
+                  <span>{t("applied")}</span>
+                  <span>{t("updated")}</span>
+                  <span>{t("status")}</span>
+                  <span>{t("action")}</span>
                 </div>
 
                 <div style={styles.tableBody}>
@@ -276,12 +311,12 @@ function CandidateApplications() {
                     <div key={application.id} style={styles.tableRow}>
                       <div style={styles.roleCell}>
                         <strong style={styles.roleTitle}>
-                          {application.job_title || "Unknown job"}
+                          {application.job_title || t("unknownJob")}
                         </strong>
                       </div>
 
                       <div style={styles.cellText}>
-                        {application.company_name || "Not specified"}
+                        {application.company_name || t("notSpecified")}
                       </div>
 
                       <div style={styles.cellText}>
@@ -307,7 +342,7 @@ function CandidateApplications() {
                           variant="danger"
                           onClick={() => setWithdrawTarget(application)}
                         >
-                          Withdraw
+                          {t("withdraw")}
                         </Button>
                       </div>
                     </div>
@@ -318,14 +353,16 @@ function CandidateApplications() {
               <div style={styles.pagination}>
                 <Button
                   variant="secondary"
-                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
                   disabled={currentPage === 1}
                 >
-                  Previous
+                  {t("previous")}
                 </Button>
 
                 <span style={styles.pageText}>
-                  Page {currentPage} of {totalPages}
+                  {t("page")} {currentPage} / {totalPages}
                 </span>
 
                 <Button
@@ -335,7 +372,7 @@ function CandidateApplications() {
                   }
                   disabled={currentPage === totalPages}
                 >
-                  Next
+                  {t("next")}
                 </Button>
               </div>
             </>
@@ -345,11 +382,12 @@ function CandidateApplications() {
 
       <ConfirmModal
         open={!!withdrawTarget}
-        title="Withdraw application?"
-        message={`Are you sure you want to withdraw your application for "${
-          withdrawTarget?.job_title || "this job"
-        }"? This action cannot be undone.`}
-        confirmText={withdrawing ? "Withdrawing..." : "Withdraw"}
+        title={t("withdrawApplicationTitle")}
+        message={t("withdrawApplicationMessage").replace(
+          "{{job}}",
+          withdrawTarget?.job_title || t("thisJob")
+        )}
+        confirmText={withdrawing ? t("withdrawing") : t("withdraw")}
         onConfirm={withdrawApplication}
         onCancel={() => {
           if (!withdrawing) setWithdrawTarget(null);
