@@ -72,6 +72,9 @@ app.use("/api/jobs", jobRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/candidates", candidateManagementRoutes);
+const adminRoutes = require("./routes/adminRoutes");
+
+app.use("/api/admin", adminRoutes);
 
 // 404 catch-all
 app.use((req, res) => {
