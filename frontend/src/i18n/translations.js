@@ -261,7 +261,655 @@ export const translations = {
     companyLinkedText: "Your company is linked to this employer account.",
     setupCompanyBeforeJobs:
     "Set up your company profile before publishing jobs.",
+    brandSubtitle: "Connecting companies to talent across Africa.",
+    adminBrandSubtitle: "Platform administration and talent network control center.",
+    activeWorkspace: "Active workspace",
+    adminWorkspace: "Admin Workspace",
+    adminWorkspaceDesc: "Manage users, companies, jobs, candidates, and platform activity.",
 
+    adminUsers: {
+    title: "User Management",
+    subtitle: "Create users, manage roles, reset passwords, and control platform access.",
+
+    stats: {
+        totalUsers: "Total Users",
+        admins: "Admins",
+        employers: "Employers",
+        candidates: "Candidates",
+        usersRegistered: "{{count}} registered users",
+        adminAccounts: "{{count}} admin accounts",
+        employerAccounts: "{{count}} employer accounts",
+        candidateProfiles: "{{count}} candidate profiles"
+    },
+
+    directory: {
+        title: "User Directory",
+        subtitle: "Search, create, edit, and manage registered platform users.",
+        searchPlaceholder: "Search by name or email...",
+        allRoles: "All roles",
+        search: "Search",
+        addUser: "Add User",
+        noUsers: "No users found",
+        loading: "Loading users..."
+    },
+
+    table: {
+        user: "User",
+        email: "Email",
+        role: "Role",
+        joined: "Joined",
+        manageRole: "Manage Role",
+        actions: "Actions"
+    },
+
+    // ✅ FIXED ROLES
+    roles: {
+        all: "All",
+        allRoles: "All roles",
+        admin: "Admin",
+        admins: "Admins",
+        employer: "Employer",
+        employers: "Employers",
+        candidate: "Candidate",
+        candidates: "Candidates",
+        unknown: "Unknown"
+    },
+
+    actions: {
+        view: "View",
+        reset: "Reset",
+        delete: "Delete",
+        previous: "Previous",
+        next: "Next",
+        page: "Page {{page}} of {{total}}"
+    },
+
+    // ✅ ADD THIS (MISSING BEFORE)
+    fallback: {
+        unnamedUser: "Unnamed User",
+        noEmail: "No email",
+        id: "ID",
+        notAvailable: "N/A",
+        user: "User"
+    },
+
+    modals: {
+        editUser: "Edit User",
+        addUser: "Add New User",
+        resetPassword: "Reset Password",
+        saveChanges: "Save Changes",
+        createUser: "Create User",
+        cancel: "Cancel",
+        close: "Close",
+        passwordWarning: "This action immediately changes the user’s login password."
+    },
+
+    // OPTIONAL (for alerts)
+    errors: {
+        fetchUsers: "Failed to fetch users",
+        createUser: "Failed to create user",
+        updateUser: "Failed to update user",
+        updateRole: "Failed to update role",
+        deleteUser: "Failed to delete user",
+        resetPassword: "Failed to reset password"
+    },
+
+    success: {
+        passwordReset: "Password reset successfully"
+    },
+
+    confirm: {
+        deleteUser: "Are you sure you want to delete this user?"
+    }
+    },
+
+    adminOverview: {
+    title: "Admin Dashboard",
+    subtitle: "Platform overview and administrative controls.",
+
+    stats: {
+        totalUsers: "Total Users",
+        totalUsersSub: "All registered accounts",
+
+        companies: "Companies",
+        companiesSub: "Registered organizations",
+
+        jobs: "Active Jobs",
+        jobsSub: "Posted opportunities",
+
+        applications: "Applications",
+        applicationsSub: "Job submissions",
+
+        candidates: "Candidates",
+        candidatesSub: "Talent profiles"
+    },
+
+    navigation: {
+        title: "Admin Navigation",
+        subtitle: "Quick access to administrative tools.",
+        manage: "Manage {{item}}",
+
+        users: {
+        title: "User Management",
+        subtitle: "Manage platform users and access levels"
+        },
+        companies: {
+        title: "Company Management",
+        subtitle: "Oversee registered companies and activities"
+        },
+        jobs: {
+        title: "Job Management",
+        subtitle: "Monitor all posted jobs and listings"
+        },
+        applications: {
+        title: "Application Tracking",
+        subtitle: "Track job applications and hiring pipeline"
+        },
+        candidates: {
+        title: "Candidate Directory",
+        subtitle: "Manage candidate profiles and activities"
+        }
+    },
+
+    analytics: {
+        growthTitle: "Platform Growth",
+        growthSubtitle: "Users, jobs, and applications over time.",
+
+        trendsTitle: "Company and Job Trends",
+        trendsSubtitle: "Monthly company registrations and job postings."
+    },
+
+    activity: {
+        title: "Recent Platform Activity",
+        subtitle: "Live activity from users, companies, jobs, and applications.",
+        empty: "No recent activity available.",
+        recent: "Recently"
+    },
+
+    health: {
+        title: "System Health",
+        subtitle: "Platform status and metrics.",
+
+        api: "API Status",
+        database: "Database",
+        notifications: "Notifications",
+        activityFeed: "Activity Feed",
+        uptime: "Uptime",
+
+        operational: "Operational",
+        connected: "Connected"
+    }
+    },
+
+    adminJobs: {
+    title: "Job Management",
+    subtitle: "Manage all posted jobs, visibility status, and application activity.",
+
+    stats: {
+        totalJobs: "Total Jobs",
+        totalJobsSub: "{{count}} posted jobs",
+        active: "Active",
+        activeSub: "{{active}}/{{total}} active listings",
+        withApplications: "With Applications",
+        withApplicationsSub: "{{count}} jobs receiving applications",
+        applications: "Applications",
+        applicationsSub: "{{count}} total applications"
+    },
+
+    directory: {
+        title: "Job Directory",
+        subtitle: "Search, filter, review, and control job listings.",
+        searchPlaceholder: "Search by job title, company, or location...",
+        noJobs: "No jobs found.",
+        loading: "Loading jobs...",
+        clearFilter: "Clear filter",
+        showingCompany: "Showing jobs for company ID: {{id}}"
+    },
+
+    filters: {
+        all: "All",
+        active: "Active",
+        inactive: "Inactive",
+        allStatus: "All status",
+        allTypes: "All types",
+        fullTime: "Full-time",
+        partTime: "Part-time",
+        contract: "Contract",
+        internship: "Internship",
+        remote: "Remote",
+        search: "Search"
+    },
+
+    table: {
+        job: "Job",
+        company: "Company",
+        type: "Type",
+        applications: "Applications",
+        status: "Status",
+        actions: "Actions"
+    },
+
+    actions: {
+        activate: "Activate",
+        deactivate: "Disable",
+        deactivateLong: "Deactivate",
+        viewDetails: "View Details",
+        previous: "Previous",
+        next: "Next",
+        page: "Page {{page}} of {{total}}"
+    },
+
+    details: {
+        jobId: "Job ID",
+        company: "Company",
+        employmentType: "Employment Type",
+        location: "Location",
+        applications: "Applications",
+        status: "Status",
+        posted: "Posted",
+        salary: "Salary"
+    },
+
+    fallback: {
+        untitled: "Untitled Job",
+        noLocation: "Location not specified",
+        unknownCompany: "Unknown Company",
+        noIndustry: "Industry not specified",
+        notSpecified: "Not specified",
+        notAvailable: "N/A",
+        noDescription: "No job description available",
+        posted: "Posted",
+        upTo: "Up to"
+    },
+
+    modal: {
+        currentStatus: "Current status",
+        jobDescription: "Job Description",
+        viewApplications: "View Applications",
+        close: "Close"
+    },
+
+    errors: {
+        fetchJobs: "Failed to fetch jobs",
+        updateStatus: "Failed to update job status"
+    },
+
+    confirm: {
+        statusChange: "Are you sure you want to update this job status?"
+    }
+    },
+
+    adminCompanies: {
+    title: "Company Management",
+    subtitle: "Manage registered companies, approval status, and hiring activity.",
+
+    stats: {
+        total: "Total Companies",
+        totalSub: "{{count}} registered companies",
+
+        active: "Active",
+        activeSub: "{{active}}/{{total}} approved",
+
+        pending: "Pending",
+        pendingSub: "{{count}} awaiting approval",
+
+        jobs: "Total Jobs",
+        jobsSub: "{{count}} jobs posted by companies"
+    },
+
+    directory: {
+        title: "Company Directory",
+        subtitle: "Search, filter, approve, and review company accounts.",
+        searchPlaceholder: "Search by company name, industry, or country...",
+        loading: "Loading companies...",
+        empty: "No companies found"
+    },
+
+    filters: {
+        all: "All",
+        pending: "Pending",
+        active: "Active",
+        inactive: "Inactive",
+        allStatus: "All status",
+        search: "Search"
+    },
+
+    table: {
+        company: "Company",
+        industry: "Industry",
+        location: "Location",
+        jobs: "Jobs",
+        status: "Status",
+        actions: "Actions"
+    },
+
+    fallback: {
+        unknown: "Unknown Company",
+        noDetails: "No company details",
+        noIndustry: "No industry specified",
+        notSpecified: "Not specified",
+        notAvailable: "N/A",
+        noDescription: "No company description available",
+        jobsPosted: "jobs posted",
+        other: "Other",
+        companyLogo: "Company logo"
+        },
+
+        confirm: {
+        approve: "Are you sure you want to approve this company?",
+        deactivate: "Are you sure you want to deactivate this company?",
+        pending: "Move this company back to pending?",
+        update: "Are you sure you want to update this company?"
+        },
+    actions: {
+        approve: "Approve",
+        viewDetails: "View Details",
+        previous: "Previous",
+        next: "Next",
+        page: "Page {{page}} of {{total}}",
+        visitWebsite: "Visit Website",
+        viewJobs: "View Jobs",
+        markPending: "Mark Pending",
+        deactivate: "Deactivate",
+        close: "Close"
+    },
+
+    details: {
+        id: "Company ID",
+        industry: "Industry",
+        country: "Country",
+        city: "City",
+        website: "Website",
+        jobs: "Jobs Posted",
+        status: "Status",
+        registered: "Registered"
+    },
+
+    modal: {
+        currentStatus: "Current status",
+        description: "Company Description"
+    },
+
+    fallback: {
+        unknown: "Unknown Company",
+        noDetails: "No company details",
+        noIndustry: "No industry specified",
+        notSpecified: "Not specified",
+        noDescription: "No company description available",
+        jobsPosted: "jobs posted"
+    },
+
+    confirm: {
+        approve: "Are you sure you want to approve this company?",
+        deactivate: "Are you sure you want to deactivate this company?",
+        pending: "Move this company back to pending?"
+    },
+
+    errors: {
+        fetch: "Failed to fetch companies",
+        update: "Failed to update company status"
+    }
+    },
+
+    adminCandidates: {
+        title: "Candidate Management",
+        subtitle:
+            "Review candidate profiles, edit profile data, and manage candidate records.",
+
+        stats: {
+            total: "Total Candidates",
+            totalSub: "{{count}} candidate accounts",
+
+            withApplications: "With Applications",
+            withApplicationsSub: "{{count}} candidates have applied",
+
+            withResume: "With Resume",
+            withResumeSub: "{{count}} uploaded resumes",
+
+            completeProfiles: "Complete Profiles",
+            completeProfilesSub: "{{count}} profile records completed"
+        },
+
+        directory: {
+            title: "Candidate Directory",
+            subtitle:
+            "Search, filter, review, edit, and manage candidate profiles.",
+            searchPlaceholder:
+            "Search by name, email, role, skill, city, or summary...",
+            loading: "Loading candidates...",
+            empty: "No candidates found"
+        },
+
+        filters: {
+            allCountries: "All countries",
+            search: "Search"
+        },
+
+        table: {
+            candidate: "Candidate",
+            role: "Professional Role",
+            location: "Location",
+            experience: "Experience",
+            applications: "Applications",
+            actions: "Actions"
+        },
+
+        actions: {
+            viewDetails: "View Details",
+            previous: "Previous",
+            next: "Next",
+            page: "Page {{page}} of {{total}}",
+            resume: "Resume",
+            edit: "Edit Candidate",
+            delete: "Delete",
+            close: "Close",
+            cancel: "Cancel",
+            save: "Save Changes",
+            viewApplications: "View Applications"
+        },
+
+        modal: {
+            profile: "Candidate profile",
+            summary: "Professional Summary",
+            skills: "Skills",
+            languages: "Languages",
+            editTitle: "Edit Candidate",
+            editSubtitle:
+            "Admin control for candidate profile information."
+        },
+
+        details: {
+            id: "Candidate ID",
+            email: "Email",
+            phone: "Phone",
+            country: "Country",
+            city: "City",
+            address: "Address",
+            gender: "Gender",
+            dob: "Date of Birth",
+            title: "Professional Title",
+            desiredRole: "Desired Role",
+            experience: "Experience",
+            applications: "Applications",
+            employmentType: "Employment Type",
+            workMode: "Work Mode",
+            salary: "Expected Salary",
+            availability: "Availability",
+            notice: "Notice Period",
+            authorization: "Work Authorization",
+            relocation: "Relocation",
+            joined: "Joined"
+        },
+
+        fallback: {
+            unnamed: "Unnamed Candidate",
+            noEmail: "No email available",
+            notSpecified: "Not specified",
+            noSummary: "No professional summary available",
+            na: "N/A",
+            preferenceNotSet: "Preference not set",
+            years: "years",
+            willing: "Willing",
+            noLocation: "Location not specified",
+            candidate: "Candidate"
+        },
+
+        confirm: {
+            delete:
+            "Are you sure you want to delete this candidate? This will also remove their applications."
+        },
+
+        errors: {
+            fetch: "Failed to fetch candidates",
+            delete: "Failed to delete candidate",
+            update: "Failed to update candidate"
+        },
+
+        // 🔥 NEW (FOR EDIT FORM — IMPORTANT)
+        form: {
+            basicInfo: "Basic Information",
+            professionalProfile: "Professional Profile",
+            jobPreferences: "Job Preferences",
+            links: "Links",
+
+            name: "Full Name",
+            email: "Email",
+            phone: "Phone",
+            country: "Country",
+            city: "City",
+            address: "Address",
+            dob: "Date of Birth",
+            gender: "Gender",
+            profileImage: "Profile Image URL",
+
+            professionalTitle: "Professional Title",
+            desiredJobTitle: "Desired Job Title",
+            yearsExperience: "Years of Experience",
+            skills: "Skills",
+            languages: "Languages",
+            professionalSummary: "Professional Summary",
+
+            employmentType: "Employment Type",
+            workMode: "Work Mode",
+            expectedSalary: "Expected Salary",
+            currency: "Currency",
+            noticePeriod: "Notice Period",
+            availability: "Availability",
+            workAuthorization: "Work Authorization",
+            willingToRelocate: "Willing to Relocate",
+
+            linkedin: "LinkedIn",
+            github: "GitHub",
+            portfolio: "Portfolio",
+            resume: "Resume URL",
+
+            select: "Select"
+        }
+        },
+
+    adminApplications: {
+        title: "Application Management",
+        subtitle:
+            "Monitor applications, review candidate progress, and manage the hiring pipeline.",
+
+        stats: {
+            total: "Total Applications",
+            totalSub: "{{count}} submitted applications",
+
+            pending: "Pending",
+            pendingSub: "{{count}} awaiting review",
+
+            shortlisted: "Shortlisted",
+            shortlistedSub: "{{count}} candidates in consideration",
+
+            hired: "Hired",
+            hiredSub: "{{count}} successful placements"
+        },
+
+        pipeline: {
+            title: "Application Pipeline",
+            subtitle:
+            "Search, filter, review, and update application statuses."
+        },
+
+        filters: {
+            all: "All",
+            pending: "Pending",
+            reviewed: "Reviewed",
+            shortlisted: "Shortlisted",
+            interview: "Interview",
+            hired: "Hired",
+            rejected: "Rejected",
+            allStatus: "All status",
+            search: "Search",
+            searchPlaceholder:
+            "Search by job, candidate, company, or email...",
+            clear: "Clear filter",
+            showingJob: "Showing applications for job ID: {{id}}"
+        },
+
+        table: {
+            application: "Application",
+            candidate: "Candidate",
+            company: "Company",
+            status: "Status",
+            actions: "Actions"
+        },
+
+        actions: {
+            markReviewed: "Mark Reviewed",
+            shortlist: "Shortlist",
+            viewDetails: "View Details",
+            previous: "Previous",
+            next: "Next",
+            page: "Page {{page}} of {{total}}",
+            viewJob: "View Job",
+            close: "Close"
+        },
+
+        modal: {
+            currentStatus: "Current status",
+            notes: "Application Notes"
+        },
+
+        details: {
+            id: "Application ID",
+            candidate: "Candidate",
+            email: "Email",
+            job: "Job",
+            company: "Company",
+            location: "Location",
+            status: "Status",
+            applied: "Applied"
+        },
+
+        fallback: {
+            unknownJob: "Unknown Job",
+            unknownCandidate: "Unknown Candidate",
+            unknownCompany: "Unknown Company",
+            noEmail: "Email not available",
+            noLocation: "Location not specified",
+            applied: "Applied",
+            na: "N/A"
+        },
+        modal: {
+        currentStatus: "Current status",
+        notes: "Application Notes",
+        notesText:
+            "Candidate application details can be expanded here later with resume, cover letter, screening score, or employer feedback."
+        },
+
+        confirm: {
+            statusChange:
+            "Are you sure you want to mark this application as {{status}}?"
+        },
+
+        errors: {
+            fetch: "Failed to fetch applications",
+            update: "Failed to update application status"
+        }
+        },
+        
     // SETTINGS PAGE
     settings: "Settings",
     settingsSubtitle: "Manage team access, permissions, notifications, and workspace preferences.",
@@ -498,6 +1146,8 @@ export const translations = {
     "south-africa": "South Africa",
     madagascar: "Madagascar",
     },
+
+
 
     // en
     createAccount: "Create account",
@@ -1260,6 +1910,675 @@ export const translations = {
     fillAllFields: "请填写所有字段",
     passwordsDoNotMatch: "两次输入的密码不一致",
     passwordResetSuccess: "密码重置成功，现在可以登录了",
+
+    // zh
+    brandSubtitle: "连接企业与非洲人才。",
+    adminBrandSubtitle: "平台管理与人才网络控制中心。",
+    activeWorkspace: "当前工作区",
+    adminWorkspace: "管理员工作区",
+    adminWorkspaceDesc: "管理用户、公司、职位、候选人和平台活动。",
+
+    adminUsers: {
+        title: "用户管理",
+        subtitle: "创建用户、管理角色、重置密码，并控制平台访问权限。",
+
+        stats: {
+            totalUsers: "用户总数",
+            admins: "管理员",
+            employers: "企业账户",
+            candidates: "候选人",
+            usersRegistered: "{{count}} 位注册用户",
+            adminAccounts: "{{count}} 个管理员账户",
+            employerAccounts: "{{count}} 个企业账户",
+            candidateProfiles: "{{count}} 个候选人资料"
+        },
+
+        directory: {
+            title: "用户列表",
+            subtitle: "搜索、创建、编辑并管理平台用户。",
+            searchPlaceholder: "按姓名或邮箱搜索...",
+            allRoles: "所有角色",
+            search: "搜索",
+            addUser: "新增用户",
+            noUsers: "未找到用户",
+            loading: "正在加载用户..."
+        },
+
+        table: {
+            user: "用户",
+            email: "邮箱",
+            role: "角色",
+            joined: "加入时间",
+            manageRole: "角色管理",
+            actions: "操作"
+        },
+
+        roles: {
+            all: "全部",
+            allRoles: "所有角色",
+            admin: "管理员",
+            admins: "管理员",
+            employer: "企业",
+            employers: "企业账户",
+            candidate: "候选人",
+            candidates: "候选人",
+            unknown: "未知"
+        },
+
+        actions: {
+            view: "查看",
+            reset: "重置",
+            delete: "删除",
+            previous: "上一页",
+            next: "下一页",
+            page: "第 {{page}} 页 / 共 {{total}} 页"
+        },
+
+        fallback: {
+            unnamedUser: "未命名用户",
+            noEmail: "无邮箱",
+            id: "编号",
+            notAvailable: "暂无",
+            user: "用户"
+        },
+
+        modals: {
+            editUser: "编辑用户",
+            addUser: "新增用户",
+            resetPassword: "重置密码",
+            saveChanges: "保存修改",
+            createUser: "创建用户",
+            cancel: "取消",
+            close: "关闭",
+            passwordWarning: "此操作会立即更改该用户的登录密码。"
+        },
+
+        errors: {
+            fetchUsers: "获取用户失败",
+            createUser: "创建用户失败",
+            updateUser: "更新用户失败",
+            updateRole: "更新角色失败",
+            deleteUser: "删除用户失败",
+            resetPassword: "重置密码失败"
+        },
+
+        success: {
+            passwordReset: "密码已成功重置"
+        },
+
+        confirm: {
+            deleteUser: "确定要删除该用户吗？此操作无法撤销。"
+        },
+
+        validation: {
+            emailRoleRequired: "邮箱和角色为必填项",
+            passwordRequired: "新用户必须设置密码",
+            passwordLength: "密码至少需要6个字符",
+            passwordMismatch: "两次输入的密码不一致"
+        },
+
+        details: {
+            accessLevel: "访问级别",
+            userId: "用户编号",
+            name: "姓名",
+            email: "邮箱",
+            role: "角色",
+            created: "创建时间",
+            updated: "更新时间",
+            managementNotes: "管理说明",
+            managementNotesText:
+            "管理员可以编辑用户信息、调整角色权限、重置密码或删除用户账户。"
+        },
+
+        form: {
+            fullName: "姓名",
+            email: "邮箱",
+            role: "角色",
+            password: "密码",
+            newPassword: "新密码",
+            confirmPassword: "确认密码",
+            newUserInfo:
+            "新用户将使用您设置的密码创建，并可以立即登录系统。"
+        }
+        },
+    adminOverview: {
+        title: "管理员仪表盘",
+        subtitle: "平台概览与管理控制中心。",
+
+        stats: {
+            totalUsers: "用户总数",
+            totalUsersSub: "所有注册账户",
+
+            companies: "公司数量",
+            companiesSub: "已注册企业",
+
+            jobs: "活跃职位",
+            jobsSub: "已发布职位",
+
+            applications: "申请数量",
+            applicationsSub: "职位申请记录",
+
+            candidates: "候选人",
+            candidatesSub: "人才资料"
+        },
+
+        navigation: {
+            title: "管理导航",
+            subtitle: "快速访问管理工具。",
+            manage: "管理 {{item}}",
+
+            users: {
+            title: "用户管理",
+            subtitle: "管理平台用户及权限"
+            },
+            companies: {
+            title: "公司管理",
+            subtitle: "管理已注册公司及活动"
+            },
+            jobs: {
+            title: "职位管理",
+            subtitle: "监控所有职位发布"
+            },
+            applications: {
+            title: "申请跟踪",
+            subtitle: "跟踪招聘流程与申请情况"
+            },
+            candidates: {
+            title: "候选人管理",
+            subtitle: "管理候选人资料与活动"
+            }
+        },
+
+        analytics: {
+            growthTitle: "平台增长",
+            growthSubtitle: "用户、职位和申请随时间变化",
+
+            trendsTitle: "公司与职位趋势",
+            trendsSubtitle: "每月公司注册与职位发布情况"
+        },
+
+        activity: {
+            title: "最近活动",
+            subtitle: "用户、公司、职位和申请的实时动态",
+            empty: "暂无活动记录",
+            recent: "刚刚"
+        },
+
+        health: {
+            title: "系统状态",
+            subtitle: "平台运行状态与指标",
+
+            api: "接口状态",
+            database: "数据库",
+            notifications: "通知",
+            activityFeed: "活动流",
+            uptime: "运行时间",
+
+            operational: "正常运行",
+            connected: "已连接"
+        }
+        },
+
+    adminJobs: {
+    title: "职位管理",
+    subtitle: "管理所有职位、可见性状态及申请情况。",
+
+    stats: {
+        totalJobs: "职位总数",
+        totalJobsSub: "{{count}} 个职位",
+        active: "活跃",
+        activeSub: "{{active}}/{{total}} 个活跃职位",
+        withApplications: "有申请",
+        withApplicationsSub: "{{count}} 个职位有申请",
+        applications: "申请数量",
+        applicationsSub: "{{count}} 个申请"
+    },
+
+    directory: {
+        title: "职位列表",
+        subtitle: "搜索、筛选、审核并管理职位。",
+        searchPlaceholder: "按职位、公司或地点搜索...",
+        noJobs: "未找到职位",
+        loading: "正在加载职位...",
+        clearFilter: "清除筛选",
+        showingCompany: "正在显示公司ID为 {{id}} 的职位"
+    },
+
+    filters: {
+        all: "全部",
+        active: "活跃",
+        inactive: "已停用",
+        allStatus: "所有状态",
+        allTypes: "所有类型",
+        fullTime: "全职",
+        partTime: "兼职",
+        contract: "合同",
+        internship: "实习",
+        remote: "远程",
+        search: "搜索"
+    },
+
+    table: {
+        job: "职位",
+        company: "公司",
+        type: "类型",
+        applications: "申请",
+        status: "状态",
+        actions: "操作"
+    },
+
+    actions: {
+        activate: "启用",
+        deactivate: "停用",
+        deactivateLong: "停用职位",
+        viewDetails: "查看详情",
+        previous: "上一页",
+        next: "下一页",
+        page: "第 {{page}} 页 / 共 {{total}} 页"
+    },
+
+    details: {
+        jobId: "职位编号",
+        company: "公司",
+        employmentType: "雇佣类型",
+        location: "地点",
+        applications: "申请数量",
+        status: "状态",
+        posted: "发布时间",
+        salary: "薪资"
+    },
+
+    fallback: {
+        untitled: "未命名职位",
+        noLocation: "未填写地点",
+        unknownCompany: "未知公司",
+        noIndustry: "未填写行业",
+        notSpecified: "未说明",
+        notAvailable: "暂无",
+        noDescription: "暂无职位描述",
+        posted: "发布于",
+        upTo: "最高"
+    },
+
+    modal: {
+        currentStatus: "当前状态",
+        jobDescription: "职位描述",
+        viewApplications: "查看申请",
+        close: "关闭"
+    },
+
+    errors: {
+        fetchJobs: "获取职位失败",
+        updateStatus: "更新职位状态失败"
+    },
+
+    confirm: {
+        statusChange: "确定要更新该职位状态吗？"
+    }
+    },
+
+    adminCompanies: {
+    title: "公司管理",
+    subtitle: "管理注册公司、审核状态及招聘活动。",
+
+    stats: {
+        total: "公司总数",
+        totalSub: "{{count}} 家注册公司",
+
+        active: "已批准",
+        activeSub: "{{active}}/{{total}} 已批准",
+
+        pending: "待审核",
+        pendingSub: "{{count}} 家待审核",
+
+        jobs: "职位总数",
+        jobsSub: "{{count}} 个职位"
+    },
+
+    directory: {
+        title: "公司列表",
+        subtitle: "搜索、筛选、审核并管理公司账户。",
+        searchPlaceholder: "按公司名称、行业或国家搜索...",
+        loading: "正在加载公司...",
+        empty: "未找到公司"
+    },
+
+    filters: {
+        all: "全部",
+        pending: "待审核",
+        active: "已批准",
+        inactive: "已停用",
+        allStatus: "所有状态",
+        search: "搜索"
+    },
+    fallback: {
+        unknown: "未知公司",
+        noDetails: "暂无公司信息",
+        noIndustry: "未填写行业",
+        notSpecified: "未说明",
+        notAvailable: "暂无",
+        noDescription: "暂无公司介绍",
+        jobsPosted: "已发布职位",
+        other: "其他",
+        companyLogo: "公司标志"
+        },
+
+        confirm: {
+        approve: "确定要批准该公司吗？",
+        deactivate: "确定要停用该公司吗？",
+        pending: "确定将该公司设为待审核状态吗？",
+        update: "确定要更新该公司信息吗？"
+        },
+
+    table: {
+        company: "公司",
+        industry: "行业",
+        location: "地点",
+        jobs: "职位",
+        status: "状态",
+        actions: "操作"
+    },
+
+    actions: {
+        approve: "批准",
+        viewDetails: "查看详情",
+        previous: "上一页",
+        next: "下一页",
+        page: "第 {{page}} 页 / 共 {{total}} 页",
+        visitWebsite: "访问网站",
+        viewJobs: "查看职位",
+        markPending: "设为待审核",
+        deactivate: "停用",
+        close: "关闭"
+    },
+
+    details: {
+        id: "公司编号",
+        industry: "行业",
+        country: "国家",
+        city: "城市",
+        website: "网站",
+        jobs: "职位数量",
+        status: "状态",
+        registered: "注册时间"
+    },
+
+    modal: {
+        currentStatus: "当前状态",
+        description: "公司简介"
+    },
+
+    fallback: {
+        unknown: "未知公司",
+        noDetails: "暂无公司信息",
+        noIndustry: "未填写行业",
+        notSpecified: "未说明",
+        noDescription: "暂无公司介绍",
+        jobsPosted: "已发布职位"
+    },
+
+    confirm: {
+        approve: "确定要批准该公司吗？",
+        deactivate: "确定要停用该公司吗？",
+        pending: "确定将该公司设为待审核状态吗？"
+    },
+
+    errors: {
+        fetch: "获取公司失败",
+        update: "更新公司状态失败"
+    }
+    },
+
+    adminCandidates: {
+        title: "候选人管理",
+        subtitle: "查看候选人资料、编辑信息并管理候选人记录。",
+
+        stats: {
+            total: "候选人总数",
+            totalSub: "{{count}} 个账户",
+
+            withApplications: "有申请",
+            withApplicationsSub: "{{count}} 名候选人已申请",
+
+            withResume: "有简历",
+            withResumeSub: "{{count}} 已上传简历",
+
+            completeProfiles: "完整资料",
+            completeProfilesSub: "{{count}} 完整资料"
+        },
+
+        directory: {
+            title: "候选人列表",
+            subtitle: "搜索、筛选、查看和管理候选人。",
+            searchPlaceholder: "按姓名、邮箱、职位、技能或城市搜索...",
+            loading: "正在加载候选人...",
+            empty: "未找到候选人"
+        },
+
+        filters: {
+            allCountries: "所有国家",
+            search: "搜索"
+        },
+
+        table: {
+            candidate: "候选人",
+            role: "职业角色",
+            location: "地点",
+            experience: "经验",
+            applications: "申请",
+            actions: "操作"
+        },
+
+        actions: {
+            viewDetails: "查看详情",
+            previous: "上一页",
+            next: "下一页",
+            page: "第 {{page}} 页 / 共 {{total}} 页",
+            resume: "简历",
+            edit: "编辑",
+            delete: "删除",
+            close: "关闭",
+            cancel: "取消",
+            save: "保存",
+            viewApplications: "查看申请"
+        },
+
+        modal: {
+            profile: "候选人资料",
+            summary: "职业简介",
+            skills: "技能",
+            languages: "语言",
+            editTitle: "编辑候选人",
+            editSubtitle: "管理员修改候选人信息"
+        },
+
+        details: {
+            id: "编号",
+            email: "邮箱",
+            phone: "电话",
+            country: "国家",
+            city: "城市",
+            address: "地址",
+            gender: "性别",
+            dob: "出生日期",
+            title: "职业",
+            desiredRole: "期望职位",
+            experience: "经验",
+            applications: "申请数量",
+            employmentType: "工作类型",
+            workMode: "工作模式",
+            salary: "期望薪资",
+            availability: "可入职时间",
+            notice: "通知期",
+            authorization: "工作许可",
+            relocation: "是否愿意搬迁",
+            joined: "加入时间"
+        },
+
+        fallback: {
+            unnamed: "未命名候选人",
+            noEmail: "暂无邮箱",
+            notSpecified: "未说明",
+            noSummary: "暂无简介",
+            na: "暂无",
+            preferenceNotSet: "未设置偏好",
+            years: "年",
+            willing: "愿意",
+            noLocation: "未填写地点",
+            candidate: "候选人"
+        },
+
+        confirm: {
+            delete: "确定删除该候选人吗？这将同时删除其申请记录。"
+        },
+
+        errors: {
+            fetch: "获取候选人失败",
+            delete: "删除失败",
+            update: "更新失败"
+        },
+
+        form: {
+            basicInfo: "基本信息",
+            professionalProfile: "职业信息",
+            jobPreferences: "求职偏好",
+            links: "链接",
+
+            name: "姓名",
+            email: "邮箱",
+            phone: "电话",
+            country: "国家",
+            city: "城市",
+            address: "地址",
+            dob: "出生日期",
+            gender: "性别",
+            profileImage: "头像链接",
+
+            professionalTitle: "职业标题",
+            desiredJobTitle: "期望职位",
+            yearsExperience: "工作年限",
+            skills: "技能",
+            languages: "语言",
+            professionalSummary: "职业简介",
+
+            employmentType: "工作类型",
+            workMode: "工作模式",
+            expectedSalary: "期望薪资",
+            currency: "货币",
+            noticePeriod: "通知期",
+            availability: "可入职时间",
+            workAuthorization: "工作许可",
+            willingToRelocate: "愿意搬迁",
+
+            linkedin: "LinkedIn",
+            github: "GitHub",
+            portfolio: "作品集",
+            resume: "简历链接",
+
+            select: "请选择"
+        }
+        },
+
+        adminApplications: {
+        title: "申请管理",
+        subtitle: "监控申请进度，审核候选人，并管理招聘流程。",
+
+        stats: {
+            total: "申请总数",
+            totalSub: "{{count}} 个申请",
+
+            pending: "待审核",
+            pendingSub: "{{count}} 个待处理",
+
+            shortlisted: "入围",
+            shortlistedSub: "{{count}} 名候选人",
+
+            hired: "已录用",
+            hiredSub: "{{count}} 成功录用"
+        },
+        modal: {
+            currentStatus: "当前状态",
+            notes: "申请备注",
+            notesText:
+                "以后可以在这里扩展候选人的申请详情，例如简历、求职信、筛选评分或雇主反馈。"
+        },
+
+        pipeline: {
+            title: "申请流程",
+            subtitle: "搜索、筛选并更新申请状态。"
+        },
+
+        filters: {
+            all: "全部",
+            pending: "待审核",
+            reviewed: "已审核",
+            shortlisted: "入围",
+            interview: "面试",
+            hired: "已录用",
+            rejected: "已拒绝",
+            allStatus: "所有状态",
+            search: "搜索",
+            searchPlaceholder: "按职位、候选人、公司或邮箱搜索...",
+            clear: "清除筛选",
+            showingJob: "显示职位 ID 为 {{id}} 的申请"
+        },
+
+        table: {
+            application: "申请",
+            candidate: "候选人",
+            company: "公司",
+            status: "状态",
+            actions: "操作"
+        },
+
+        actions: {
+            markReviewed: "标记为已审核",
+            shortlist: "加入候选",
+            viewDetails: "查看详情",
+            previous: "上一页",
+            next: "下一页",
+            page: "第 {{page}} 页 / 共 {{total}} 页",
+            viewJob: "查看职位",
+            close: "关闭"
+        },
+
+        modal: {
+            currentStatus: "当前状态",
+            notes: "申请备注"
+        },
+
+        details: {
+            id: "申请编号",
+            candidate: "候选人",
+            email: "邮箱",
+            job: "职位",
+            company: "公司",
+            location: "地点",
+            status: "状态",
+            applied: "申请时间"
+        },
+
+        fallback: {
+            unknownJob: "未知职位",
+            unknownCandidate: "未知候选人",
+            unknownCompany: "未知公司",
+            noEmail: "暂无邮箱",
+            noLocation: "未填写地点",
+            applied: "申请于",
+            na: "暂无"
+        },
+
+        confirm: {
+            statusChange: "确定将该申请标记为 {{status}} 吗？"
+        },
+
+        errors: {
+            fetch: "获取申请失败",
+            update: "更新状态失败"
+        }
+        },
+
+
 
     // zh
     createAccount: "创建账户",

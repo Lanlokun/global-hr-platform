@@ -24,7 +24,8 @@
     "pg": "^8.20.0",
     "react-select": "^5.10.2",
     "react-select-country-list": "^2.2.3",
-    "react-simple-maps": "^3.0.0"
+    "react-simple-maps": "^3.0.0",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
