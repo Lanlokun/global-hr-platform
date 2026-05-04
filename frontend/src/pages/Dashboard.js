@@ -13,6 +13,8 @@ import CandidateOpportunities from "./candidate/CandidateOpportunities";
 import CandidateApplications from "./candidate/CandidateApplications";
 import CandidateProfile from "./candidate/CandidateProfile";
 
+import Messages from "./messages/Messages";
+
 function Dashboard() {
   const { t } = useLanguage();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -25,6 +27,7 @@ function Dashboard() {
         <Route path="/jobs" element={<EmployerJobs />} />
         <Route path="/applicants" element={<EmployerApplicants />} />
         <Route path="/talent" element={<EmployerTalent />} />
+        <Route path="/messages" element={<Messages />} />
         <Route path="/settings" element={<EmployerSettings />} />
       </Routes>
     );
@@ -37,6 +40,7 @@ function Dashboard() {
         <Route path="/opportunities" element={<CandidateOpportunities />} />
         <Route path="/applications" element={<CandidateApplications />} />
         <Route path="/profile" element={<CandidateProfile />} />
+        <Route path="/messages" element={<Messages />} />
       </Routes>
     );
   }

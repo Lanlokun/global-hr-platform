@@ -64,6 +64,39 @@ function CandidateOpportunities() {
     }
   };
 
+  const navigateToMessages = () => {
+  window.location.href = "/dashboard/messages";
+};
+
+const startEmployerConversation = async (job) => {
+  try {
+    await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/messages/conversations`,
+      {
+        employerId: job.employer_id,
+        jobId: job.id,
+        body: t("defaultJobMessage").replace(
+          "{{title}}",
+          job.title || ""
+        ),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    toast.success(t("conversationStarted"));
+    navigateToMessages();
+  } catch (error) {
+    console.error("Failed to start conversation:", error);
+    toast.error(
+      error.response?.data?.error || t("startConversationError")
+    );
+  }
+};
+
   const filteredJobs = useMemo(() => {
     const q = filters.search.trim().toLowerCase();
     const locationQuery = filters.location.trim().toLowerCase();
@@ -177,6 +210,7 @@ function CandidateOpportunities() {
                 <th>{t("salary")}</th>
                 <th>{t("type")}</th>
                 <th>{t("action")}</th>
+                <th>{t("message")}</th>
               </tr>
             </thead>
 
@@ -213,6 +247,11 @@ function CandidateOpportunities() {
                       <td>
                         <Button onClick={() => applyToJob(job.id)}>
                           {t("apply")}
+                        </Button>
+                      </td>
+                      <td>
+                        <Button onClick={() => startEmployerConversation(job)}>
+                          {t("message")}
                         </Button>
                       </td>
                     </tr>
