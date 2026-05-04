@@ -138,7 +138,8 @@ exports.getPublicJobs = async (req, res) => {
         j.*,
         c.name AS company_name,
         c.logo AS company_logo,
-        c.industry AS company_industry
+        c.industry AS company_industry,
+        c.user_id AS employer_id
       FROM jobs j
       LEFT JOIN companies c ON c.id = j.company_id
       WHERE j.status = 'active'

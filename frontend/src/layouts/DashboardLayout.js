@@ -17,6 +17,7 @@ import {
   Sparkles,
   Shield,
   Settings,
+  MessageCircle,
 } from "lucide-react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
@@ -122,6 +123,11 @@ function DashboardLayout({ title, subtitle, children }) {
       icon: <FileText size={18} />,
     },
     {
+      to: "/dashboard/messages",
+      label: t("messages"),
+      icon: <MessageCircle size={18} />,
+    },
+    {
       to: "/dashboard/profile",
       label: t("profile"),
       icon: <UserCircle2 size={18} />,
@@ -154,6 +160,11 @@ function DashboardLayout({ title, subtitle, children }) {
       to: "/dashboard/talent",
       label: t("talentDirectory"),
       icon: <Users size={18} />,
+    },
+    {
+      to: "/dashboard/messages",
+      label: t("messages"),
+      icon: <MessageCircle size={18} />,
     },
     {
       to: "/dashboard/settings",
@@ -511,14 +522,14 @@ const styles = {
     gap: 10,
     marginTop: 12,
   },
-notificationItem: {
-  width: "100%",
-  textAlign: "left",
-  padding: 12,
-  borderRadius: 14,
-  background: "#f9fafb",
-  border: "1px solid #e5e7eb",
-},
+  notificationItem: {
+    width: "100%",
+    textAlign: "left",
+    padding: 12,
+    borderRadius: 14,
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+  },
   emptyNotifications: {
     color: "#6b7280",
     fontSize: 14,

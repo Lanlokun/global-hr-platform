@@ -266,6 +266,25 @@ export const translations = {
     activeWorkspace: "Active workspace",
     adminWorkspace: "Admin Workspace",
     adminWorkspaceDesc: "Manage users, companies, jobs, candidates, and platform activity.",
+    
+    messagesPage: {
+        title: "Messages",
+        subtitle: "Chat with candidates and employers across the platform.",
+        conversations: "Conversations",
+        conversationsSubtitle: "Your active message threads.",
+        conversation: "Conversation",
+        selectConversation: "Select a conversation to start chatting.",
+        empty: "No conversations yet.",
+        loading: "Loading messages...",
+        noMessagesYet: "No messages yet.",
+        unknownUser: "Unknown user",
+        generalChat: "General conversation",
+        placeholder: "Write a message...",
+        send: "Send",
+        errors: {
+            send: "Failed to send message"
+        }
+        },
 
     adminUsers: {
     title: "User Management",
@@ -1025,6 +1044,7 @@ export const translations = {
     companyLevel: "Company-level",
     security: "Security",
     standard: "Standard",
+    messageCandidate: "Message Candidate",
 
     // FEATURES
     settingsAreas: "Settings Areas",
@@ -1146,6 +1166,9 @@ export const translations = {
     "south-africa": "South Africa",
     madagascar: "Madagascar",
     },
+
+    messages: "Messages",
+    defaultCandidateMessage: "Hello {{name}}, I would like to discuss your application.",
 
 
 
@@ -1375,6 +1398,33 @@ export const translations = {
     saveCompanyError: "Failed to save company",
     companyUpdated: "Company profile updated",
     companyCreated: "Company profile created",
+    defaultJobMessage: "Hello, I am interested in the {{title}} position. I would like to learn more about this opportunity.",
+
+    messagesPage: {
+    title: "Messages",
+    subtitle: "Chat with candidates and employers across the platform.",
+    conversations: "Conversations",
+    conversationsSubtitle: "Your active message threads.",
+    conversation: "Conversation",
+    selectConversation: "Select a conversation to start chatting.",
+    selectConversationHint: "Choose a thread from the left panel to view messages.",
+    empty: "No conversations yet.",
+    emptyHint: "Messages will appear here once you contact a candidate or employer.",
+    loading: "Loading messages...",
+    noMessagesYet: "No messages yet.",
+    noMessagesHint: "Send the first message to start the conversation.",
+    unknownUser: "Unknown user",
+    generalChat: "General conversation",
+    placeholder: "Write a message...",
+    send: "Send",
+    sending: "Sending...",
+    unread: "Unread",
+    refresh: "Refresh",
+    searchPlaceholder: "Search conversations...",
+    errors: {
+        send: "Failed to send message"
+    }
+    },
 
     profileStrength: "Profile Strength",
     profileStrengthSubtitle: "Improve your employer profile.",
@@ -2216,6 +2266,9 @@ export const translations = {
         statusChange: "确定要更新该职位状态吗？"
     }
     },
+
+    defaultCandidateMessage: "你好 {{name}}，我想和你讨论你的申请。",
+    messageCandidate: "联系候选人",
 
     adminCompanies: {
     title: "公司管理",
@@ -3114,6 +3167,7 @@ export const translations = {
     allCaughtUp: "全部已读",
     new: "新",
     open: "打开",
+    defaultJobMessage: "你好，我对 {{title}} 这个职位很感兴趣，想了解更多信息。",
 
     teamMember: "团队成员",
     teamInvitationNotification: "已被邀请加入雇主工作区。",
@@ -3223,6 +3277,33 @@ export const translations = {
     withdrawApplicationMessage:
     "您确定要撤回“{{job}}”的申请吗？此操作无法撤销。",
     thisJob: "该职位",
+
+    messagesPage: {
+    title: "消息",
+    subtitle: "与候选人和企业进行沟通。",
+    conversations: "会话",
+    conversationsSubtitle: "您的聊天列表。",
+    conversation: "聊天",
+    selectConversation: "请选择一个会话开始聊天。",
+    selectConversationHint: "从左侧选择一个会话查看消息。",
+    empty: "暂无会话。",
+    emptyHint: "当您联系候选人或企业后，消息会显示在这里。",
+    loading: "正在加载消息...",
+    noMessagesYet: "暂无消息。",
+    noMessagesHint: "发送第一条消息开始交流。",
+    unknownUser: "未知用户",
+    generalChat: "普通会话",
+    placeholder: "输入消息...",
+    send: "发送",
+    sending: "发送中...",
+    unread: "未读",
+    refresh: "刷新",
+    searchPlaceholder: "搜索会话...",
+    errors: {
+        send: "发送消息失败"
+    }
+    },
+    messages: "消息",
 
     countryDescriptions: {
     morocco:

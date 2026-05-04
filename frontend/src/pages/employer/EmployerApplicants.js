@@ -3,6 +3,7 @@ import { toast } from "react-hot-toast";
 import {
   Mail,
   MapPin,
+  MessageCircle,
   Briefcase,
   UserCircle2,
   X,
@@ -109,6 +110,39 @@ function EmployerApplicants() {
   useEffect(() => {
     setCurrentPage(1);
   }, [filters.search, filters.status]);
+
+  const startCandidateConversation = async (applicant) => {
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    console.log("Starting conversation with:", {
+      candidateId: applicant.candidate_id,
+      employerId: currentUser.id,
+      jobId: applicant.job_id,
+    });
+
+    await api.post(
+      "/api/messages/conversations",
+      {
+        candidateId: applicant.candidate_id,
+        employerId: currentUser.id,
+        jobId: applicant.job_id,
+        body: t("defaultCandidateMessage").replace(
+          "{{name}}",
+          applicant.candidate_name || ""
+        ),
+      },
+      authHeaders
+    );
+
+    toast.success(t("conversationStarted"));
+    window.location.href = "/dashboard/messages";
+  } catch (error) {
+    console.error("Failed to start conversation:", error);
+    toast.error(
+      error.response?.data?.error || t("startConversationError")
+    );
+  }
+};
 
   return (
     <DashboardLayout
@@ -258,6 +292,7 @@ function EmployerApplicants() {
           statusVariant={statusVariant}
           updateStatus={updateStatus}
           onClose={() => setSelectedApplicant(null)}
+          startConversation={startCandidateConversation}
           t={t}
         />
       )}
@@ -265,7 +300,14 @@ function EmployerApplicants() {
   );
 }
 
-function ApplicantModal({ applicant, statusVariant, updateStatus, onClose, t }) {
+function ApplicantModal({
+  applicant,
+  statusVariant,
+  updateStatus,
+  onClose,
+  startConversation,
+  t,
+}) {
   const resumeUrl = applicant.resume_url || applicant.application_resume_url;
 
   return (
@@ -475,7 +517,20 @@ function ApplicantModal({ applicant, statusVariant, updateStatus, onClose, t }) 
         </Section>
 
         <div style={styles.modalActions}>
-          <Button variant="secondary" onClick={onClose}>
+         <Button
+            onClick={() => startConversation(applicant)}
+            style={styles.primaryButton}
+          >
+            <MessageCircle size={16} style={{ marginRight: "6px" }} />
+            {t("messageCandidate")}
+          </Button>
+
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            style={styles.secondaryButton}
+          >
+            <X size={16} style={{ marginRight: "6px" }} />
             {t("close")}
           </Button>
         </div>
@@ -794,6 +849,23 @@ const styles = {
     lineHeight: 1.4,
     wordBreak: "break-word",
   },
+
+  primaryButton: {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "10px 16px",
+  borderRadius: "10px",
+  fontWeight: 600,
+},
+
+secondaryButton: {
+  display: "flex",
+  alignItems: "center",
+  gap: "6px",
+  padding: "10px 16px",
+  borderRadius: "10px",
+},
   timelineList: {
     display: "grid",
     gap: 12,
@@ -826,7 +898,11 @@ const styles = {
   modalActions: {
     display: "flex",
     justifyContent: "flex-end",
-    marginTop: 20,
+    alignItems: "center",
+    gap: "12px",
+    marginTop: "20px",
+    paddingTop: "16px",
+    borderTop: "1px solid #e2e8f0",
   },
 };
 
