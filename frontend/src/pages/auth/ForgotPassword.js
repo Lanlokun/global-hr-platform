@@ -8,7 +8,7 @@ import AuthFooter from "../../components/auth/AuthFooter";
 import LanguageSwitcher from "../../components/ui/LanguageSwitcher";
 import { useLanguage } from "../../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
 import "../../components/auth/itss-auth.css";
 
 function ForgotPassword() {
@@ -18,10 +18,23 @@ function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = () => {
-    setTimeout(() => navigate("/login"), 1500);
-    setMessage(t("passwordResetSent"));
-  };
+const handleSubmit = async () => {
+  if (!email.trim()) {
+    setMessage(t("emailRequired"));
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      `${process.env.REACT_APP_API_URL}/api/auth/forgot-password`,
+      { email }
+    );
+
+    setMessage(res.data?.message || t("passwordResetSent"));
+  } catch (error) {
+    setMessage(error.response?.data?.error || t("passwordResetFailed"));
+  }
+};
 
 
   return (
