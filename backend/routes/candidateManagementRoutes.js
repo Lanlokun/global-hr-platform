@@ -17,7 +17,7 @@ const role = require("../middleware/roleMiddleware");
 router.get("/", auth, role("employer"), getAllCandidates);
 router.get("/:id", auth, role("employer"), getCandidateById);
 
-router.get("/:id/evaluation", auth, role("employer"), getCandidateEvaluation);
-router.post("/:id/evaluation", auth, role("employer"), saveCandidateEvaluation);
+router.get("/candidates/:id/evaluation", auth, role("admin"), getCandidateEvaluation);
+router.post("/candidates/:id/evaluation", auth, role("admin"), saveCandidateEvaluation);
 
 module.exports = router;

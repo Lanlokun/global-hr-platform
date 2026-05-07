@@ -79,6 +79,9 @@ app.use("/api/admin", adminRoutes);
 const messageRoutes = require("./routes/messageRoutes");
 app.use("/api/messages", messageRoutes);
 
+const recommendationRoutes = require("./routes/recommendationRoutes");
+app.use("/api/recommendations", recommendationRoutes);
+
 // 404 catch-all
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

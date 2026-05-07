@@ -15,7 +15,7 @@ exports.getCandidateEvaluation = async (req, res) => {
       SELECT
         id,
         candidate_id,
-        employer_id,
+        evaluator_id,
         technical_score,
         communication_score,
         problem_solving_score,
@@ -28,14 +28,14 @@ exports.getCandidateEvaluation = async (req, res) => {
         created_at,
         updated_at
       FROM candidate_evaluations
-      WHERE candidate_id = $1 AND employer_id = $2
+      WHERE candidate_id = $1 AND evaluator_id = $2
       LIMIT 1
       `,
       [id, req.user.id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Evaluation not found" });
+      return res.json({ evaluation: null });
     }
 
     return res.json({ evaluation: result.rows[0] });
@@ -43,7 +43,6 @@ exports.getCandidateEvaluation = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
-
 exports.saveCandidateEvaluation = async (req, res) => {
   const { id } = req.params;
 
@@ -94,7 +93,7 @@ exports.saveCandidateEvaluation = async (req, res) => {
       `
       INSERT INTO candidate_evaluations (
         candidate_id,
-        employer_id,
+        evaluator_id,
         technical_score,
         communication_score,
         problem_solving_score,
@@ -108,7 +107,7 @@ exports.saveCandidateEvaluation = async (req, res) => {
         updated_at
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
-      ON CONFLICT (candidate_id, employer_id)
+      ON CONFLICT (candidate_id, evaluator_id)
       DO UPDATE SET
         technical_score = EXCLUDED.technical_score,
         communication_score = EXCLUDED.communication_score,
@@ -123,7 +122,7 @@ exports.saveCandidateEvaluation = async (req, res) => {
       RETURNING
         id,
         candidate_id,
-        employer_id,
+        evaluator_id,
         technical_score,
         communication_score,
         problem_solving_score,
