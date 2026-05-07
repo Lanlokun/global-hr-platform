@@ -1,3 +1,5 @@
+// frontend/src/pages/employer/EmployerJobs.jsx
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import {
@@ -13,6 +15,9 @@ import {
   Users,
   Building2,
   CalendarDays,
+  Sparkles,
+  MessageCircle,
+  Eye,
 } from "lucide-react";
 
 import api from "../../services/api";
@@ -33,6 +38,13 @@ function EmployerJobs() {
   const [editingJob, setEditingJob] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [profileCandidate, setProfileCandidate] = useState(null);
+
+  const [recommendedCandidates, setRecommendedCandidates] = useState([]);
+  const [recommendationLoading, setRecommendationLoading] = useState(false);
+  const [recommendationJob, setRecommendationJob] = useState(null);
+  const [recommendationModalOpen, setRecommendationModalOpen] = useState(false);
+
   const jobsPerPage = 16;
 
   const emptyForm = {
@@ -79,6 +91,27 @@ function EmployerJobs() {
     fetchJobs();
   }, [fetchJobs]);
 
+  const loadRecommendations = async (job) => {
+    try {
+      setRecommendationLoading(true);
+      setRecommendationJob(job);
+      setRecommendationModalOpen(true);
+
+      const res = await api.get(
+        `/api/recommendations/jobs/${job.id}/candidates`,
+        authHeaders
+      );
+
+      setRecommendedCandidates(res.data || []);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.error || "Failed to load recommendations"
+      );
+    } finally {
+      setRecommendationLoading(false);
+    }
+  };
+
   const openCreateModal = () => {
     setEditingJob(null);
     setForm(emptyForm);
@@ -115,6 +148,12 @@ function EmployerJobs() {
     setModalOpen(false);
     setEditingJob(null);
     setForm(emptyForm);
+  };
+
+  const closeRecommendationModal = () => {
+    setRecommendationModalOpen(false);
+    setRecommendedCandidates([]);
+    setRecommendationJob(null);
   };
 
   const saveJob = async () => {
@@ -314,6 +353,14 @@ function EmployerJobs() {
               )}
 
               <div style={styles.jobActions}>
+                <Button
+                  variant="secondary"
+                  onClick={() => loadRecommendations(job)}
+                >
+                  <Sparkles size={15} />
+                  Recommended
+                </Button>
+
                 <Button variant="secondary" onClick={() => openEditModal(job)}>
                   <Pencil size={15} />
                   {t("edit")}
@@ -600,12 +647,227 @@ function EmployerJobs() {
         </div>
       )}
 
+      {recommendationModalOpen && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.recommendationModal}>
+            <div style={styles.modalHeader}>
+              <div>
+                <h2 style={styles.modalTitle}>Recommended Candidates</h2>
+                <p style={styles.modalSubtitle}>
+                  {recommendationJob?.title || "Selected job"}
+                </p>
+              </div>
+
+              <button
+                style={styles.closeButton}
+                onClick={closeRecommendationModal}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {recommendationLoading ? (
+              <div style={styles.recommendationEmpty}>
+                <Sparkles size={38} />
+                <h3>Finding best matches...</h3>
+                <p>Checking candidate profiles, skills, and evaluation scores.</p>
+              </div>
+            ) : recommendedCandidates.length === 0 ? (
+              <div style={styles.recommendationEmpty}>
+                <Users size={38} />
+                <h3>No recommended candidates found</h3>
+                <p>
+                  Add more candidate profiles or interview evaluation scores to
+                  improve matching.
+                </p>
+              </div>
+            ) : (
+              <div style={styles.recommendationGrid}>
+                {recommendedCandidates.map((candidate) => (
+                  <div key={candidate.id} style={styles.recommendationCard}>
+                    <div style={styles.recommendationHeader}>
+                      <img
+                        src={candidate.profile_image || "/images/avatar.jpg"}
+                        alt={candidate.name || "Candidate"}
+                        style={styles.candidateAvatar}
+                      />
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <h3 style={styles.candidateName}>
+                          {candidate.name || "Unnamed Candidate"}
+                        </h3>
+                        <p style={styles.candidateTitle}>
+                          {candidate.professional_title || "Candidate"}
+                        </p>
+                        <p style={styles.candidateLocation}>
+                          {[candidate.city, candidate.country]
+                            .filter(Boolean)
+                            .join(", ") || "Location not specified"}
+                        </p>
+                      </div>
+
+                      <div style={styles.matchScore}>
+                        {candidate.match_score || 0}%
+                      </div>
+                    </div>
+
+                    <div style={styles.matchBreakdown}>
+                      <ScoreLine
+                        label="Skills"
+                        value={candidate.match_breakdown?.skills_score}
+                      />
+                      <ScoreLine
+                        label="Experience"
+                        value={candidate.match_breakdown?.experience_score}
+                      />
+                      <ScoreLine
+                        label="Location"
+                        value={candidate.match_breakdown?.location_score}
+                      />
+                      <ScoreLine
+                        label="Evaluation"
+                        value={candidate.match_breakdown?.evaluation_score}
+                      />
+                      <ScoreLine
+                        label="Profile"
+                        value={
+                          candidate.match_breakdown
+                            ?.profile_completeness_score
+                        }
+                      />
+                    </div>
+
+                    <SkillTags skills={candidate.skills} t={t} />
+
+                    <div style={styles.recommendationMeta}>
+                      <Badge variant="default">
+                        {candidate.years_of_experience || 0} yrs experience
+                      </Badge>
+
+                      {candidate.already_applied && (
+                        <Badge variant="success">Already applied</Badge>
+                      )}
+
+                      {!candidate.already_applied && (
+                        <Badge variant="warning">Not applied yet</Badge>
+                      )}
+                    </div>
+
+                    <div style={styles.recommendationActions}>
+                      <Button
+                        onClick={() => {
+                          window.location.href = `/dashboard/messages?candidate=${candidate.id}`;
+                        }}
+                      >
+                        <MessageCircle size={15} />
+                        Message
+                      </Button>
+
+                    <Button
+                      variant="secondary"
+                      onClick={() => setProfileCandidate(candidate)}
+                    >
+                      <Eye size={15} />
+                      View Profile
+                    </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {profileCandidate && (
+  <div style={styles.modalOverlay}>
+    <div style={styles.profileModal}>
+      <div style={styles.modalHeader}>
+        <div>
+          <h2 style={styles.modalTitle}>{profileCandidate.name}</h2>
+          <p style={styles.modalSubtitle}>
+            {profileCandidate.professional_title || "Candidate"}
+          </p>
+        </div>
+
+        <button
+          style={styles.closeButton}
+          onClick={() => setProfileCandidate(null)}
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      <div style={styles.profileHeader}>
+        <img
+          src={profileCandidate.profile_image || "/images/avatar.jpg"}
+          alt={profileCandidate.name}
+          style={styles.profileAvatar}
+        />
+
+        <div>
+          <h3 style={styles.profileName}>{profileCandidate.name}</h3>
+          <p style={styles.profileText}>
+            {[profileCandidate.city, profileCandidate.country]
+              .filter(Boolean)
+              .join(", ") || "Location not specified"}
+          </p>
+          <p style={styles.profileText}>
+            {profileCandidate.email}
+          </p>
+        </div>
+      </div>
+
+      <ProfileSection title="Professional Summary">
+        {profileCandidate.professional_summary || "No summary provided."}
+      </ProfileSection>
+
+      <ProfileSection title="Skills">
+        <SkillTags skills={profileCandidate.skills} t={t} />
+      </ProfileSection>
+
+      <ProfileSection title="Experience">
+        {profileCandidate.years_of_experience || 0} years of experience
+      </ProfileSection>
+
+      <ProfileSection title="Preferred Work Mode">
+        {profileCandidate.preferred_work_mode || "Not specified"}
+      </ProfileSection>
+
+      <ProfileSection title="Expected Salary">
+        {profileCandidate.expected_salary
+          ? `${profileCandidate.salary_currency || ""} ${profileCandidate.expected_salary}`
+          : "Not specified"}
+      </ProfileSection>
+
+      <ProfileSection title="Interview Evaluation">
+        <div style={styles.profileScoreGrid}>
+          <ScoreLine label="Overall" value={profileCandidate.evaluation_score} />
+          <ScoreLine label="Technical" value={profileCandidate.technical_score} />
+          <ScoreLine label="Communication" value={profileCandidate.communication_score} />
+          <ScoreLine label="Problem Solving" value={profileCandidate.problem_solving_score} />
+          <ScoreLine label="Culture Fit" value={profileCandidate.culture_fit_score} />
+          <ScoreLine label="Confidence" value={profileCandidate.confidence_score} />
+        </div>
+      </ProfileSection>
+
+      <div style={styles.modalActions}>
+        <Button
+          onClick={() => {
+            window.location.href = `/dashboard/messages?candidate=${profileCandidate.id}`;
+          }}
+        >
+          Message Candidate
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
+
       <ConfirmModal
         open={!!deleteTarget}
         title={t("deleteJobTitle")}
-        message={`${t("deleteJobMessage")} "${
-          deleteTarget?.title || ""
-        }"?`}
+        message={`${t("deleteJobMessage")} "${deleteTarget?.title || ""}"?`}
         confirmText={t("deleteJob")}
         onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}
@@ -613,6 +875,16 @@ function EmployerJobs() {
     </DashboardLayout>
   );
 }
+
+function ProfileSection({ title, children }) {
+  return (
+    <div style={styles.profileSection}>
+      <h4>{title}</h4>
+      <div>{children}</div>
+    </div>
+  );
+}
+
 
 function statusVariant(status) {
   if (status === "active") return "success";
@@ -664,9 +936,20 @@ function Meta({ icon, label }) {
   );
 }
 
+function ScoreLine({ label, value }) {
+  const score = Number(value || 0);
+
+  return (
+    <div style={styles.scoreLine}>
+      <span>{label}</span>
+      <strong>{score}%</strong>
+    </div>
+  );
+}
+
 function SkillTags({ skills, t }) {
   const list = skills
-    ? skills
+    ? String(skills)
         .split(",")
         .map((skill) => skill.trim())
         .filter(Boolean)
@@ -758,6 +1041,65 @@ const styles = {
     color: "#111827",
   },
 
+
+  profileModal: {
+  width: "100%",
+  maxWidth: 760,
+  maxHeight: "90vh",
+  overflowY: "auto",
+  background: "#fff",
+  borderRadius: 26,
+  padding: 26,
+  boxShadow: "0 30px 80px rgba(0,0,0,0.28)",
+},
+
+profileHeader: {
+  display: "flex",
+  gap: 16,
+  alignItems: "center",
+  padding: 16,
+  borderRadius: 20,
+  background: "#f9fafb",
+  border: "1px solid #e5e7eb",
+  marginBottom: 18,
+},
+
+profileAvatar: {
+  width: 76,
+  height: 76,
+  borderRadius: "50%",
+  objectFit: "cover",
+  background: "#f3f4f6",
+},
+
+profileName: {
+  margin: 0,
+  fontSize: 20,
+  color: "#111827",
+},
+
+profileText: {
+  margin: "5px 0 0",
+  color: "#6b7280",
+},
+
+profileSection: {
+  padding: 16,
+  borderRadius: 18,
+  border: "1px solid #e5e7eb",
+  background: "#fff",
+  marginBottom: 14,
+  color: "#374151",
+  lineHeight: 1.6,
+},
+
+profileScoreGrid: {
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: 10,
+},
+
+
   jobDescription: {
     margin: "8px 0 0",
     color: "#6b7280",
@@ -838,6 +1180,7 @@ const styles = {
     gap: 10,
     justifyContent: "flex-end",
     marginTop: 18,
+    flexWrap: "wrap",
   },
 
   emptyState: {
@@ -864,6 +1207,17 @@ const styles = {
   modal: {
     width: "100%",
     maxWidth: 860,
+    maxHeight: "90vh",
+    overflowY: "auto",
+    background: "#fff",
+    borderRadius: 26,
+    padding: 26,
+    boxShadow: "0 30px 80px rgba(0,0,0,0.28)",
+  },
+
+  recommendationModal: {
+    width: "100%",
+    maxWidth: 1120,
     maxHeight: "90vh",
     overflowY: "auto",
     background: "#fff",
@@ -938,6 +1292,108 @@ const styles = {
     justifyContent: "flex-end",
     gap: 12,
     marginTop: 22,
+  },
+
+  recommendationGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+    gap: 18,
+    marginTop: 20,
+  },
+
+  recommendationCard: {
+    border: "1px solid #e5e7eb",
+    borderRadius: 22,
+    padding: 18,
+    background: "#fff",
+    boxShadow: "0 12px 28px rgba(15, 23, 42, 0.05)",
+  },
+
+  recommendationHeader: {
+    display: "flex",
+    gap: 14,
+    alignItems: "center",
+  },
+
+  candidateAvatar: {
+    width: 56,
+    height: 56,
+    borderRadius: "50%",
+    objectFit: "cover",
+    background: "#f3f4f6",
+  },
+
+  candidateName: {
+    margin: 0,
+    fontSize: 17,
+    color: "#111827",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+
+  candidateTitle: {
+    margin: "4px 0 0",
+    color: "#6b7280",
+    fontSize: 14,
+  },
+
+  candidateLocation: {
+    margin: "4px 0 0",
+    color: "#9ca3af",
+    fontSize: 13,
+  },
+
+  matchScore: {
+    minWidth: 68,
+    height: 68,
+    borderRadius: "50%",
+    background: "#eff6ff",
+    color: "#1d4ed8",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontWeight: 800,
+    fontSize: 18,
+  },
+
+  matchBreakdown: {
+    marginTop: 14,
+    display: "grid",
+    gap: 8,
+    color: "#374151",
+    fontSize: 14,
+  },
+
+  scoreLine: {
+    display: "flex",
+    justifyContent: "space-between",
+    padding: "8px 10px",
+    background: "#f9fafb",
+    borderRadius: 12,
+  },
+
+  recommendationMeta: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 14,
+  },
+
+  recommendationActions: {
+    display: "flex",
+    gap: 10,
+    marginTop: 16,
+    flexWrap: "wrap",
+  },
+
+  recommendationEmpty: {
+    textAlign: "center",
+    padding: "56px 20px",
+    color: "#6b7280",
+    border: "1px dashed #d1d5db",
+    borderRadius: 22,
+    background: "#f9fafb",
   },
 };
 

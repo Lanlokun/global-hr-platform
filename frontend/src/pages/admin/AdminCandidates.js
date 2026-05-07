@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-hot-toast";
 import api from "../../services/api";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Card from "../../components/ui/Card";
@@ -14,6 +14,23 @@ function AdminCandidates() {
   const [candidates, setCandidates] = useState([]);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [editingCandidate, setEditingCandidate] = useState(null);
+  const [evaluatingCandidate, setEvaluatingCandidate] = useState(null);
+
+  const [evaluationLoading, setEvaluationLoading] = useState(false);
+  const [evaluationSaving, setEvaluationSaving] = useState(false);
+
+  const defaultEvaluationForm = {
+    technical_score: 0,
+    communication_score: 0,
+    problem_solving_score: 0,
+    culture_fit_score: 0,
+    experience_relevance_score: 0,
+    confidence_score: 0,
+    recommendation: "hold",
+    interview_notes: "",
+  };
+
+  const [evaluationForm, setEvaluationForm] = useState(defaultEvaluationForm);
 
   const [summary, setSummary] = useState({
     total: 0,
@@ -82,6 +99,76 @@ function AdminCandidates() {
     e.preventDefault();
     setPage(1);
     fetchCandidates();
+  };
+
+  const resetEvaluationForm = () => {
+    setEvaluationForm({
+      technical_score: 0,
+      communication_score: 0,
+      problem_solving_score: 0,
+      culture_fit_score: 0,
+      experience_relevance_score: 0,
+      confidence_score: 0,
+      recommendation: "hold",
+      interview_notes: "",
+    });
+  };
+
+  const openEvaluationModal = async (candidate) => {
+    setEvaluatingCandidate(candidate);
+    setEvaluationLoading(true);
+    resetEvaluationForm();
+
+    try {
+      const res = await api.get(`/api/admin/candidates/${candidate.id}/evaluation`);
+      const evaluation = res.data?.evaluation;
+
+      if (evaluation) {
+        setEvaluationForm({
+          technical_score: evaluation.technical_score || 0,
+          communication_score: evaluation.communication_score || 0,
+          problem_solving_score: evaluation.problem_solving_score || 0,
+          culture_fit_score: evaluation.culture_fit_score || 0,
+          experience_relevance_score:
+            evaluation.experience_relevance_score || 0,
+          confidence_score: evaluation.confidence_score || 0,
+          recommendation: evaluation.recommendation || "hold",
+          interview_notes: evaluation.interview_notes || "",
+        });
+      }
+    } catch (error) {
+      if (error.response?.status !== 404) {
+        alert(error.response?.data?.error || "Failed to load evaluation");
+      }
+    } finally {
+      setEvaluationLoading(false);
+    }
+  };
+
+  const closeEvaluationModal = () => {
+    setEvaluatingCandidate(null);
+    resetEvaluationForm();
+  };
+
+  const saveEvaluation = async () => {
+    if (!evaluatingCandidate) return;
+
+    try {
+      setEvaluationSaving(true);
+
+      await api.post(
+        `/api/admin/candidates/${evaluatingCandidate.id}/evaluation`,
+        evaluationForm
+      );
+
+      toast.success("Evaluation saved successfully");
+      await fetchCandidates();
+      closeEvaluationModal();
+    } catch (error) {
+      alert(error.response?.data?.error || "Failed to save evaluation");
+    } finally {
+      setEvaluationSaving(false);
+    }
   };
 
   const handleDeleteCandidate = async (candidateId) => {
@@ -186,7 +273,9 @@ function AdminCandidates() {
             }}
             style={selectStyle}
           >
-            <option value="all">{t("adminCandidates.filters.allCountries")}</option>
+            <option value="all">
+              {t("adminCandidates.filters.allCountries")}
+            </option>
             <option value="The Gambia">The Gambia</option>
             <option value="Nigeria">Nigeria</option>
             <option value="Ghana">Ghana</option>
@@ -209,9 +298,13 @@ function AdminCandidates() {
           </div>
 
           {loading ? (
-            <div style={emptyStyle}>{t("adminCandidates.directory.loading")}</div>
+            <div style={emptyStyle}>
+              {t("adminCandidates.directory.loading")}
+            </div>
           ) : candidates.length === 0 ? (
-            <div style={emptyStyle}>{t("adminCandidates.directory.empty")}</div>
+            <div style={emptyStyle}>
+              {t("adminCandidates.directory.empty")}
+            </div>
           ) : (
             candidates.map((candidate) => (
               <div
@@ -293,6 +386,14 @@ function AdminCandidates() {
                   >
                     {t("adminCandidates.actions.viewDetails")}
                   </button>
+
+                  <button
+                    type="button"
+                    style={evaluateButtonStyle}
+                    onClick={() => openEvaluationModal(candidate)}
+                  >
+                    Evaluate
+                  </button>
                 </div>
               </div>
             ))
@@ -333,6 +434,7 @@ function AdminCandidates() {
             setEditingCandidate(selectedCandidate);
             setSelectedCandidate(null);
           }}
+          onEvaluate={() => openEvaluationModal(selectedCandidate)}
           onDelete={() => handleDeleteCandidate(selectedCandidate.id)}
           onViewApplications={() => {
             setSelectedCandidate(null);
@@ -346,10 +448,210 @@ function AdminCandidates() {
           candidate={editingCandidate}
           t={t}
           onClose={() => setEditingCandidate(null)}
-          onSave={(payload) => handleUpdateCandidate(editingCandidate.id, payload)}
+          onSave={(payload) =>
+            handleUpdateCandidate(editingCandidate.id, payload)
+          }
+        />
+      )}
+
+      {evaluatingCandidate && (
+        <EvaluationModal
+          candidate={evaluatingCandidate}
+          form={evaluationForm}
+          setForm={setEvaluationForm}
+          loading={evaluationLoading}
+          saving={evaluationSaving}
+          onClose={closeEvaluationModal}
+          onSave={saveEvaluation}
         />
       )}
     </DashboardLayout>
+  );
+}
+
+function EvaluationModal({
+  candidate,
+  form,
+  setForm,
+  loading,
+  saving,
+  onClose,
+  onSave,
+}) {
+  return (
+    <div style={modalOverlayStyle} onClick={onClose}>
+      <div style={evaluationModalStyle} onClick={(e) => e.stopPropagation()}>
+        <div style={modalHeaderStyle}>
+          <div>
+            <h2 style={modalTitleStyle}>Candidate Evaluation</h2>
+            <p style={modalSubtitleStyle}>
+              {candidate.name || "Candidate"} ·{" "}
+              {candidate.professional_title || "Talent profile"}
+            </p>
+          </div>
+
+          <button type="button" onClick={onClose} style={closeButtonStyle}>
+            ×
+          </button>
+        </div>
+
+        {loading ? (
+          <div style={emptyStyle}>Loading evaluation...</div>
+        ) : (
+          <>
+            <div style={evaluationBodyStyle}>
+              <div style={evaluationGridStyle}>
+                <EvaluationInput
+                  label="Technical"
+                  field="technical_score"
+                  form={form}
+                  setForm={setForm}
+                />
+                <EvaluationInput
+                  label="Communication"
+                  field="communication_score"
+                  form={form}
+                  setForm={setForm}
+                />
+                <EvaluationInput
+                  label="Problem Solving"
+                  field="problem_solving_score"
+                  form={form}
+                  setForm={setForm}
+                />
+                <EvaluationInput
+                  label="Culture Fit"
+                  field="culture_fit_score"
+                  form={form}
+                  setForm={setForm}
+                />
+                <EvaluationInput
+                  label="Experience Relevance"
+                  field="experience_relevance_score"
+                  form={form}
+                  setForm={setForm}
+                />
+                <EvaluationInput
+                  label="Confidence"
+                  field="confidence_score"
+                  form={form}
+                  setForm={setForm}
+                />
+              </div>
+
+              <div style={overallScoreStyle}>
+                Overall Score: <strong>{calculateOverall(form)}%</strong>
+              </div>
+
+              <label style={fieldStyle}>
+                <span style={fieldLabelStyle}>Recommendation</span>
+                <select
+                  value={form.recommendation}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      recommendation: e.target.value,
+                    }))
+                  }
+                  style={fieldInputStyle}
+                >
+                  <option value="strong_recommend">Strong Recommend</option>
+                  <option value="recommend">Recommend</option>
+                  <option value="hold">Hold</option>
+                  <option value="reject">Reject</option>
+                </select>
+              </label>
+
+              <label style={{ ...fieldStyle, marginTop: 16 }}>
+                <span style={fieldLabelStyle}>Interview Notes</span>
+                <textarea
+                  value={form.interview_notes}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      interview_notes: e.target.value,
+                    }))
+                  }
+                  rows={5}
+                  style={fieldTextareaStyle}
+                  placeholder="Write interview notes, strengths, weaknesses, hiring readiness, and suggested employer fit..."
+                />
+              </label>
+            </div>
+
+            <div style={modalFooterStyle}>
+              <Button variant="secondary" onClick={onClose}>
+                Cancel
+              </Button>
+
+              <button
+                type="button"
+                style={saveButtonStyle}
+                onClick={onSave}
+                disabled={saving}
+              >
+                {saving ? "Saving..." : "Save Evaluation"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EvaluationInput({ label, field, form, setForm }) {
+  const value = Number(form[field] || 0);
+
+  const updateValue = (nextValue) => {
+    const clean = Math.max(0, Math.min(100, Number(nextValue || 0)));
+
+    setForm((prev) => ({
+      ...prev,
+      [field]: clean,
+    }));
+  };
+
+  return (
+    <div style={evaluationInputStyle}>
+      <div style={evaluationLabelStyle}>
+        <span>{label}</span>
+        <strong>{value}%</strong>
+      </div>
+
+      <input
+        type="range"
+        min="0"
+        max="100"
+        value={value}
+        onChange={(e) => updateValue(e.target.value)}
+        style={{ width: "100%" }}
+      />
+
+      <input
+        type="number"
+        min="0"
+        max="100"
+        value={value}
+        onChange={(e) => updateValue(e.target.value)}
+        style={scoreInputStyle}
+      />
+    </div>
+  );
+}
+
+function calculateOverall(form) {
+  const scores = [
+    form.technical_score,
+    form.communication_score,
+    form.problem_solving_score,
+    form.culture_fit_score,
+    form.experience_relevance_score,
+    form.confidence_score,
+  ].map((score) => Number(score || 0));
+
+  return Math.round(
+    scores.reduce((sum, score) => sum + score, 0) / scores.length
   );
 }
 
@@ -358,6 +660,7 @@ function CandidateDetailsModal({
   t,
   onClose,
   onEdit,
+  onEvaluate,
   onDelete,
   onViewApplications,
 }) {
@@ -388,7 +691,10 @@ function CandidateDetailsModal({
         </div>
 
         <div style={modalGridStyle}>
-          <DetailItem label={t("adminCandidates.details.id")} value={candidate.id} />
+          <DetailItem
+            label={t("adminCandidates.details.id")}
+            value={candidate.id}
+          />
           <DetailItem
             label={t("adminCandidates.details.email")}
             value={candidate.email || t("adminCandidates.fallback.na")}
@@ -419,7 +725,9 @@ function CandidateDetailsModal({
           />
           <DetailItem
             label={t("adminCandidates.details.title")}
-            value={candidate.professional_title || t("adminCandidates.fallback.na")}
+            value={
+              candidate.professional_title || t("adminCandidates.fallback.na")
+            }
           />
           <DetailItem
             label={t("adminCandidates.details.desiredRole")}
@@ -444,7 +752,9 @@ function CandidateDetailsModal({
           />
           <DetailItem
             label={t("adminCandidates.details.workMode")}
-            value={candidate.preferred_work_mode || t("adminCandidates.fallback.na")}
+            value={
+              candidate.preferred_work_mode || t("adminCandidates.fallback.na")
+            }
           />
           <DetailItem
             label={t("adminCandidates.details.salary")}
@@ -460,7 +770,9 @@ function CandidateDetailsModal({
           />
           <DetailItem
             label={t("adminCandidates.details.authorization")}
-            value={candidate.work_authorization || t("adminCandidates.fallback.na")}
+            value={
+              candidate.work_authorization || t("adminCandidates.fallback.na")
+            }
           />
           <DetailItem
             label={t("adminCandidates.details.relocation")}
@@ -501,6 +813,10 @@ function CandidateDetailsModal({
           <Button variant="secondary" onClick={onViewApplications}>
             {t("adminCandidates.actions.viewApplications")}
           </Button>
+
+          <button type="button" style={evaluateButtonStyle} onClick={onEvaluate}>
+            Evaluate
+          </button>
 
           <button type="button" style={editButtonStyle} onClick={onEdit}>
             {t("adminCandidates.actions.edit")}
@@ -626,7 +942,9 @@ function CandidateEditModal({ candidate, t, onClose, onSave }) {
       >
         <div style={modalHeaderStyle}>
           <div>
-            <h2 style={modalTitleStyle}>{t("adminCandidates.modal.editTitle")}</h2>
+            <h2 style={modalTitleStyle}>
+              {t("adminCandidates.modal.editTitle")}
+            </h2>
             <p style={modalSubtitleStyle}>
               {t("adminCandidates.modal.editSubtitle")}
             </p>
@@ -913,7 +1231,7 @@ const directoryStyle = {
 
 const tableHeaderStyle = {
   display: "grid",
-  gridTemplateColumns: "1.6fr 1.3fr 1.1fr 0.8fr 0.8fr 1.2fr",
+  gridTemplateColumns: "1.6fr 1.3fr 1.1fr 0.8fr 0.8fr 1.4fr",
   gap: "14px",
   padding: "15px 18px",
   background: "#f8fafc",
@@ -927,7 +1245,7 @@ const tableHeaderStyle = {
 
 const rowStyle = {
   display: "grid",
-  gridTemplateColumns: "1.6fr 1.3fr 1.1fr 0.8fr 0.8fr 1.2fr",
+  gridTemplateColumns: "1.6fr 1.3fr 1.1fr 0.8fr 0.8fr 1.4fr",
   gap: "14px",
   padding: "16px 18px",
   borderBottom: "1px solid #f1f5f9",
@@ -965,19 +1283,6 @@ const avatarImageStyle = {
   display: "block",
 };
 
-const avatarFallbackStyle = {
-  width: "42px",
-  height: "42px",
-  borderRadius: "14px",
-  background: "#eff6ff",
-  color: "#2563eb",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontWeight: 900,
-  fontSize: "13px",
-};
-
 const nameStyle = {
   color: "#0f172a",
   fontSize: "15px",
@@ -996,14 +1301,13 @@ const mutedStyle = {
   overflow: "hidden",
   textOverflow: "ellipsis",
 };
+
 const roleStyle = {
   color: "#0f172a",
   fontSize: "14px",
   fontWeight: 900,
   display: "block",
 };
-
-
 
 const cellStyle = {
   fontSize: "14px",
@@ -1012,7 +1316,7 @@ const cellStyle = {
 
 const actionGroupStyle = {
   display: "flex",
-  gap: "10px",
+  gap: "8px",
   flexWrap: "wrap",
   alignItems: "center",
 };
@@ -1033,6 +1337,17 @@ const detailsButtonStyle = {
   border: "1px solid #dbe3ef",
   background: "#ffffff",
   color: "#0f172a",
+  fontWeight: 800,
+  cursor: "pointer",
+  fontSize: "12px",
+};
+
+const evaluateButtonStyle = {
+  padding: "8px 14px",
+  borderRadius: "999px",
+  border: "none",
+  background: "#7c3aed",
+  color: "#ffffff",
   fontWeight: 800,
   cursor: "pointer",
   fontSize: "12px",
@@ -1073,6 +1388,16 @@ const modalStyle = {
   width: "100%",
   maxWidth: "920px",
   maxHeight: "90vh",
+  overflowY: "auto",
+  background: "#ffffff",
+  borderRadius: "24px",
+  boxShadow: "0 30px 80px rgba(15, 23, 42, 0.35)",
+};
+
+const evaluationModalStyle = {
+  width: "100%",
+  maxWidth: "860px",
+  maxHeight: "92vh",
   overflowY: "auto",
   background: "#ffffff",
   borderRadius: "24px",
@@ -1283,6 +1608,53 @@ const checkboxLabelStyle = {
   fontSize: "14px",
   color: "#334155",
   fontWeight: 700,
+};
+
+const evaluationBodyStyle = {
+  padding: "24px",
+};
+
+const evaluationGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+  gap: "14px",
+  marginBottom: "18px",
+};
+
+const evaluationInputStyle = {
+  padding: "14px",
+  borderRadius: "16px",
+  border: "1px solid #e2e8f0",
+  background: "#f8fafc",
+};
+
+const evaluationLabelStyle = {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "8px",
+  fontSize: "14px",
+  color: "#0f172a",
+  fontWeight: 900,
+};
+
+const scoreInputStyle = {
+  marginTop: "8px",
+  width: "100%",
+  padding: "9px 10px",
+  borderRadius: "10px",
+  border: "1px solid #dbe3ef",
+  outline: "none",
+};
+
+const overallScoreStyle = {
+  padding: "16px",
+  borderRadius: "16px",
+  background: "#eff6ff",
+  color: "#1d4ed8",
+  fontSize: "18px",
+  fontWeight: 900,
+  marginBottom: "18px",
 };
 
 export default AdminCandidates;
