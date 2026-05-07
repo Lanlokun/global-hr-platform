@@ -178,7 +178,6 @@ function calculateKeywordRelevance(candidate, job) {
 exports.getRecommendedCandidatesForJob = async (req, res) => {
   try {
     const employerCompanyId = req.user.company_id;
-    const employerId = req.user.id;
     const { jobId } = req.params;
 
     const jobResult = await db.query(
@@ -238,9 +237,13 @@ exports.getRecommendedCandidatesForJob = async (req, res) => {
 
       FROM users u
 
-      LEFT JOIN candidate_evaluations ce 
-        ON ce.candidate_id = u.id
-        AND ce.employer_id = $2
+        LEFT JOIN LATERAL (
+        SELECT *
+        FROM candidate_evaluations ce
+        WHERE ce.candidate_id = u.id
+        ORDER BY ce.updated_at DESC
+        LIMIT 1
+        ) ce ON true
 
       LEFT JOIN applications a
         ON a.user_id = u.id
@@ -261,7 +264,7 @@ exports.getRecommendedCandidatesForJob = async (req, res) => {
         ce.interview_notes,
         a.id
       `,
-      [jobId, employerId]
+      [jobId]
     );
 
     const recommendations = candidatesResult.rows.map((candidate) => {
