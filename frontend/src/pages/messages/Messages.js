@@ -4,11 +4,15 @@ import {
   Search,
   Send,
   RefreshCw,
-  UserCircle2,
   Briefcase,
   Clock,
   Inbox,
+  Plus,
+  X,
+  Users,
+  Building2,
 } from "lucide-react";
+import { useLocation } from "react-router-dom";
 
 import api from "../../services/api";
 import DashboardLayout from "../../layouts/DashboardLayout";
@@ -19,6 +23,14 @@ function Messages() {
   const { t } = useLanguage();
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+
+  const conversationIdFromUrl = params.get("conversation");
+  const employerIdFromUrl = params.get("employer");
+  const candidateIdFromUrl = params.get("candidate");
+  const jobIdFromUrl = params.get("job");
+
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -27,30 +39,156 @@ function Messages() {
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
+  const [newConversationOpen, setNewConversationOpen] = useState(false);
+  const [contacts, setContacts] = useState([]);
+  const [contactsLoading, setContactsLoading] = useState(false);
+  const [contactSearch, setContactSearch] = useState("");
+  const [selectedRole, setSelectedRole] = useState("all");
 
   const messagesEndRef = useRef(null);
 
-  const getOtherPerson = (conversation) => {
-    if (!conversation) return {};
+  const fetchContacts = async () => {
+  try {
+    setContactsLoading(true);
+    const res = await api.get("/api/messages/contacts");
+    setContacts(Array.isArray(res.data) ? res.data : []);
+  } catch (err) {
+    console.error("Failed to load contacts:", err);
+    alert(err.response?.data?.error || "Failed to load contacts");
+  } finally {
+    setContactsLoading(false);
+  }
+};
 
-    if (currentUser.role === "candidate") {
-      return {
-        name: conversation.employer_name,
-        email: conversation.employer_email,
-        image: conversation.employer_image,
-      };
+const openNewConversation = async () => {
+  setNewConversationOpen(true);
+  await fetchContacts();
+};
+
+const startConversationWithContact = async (contact) => {
+  try {
+    const res = await api.post("/api/messages/conversations", {
+      receiver_id: contact.id,
+    });
+
+    const conversation =
+      res.data?.conversation ||
+      res.data;
+
+    const conversationId =
+      conversation?.id ||
+      res.data?.conversation_id;
+
+    const data = await fetchConversations();
+
+    const found = data.find(
+      (item) => String(item.id) === String(conversationId)
+    );
+
+    if (found) {
+      setActiveConversation(found);
+    } else if (conversation?.id) {
+      setActiveConversation(conversation);
     }
 
+    setNewConversationOpen(false);
+  } catch (err) {
+    console.error("Failed to start conversation:", err);
+    alert(err.response?.data?.error || "Failed to start conversation");
+  }
+};
+
+const filteredContacts = useMemo(() => {
+  const q = contactSearch.trim().toLowerCase();
+
+  return contacts.filter((contact) => {
+    const matchesRole = selectedRole === "all" || contact.role === selectedRole;
+
+    const text = [
+      contact.name,
+      contact.email,
+      contact.role,
+      contact.company_name,
+      contact.professional_title,
+      contact.country,
+      contact.city,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return matchesRole && text.includes(q);
+  });
+}, [contacts, contactSearch, selectedRole]);
+
+const getOtherPerson = (conversation) => {
+  if (!conversation) return {};
+
+  if (conversation.other_user_id) {
     return {
-      name: conversation.candidate_name,
-      email: conversation.candidate_email,
-      image: conversation.candidate_image,
+      id: conversation.other_user_id,
+      name: conversation.other_user_name,
+      email: conversation.other_user_email,
+      image: conversation.other_user_image,
     };
+  }
+
+  const currentId = Number(currentUser.id);
+
+  const senderId = Number(conversation.sender_id);
+  const receiverId = Number(conversation.receiver_id);
+
+  if (senderId && receiverId) {
+    const otherId = senderId === currentId ? receiverId : senderId;
+
+    return {
+      id: otherId,
+      name:
+        senderId === currentId
+          ? conversation.receiver_name
+          : conversation.sender_name,
+      email:
+        senderId === currentId
+          ? conversation.receiver_email
+          : conversation.sender_email,
+      image:
+        senderId === currentId
+          ? conversation.receiver_image
+          : conversation.sender_image,
+    };
+  }
+
+  if (currentUser.role === "candidate") {
+    return {
+      id: conversation.employer_id,
+      name: conversation.employer_name,
+      email: conversation.employer_email,
+      image: conversation.employer_image,
+    };
+  }
+
+  return {
+    id: conversation.candidate_id || conversation.employer_id,
+    name:
+      conversation.candidate_name ||
+      conversation.employer_name ||
+      conversation.receiver_name ||
+      conversation.sender_name,
+    email:
+      conversation.candidate_email ||
+      conversation.employer_email ||
+      conversation.receiver_email ||
+      conversation.sender_email,
+    image:
+      conversation.candidate_image ||
+      conversation.employer_image ||
+      conversation.receiver_image ||
+      conversation.sender_image,
   };
+};
 
   const filteredConversations = useMemo(() => {
     const q = search.trim().toLowerCase();
-
     if (!q) return conversations;
 
     return conversations.filter((conversation) => {
@@ -77,28 +215,28 @@ function Messages() {
       setLoadingConversations(true);
 
       const res = await api.get("/api/messages/conversations");
-      const data = res.data || [];
+      const data = Array.isArray(res.data) ? res.data : res.data.conversations || [];
 
       setConversations(data);
-
-      if (!activeConversation && data.length > 0) {
-        setActiveConversation(data[0]);
-      }
+      return data;
     } catch (error) {
       console.error("Failed to load conversations:", error);
+      return [];
     } finally {
       setLoadingConversations(false);
     }
   };
 
   const fetchMessages = async (conversation) => {
-    if (!conversation) return;
+    if (!conversation?.id) return;
 
     try {
       setLoadingMessages(true);
 
       const res = await api.get(`/api/messages/conversations/${conversation.id}`);
-      setMessages(res.data || []);
+      const data = Array.isArray(res.data) ? res.data : res.data.messages || [];
+
+      setMessages(data);
 
       await api.patch(`/api/messages/conversations/${conversation.id}/read`);
       await fetchConversations();
@@ -109,10 +247,57 @@ function Messages() {
     }
   };
 
+const openConversationFromUrl = async (data) => {
+  if (!data.length) return;
+
+  if (conversationIdFromUrl) {
+    const found = data.find(
+      (item) => String(item.id) === String(conversationIdFromUrl)
+    );
+
+    if (found) {
+      setActiveConversation(found);
+      return;
+    }
+  }
+
+  const targetUserId = employerIdFromUrl || candidateIdFromUrl;
+
+  if (targetUserId) {
+    const found = data.find((item) => {
+      const other = getOtherPerson(item);
+
+      const sameUser =
+        String(other.id) === String(targetUserId) ||
+        String(item.sender_id) === String(targetUserId) ||
+        String(item.receiver_id) === String(targetUserId) ||
+        String(item.employer_id) === String(targetUserId) ||
+        String(item.candidate_id) === String(targetUserId);
+
+      const sameJob = jobIdFromUrl
+        ? String(item.job_id) === String(jobIdFromUrl)
+        : true;
+
+      return sameUser && sameJob;
+    });
+
+    if (found) {
+      setActiveConversation(found);
+      return;
+    }
+  }
+
+  setActiveConversation((prev) => prev || data[0]);
+};
   useEffect(() => {
-    fetchConversations();
+    const init = async () => {
+      const data = await fetchConversations();
+      await openConversationFromUrl(data);
+    };
+
+    init();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location.search]);
 
   useEffect(() => {
     fetchMessages(activeConversation);
@@ -171,25 +356,27 @@ function Messages() {
             <span>{t("messagesPage.unread")}</span>
           </div>
 
-          <button
-            type="button"
-            style={refreshButtonStyle}
-            onClick={fetchConversations}
-          >
+          <button type="button" style={refreshButtonStyle} onClick={fetchConversations}>
             <RefreshCw size={16} />
             {t("messagesPage.refresh")}
+          </button>
+          <button
+            type="button"
+            style={newConversationButtonStyle}
+            onClick={openNewConversation}
+          >
+            <Plus size={16} />
+            New Conversation
           </button>
         </div>
 
         <div style={layoutStyle}>
           <aside style={sidebarStyle}>
             <div style={sidebarHeaderStyle}>
-              <div>
-                <h3 style={panelTitleStyle}>{t("messagesPage.conversations")}</h3>
-                <p style={panelSubtitleStyle}>
-                  {t("messagesPage.conversationsSubtitle")}
-                </p>
-              </div>
+              <h3 style={panelTitleStyle}>{t("messagesPage.conversations")}</h3>
+              <p style={panelSubtitleStyle}>
+                {t("messagesPage.conversationsSubtitle")}
+              </p>
             </div>
 
             <div style={searchBoxStyle}>
@@ -204,10 +391,7 @@ function Messages() {
 
             <div style={conversationListStyle}>
               {loadingConversations ? (
-                <EmptyState
-                  icon={<RefreshCw size={32} />}
-                  title={t("messagesPage.loading")}
-                />
+                <EmptyState icon={<RefreshCw size={32} />} title={t("messagesPage.loading")} />
               ) : filteredConversations.length === 0 ? (
                 <EmptyState
                   icon={<Inbox size={34} />}
@@ -234,9 +418,7 @@ function Messages() {
                       <div style={conversationBodyStyle}>
                         <div style={conversationTopLineStyle}>
                           <strong style={conversationNameStyle}>
-                            {other.name ||
-                              other.email ||
-                              t("messagesPage.unknownUser")}
+                            {other.name || other.email || t("messagesPage.unknownUser")}
                           </strong>
 
                           <span style={conversationTimeStyle}>
@@ -247,21 +429,17 @@ function Messages() {
                         <div style={conversationMetaStyle}>
                           <Briefcase size={13} />
                           <span>
-                            {conversation.job_title ||
-                              t("messagesPage.generalChat")}
+                            {conversation.job_title || t("messagesPage.generalChat")}
                           </span>
                         </div>
 
                         <div style={conversationPreviewStyle}>
-                          {conversation.last_message ||
-                            t("messagesPage.noMessagesYet")}
+                          {conversation.last_message || t("messagesPage.noMessagesYet")}
                         </div>
                       </div>
 
                       {conversation.unread_count > 0 && (
-                        <span style={unreadBadgeStyle}>
-                          {conversation.unread_count}
-                        </span>
+                        <span style={unreadBadgeStyle}>{conversation.unread_count}</span>
                       )}
                     </button>
                   );
@@ -297,8 +475,7 @@ function Messages() {
                       </h3>
 
                       <p style={chatSubtitleStyle}>
-                        {activeConversation.job_title ||
-                          t("messagesPage.generalChat")}
+                        {activeConversation.job_title || t("messagesPage.generalChat")}
                       </p>
                     </div>
                   </div>
@@ -311,10 +488,7 @@ function Messages() {
 
                 <div style={messagesBoxStyle}>
                   {loadingMessages ? (
-                    <EmptyState
-                      icon={<RefreshCw size={32} />}
-                      title={t("messagesPage.loading")}
-                    />
+                    <EmptyState icon={<RefreshCw size={32} />} title={t("messagesPage.loading")} />
                   ) : messages.length === 0 ? (
                     <EmptyState
                       icon={<MessageCircle size={38} />}
@@ -323,8 +497,7 @@ function Messages() {
                     />
                   ) : (
                     messages.map((message) => {
-                      const mine =
-                        Number(message.sender_id) === Number(currentUser.id);
+                      const mine = Number(message.sender_id) === Number(currentUser.id);
 
                       return (
                         <div
@@ -387,6 +560,85 @@ function Messages() {
           </section>
         </div>
       </div>
+
+      {newConversationOpen && (
+  <div style={modalOverlayStyle} onClick={() => setNewConversationOpen(false)}>
+    <div style={newConversationModalStyle} onClick={(e) => e.stopPropagation()}>
+      <div style={modalHeaderStyle}>
+        <div>
+          <h2 style={modalTitleStyle}>Start New Conversation</h2>
+          <p style={modalSubtitleStyle}>
+            Select a candidate, employer, or recruiter to message.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          style={modalCloseButtonStyle}
+          onClick={() => setNewConversationOpen(false)}
+        >
+          <X size={18} />
+        </button>
+      </div>
+
+      <div style={modalControlsStyle}>
+        <div style={searchBoxStyle}>
+          <Search size={16} />
+          <input
+            value={contactSearch}
+            onChange={(e) => setContactSearch(e.target.value)}
+            placeholder="Search contacts..."
+            style={searchInputStyle}
+          />
+        </div>
+
+        <select
+          value={selectedRole}
+          onChange={(e) => setSelectedRole(e.target.value)}
+          style={roleSelectStyle}
+        >
+          <option value="all">All contacts</option>
+          <option value="candidate">Candidates</option>
+          <option value="employer">Employers</option>
+          <option value="recruiter">Recruiters</option>
+        </select>
+      </div>
+
+      <div style={contactsListStyle}>
+        {contactsLoading ? (
+          <EmptyState icon={<RefreshCw size={32} />} title="Loading contacts..." />
+        ) : filteredContacts.length === 0 ? (
+          <EmptyState icon={<Users size={34} />} title="No contacts found" />
+        ) : (
+          filteredContacts.map((contact) => (
+            <button
+              key={contact.id}
+              type="button"
+              style={contactItemStyle}
+              onClick={() => startConversationWithContact(contact)}
+            >
+              <Avatar
+                name={contact.name || contact.email}
+                image={contact.profile_image || contact.company_logo}
+              />
+
+              <div style={contactBodyStyle}>
+                <strong>{contact.name || contact.email}</strong>
+                <span>
+                  {contact.role}
+                  {contact.company_name ? ` • ${contact.company_name}` : ""}
+                </span>
+                <small>{contact.email}</small>
+              </div>
+
+              <MessageCircle size={17} />
+            </button>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+)}
     </DashboardLayout>
   );
 }
@@ -406,6 +658,9 @@ function Avatar({ name, image, large = false, small = false }) {
           borderRadius: large ? 18 : 14,
           objectFit: "cover",
           border: "1px solid #e2e8f0",
+        }}
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
         }}
       />
     );
@@ -457,10 +712,7 @@ function formatShortDate(date) {
   });
 }
 
-const pageShellStyle = {
-  display: "grid",
-  gap: "18px",
-};
+const pageShellStyle = { display: "grid", gap: "18px" };
 
 const summaryBarStyle = {
   display: "flex",
@@ -472,6 +724,7 @@ const summaryBarStyle = {
   background: "#ffffff",
   border: "1px solid #e2e8f0",
   boxShadow: "0 12px 30px rgba(15, 23, 42, 0.05)",
+  flexWrap: "wrap",
 };
 
 const summaryItemStyle = {
@@ -569,7 +822,6 @@ const conversationItemStyle = {
   alignItems: "flex-start",
   gap: "11px",
   position: "relative",
-  transition: "all 0.2s ease",
 };
 
 const activeConversationStyle = {
@@ -578,10 +830,7 @@ const activeConversationStyle = {
   boxShadow: "0 10px 25px rgba(37, 99, 235, 0.12)",
 };
 
-const conversationBodyStyle = {
-  minWidth: 0,
-  flex: 1,
-};
+const conversationBodyStyle = { minWidth: 0, flex: 1 };
 
 const conversationTopLineStyle = {
   display: "flex",
@@ -689,8 +938,7 @@ const chatHeaderMetaStyle = {
 const messagesBoxStyle = {
   flex: 1,
   overflowY: "auto",
-  background:
-    "linear-gradient(180deg, #f8fafc 0%, #ffffff 55%, #f8fafc 100%)",
+  background: "linear-gradient(180deg, #f8fafc 0%, #ffffff 55%, #f8fafc 100%)",
   padding: "20px",
   display: "grid",
   alignContent: "start",
@@ -796,6 +1044,109 @@ const avatarStyle = {
   alignItems: "center",
   justifyContent: "center",
   fontWeight: 900,
+};
+
+const newConversationButtonStyle = {
+  border: "none",
+  background: "#2563eb",
+  color: "#fff",
+  borderRadius: "999px",
+  padding: "9px 13px",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "7px",
+  cursor: "pointer",
+  fontWeight: 800,
+};
+
+const modalOverlayStyle = {
+  position: "fixed",
+  inset: 0,
+  background: "rgba(15, 23, 42, 0.58)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  padding: 20,
+  zIndex: 5000,
+};
+
+const newConversationModalStyle = {
+  width: "100%",
+  maxWidth: 720,
+  maxHeight: "88vh",
+  overflowY: "auto",
+  background: "#fff",
+  borderRadius: 26,
+  boxShadow: "0 30px 80px rgba(15, 23, 42, 0.25)",
+};
+
+const modalHeaderStyle = {
+  padding: 22,
+  borderBottom: "1px solid #e5e7eb",
+  display: "flex",
+  justifyContent: "space-between",
+  gap: 16,
+};
+
+const modalTitleStyle = {
+  margin: 0,
+  color: "#0f172a",
+};
+
+const modalSubtitleStyle = {
+  margin: "6px 0 0",
+  color: "#64748b",
+};
+
+const modalCloseButtonStyle = {
+  width: 38,
+  height: 38,
+  border: "none",
+  borderRadius: 999,
+  background: "#f1f5f9",
+  cursor: "pointer",
+};
+
+const modalControlsStyle = {
+  padding: 16,
+  display: "grid",
+  gridTemplateColumns: "1fr 180px",
+  gap: 12,
+};
+
+const roleSelectStyle = {
+  border: "1px solid #dbe3ef",
+  borderRadius: 14,
+  padding: "0 12px",
+  fontWeight: 800,
+  color: "#334155",
+};
+
+const contactsListStyle = {
+  padding: "0 16px 16px",
+  display: "grid",
+  gap: 10,
+};
+
+const contactItemStyle = {
+  width: "100%",
+  border: "1px solid #e5e7eb",
+  background: "#fff",
+  borderRadius: 18,
+  padding: 14,
+  display: "flex",
+  alignItems: "center",
+  gap: 12,
+  cursor: "pointer",
+  textAlign: "left",
+};
+
+const contactBodyStyle = {
+  flex: 1,
+  minWidth: 0,
+  display: "grid",
+  gap: 3,
+  color: "#64748b",
 };
 
 export default Messages;

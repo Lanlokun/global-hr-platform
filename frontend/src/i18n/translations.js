@@ -1123,6 +1123,16 @@ export const translations = {
     individual: "Individual",
     company: "Company",
 
+    recruiterWorkspace: "Recruiter Workspace",
+    recruiterWorkspaceDesc:
+    "Manage talent evaluations, recommendations, and hiring workflows.",
+
+    talent: "Talent",
+    recommendations: "Recommendations",
+
+    searchPlaceholderRecruiter:
+    "Search talent, jobs, recommendations...",
+
     unreadNotifications: "unread",
     allCaughtUp: "All caught up",
     new: "New",
@@ -3277,6 +3287,18 @@ export const translations = {
     withdrawApplicationMessage:
     "您确定要撤回“{{job}}”的申请吗？此操作无法撤销。",
     thisJob: "该职位",
+
+    recruiterWorkspace: "招聘顾问工作台",
+
+    recruiterWorkspaceDesc:
+    "管理人才评估、推荐流程和招聘工作。",
+
+    talent: "人才库",
+
+    recommendations: "推荐",
+
+    searchPlaceholderRecruiter:
+    "搜索人才、职位、推荐...",
 
     messagesPage: {
     title: "消息",

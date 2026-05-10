@@ -12,24 +12,32 @@ const {
 exports.signup = async (req, res) => {
   const { name, email, password, role, country } = req.body;
 
+  const client = await db.connect();
+
   try {
-    if (!["candidate", "employer"].includes(role)) {
+    if (!["candidate", "employer", "recruiter"].includes(role)) {
       return res.status(400).json({ error: "Invalid signup role" });
     }
 
-    const existing = await db.query(
+    await client.query("BEGIN");
+
+    const existing = await client.query(
       "SELECT id FROM users WHERE email = $1",
       [email]
     );
 
     if (existing.rows.length > 0) {
-      return res.status(400).json({ error: "Email already exists" });
+      await client.query("ROLLBACK");
+
+      return res.status(400).json({
+        error: "Email already exists",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomBytes(32).toString("hex");
 
-    const result = await db.query(
+    const result = await client.query(
       `
       INSERT INTO users (
         name,
@@ -41,13 +49,63 @@ exports.signup = async (req, res) => {
         email_verification_token,
         email_verification_expires
       )
-      VALUES ($1, $2, $3, $4, $5, false, $6, NOW() + INTERVAL '24 hours')
-      RETURNING id, name, email, role, country, company_id, professional_title, skills
+      VALUES (
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
+        false,
+        $6,
+        NOW() + INTERVAL '24 hours'
+      )
+      RETURNING
+        id,
+        name,
+        email,
+        role,
+        country,
+        company_id,
+        professional_title,
+        skills
       `,
-      [name, email, hashedPassword, role, country, verificationToken]
+      [
+        name,
+        email,
+        hashedPassword,
+        role,
+        country,
+        verificationToken,
+      ]
     );
 
     const user = result.rows[0];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Create recruiter profile automatically
+    |--------------------------------------------------------------------------
+    */
+
+    if (role === "recruiter") {
+      await client.query(
+        `
+        INSERT INTO recruiters (
+          user_id,
+          created_at,
+          updated_at
+        )
+        VALUES (
+          $1,
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP
+        )
+        `,
+        [user.id]
+      );
+    }
+
+    await client.query("COMMIT");
 
     try {
       await sendVerificationEmail({
@@ -60,12 +118,20 @@ exports.signup = async (req, res) => {
     }
 
     res.json({
-      message: "Account created. Please check your email to verify your account.",
+      message:
+        "Account created. Please check your email to verify your account.",
       user,
     });
   } catch (err) {
+    await client.query("ROLLBACK");
+
     console.error("SIGNUP error:", err);
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message,
+    });
+  } finally {
+    client.release();
   }
 };
 

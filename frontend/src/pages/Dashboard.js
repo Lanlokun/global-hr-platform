@@ -13,6 +13,12 @@ import CandidateOpportunities from "./candidate/CandidateOpportunities";
 import CandidateApplications from "./candidate/CandidateApplications";
 import CandidateProfile from "./candidate/CandidateProfile";
 
+import RecruiterOverview from "./recruiter/RecruiterOverview";
+import RecruiterTalent from "./recruiter/RecruiterTalent";
+import RecruiterJobs from "./recruiter/RecruiterJobs";
+import RecruiterRecommendations from "./recruiter/RecruiterRecommendations";
+import RecruiterSettings from "./recruiter/RecruiterSettings";
+
 import Messages from "./messages/Messages";
 
 function Dashboard() {
@@ -47,6 +53,20 @@ function Dashboard() {
 
   if (user.role === "admin") {
     return <Navigate to="/admin" replace />;
+  }
+
+  if (user.role === "recruiter") {
+    return (
+      <Routes>
+        <Route path="/" element={<Navigate to="overview" replace />} />
+        <Route path="/overview" element={<RecruiterOverview />} />
+        <Route path="/talent" element={<RecruiterTalent />} />
+        <Route path="/jobs" element={<RecruiterJobs />} />
+        <Route path="/recommendations" element={<RecruiterRecommendations />} />
+        <Route path="/messages" element={<Messages />} />
+        <Route path="/settings" element={<RecruiterSettings />} />
+      </Routes>
+    );
   }
 
   return <div>{t("noDashboard") || "No dashboard available"}</div>;

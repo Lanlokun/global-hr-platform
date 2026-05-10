@@ -8,6 +8,7 @@ const {
   startConversation,
   sendMessage,
   markConversationRead,
+  getMessageContacts,
 } = require("../controllers/messageController");
 
 router.get("/conversations", authMiddleware, getConversations);
@@ -15,5 +16,5 @@ router.get("/conversations/:conversationId", authMiddleware, getConversationMess
 router.post("/conversations", authMiddleware, startConversation);
 router.post("/conversations/:conversationId", authMiddleware, sendMessage);
 router.patch("/conversations/:conversationId/read", authMiddleware, markConversationRead);
-
+router.get("/contacts", authMiddleware, getMessageContacts);
 module.exports = router;
