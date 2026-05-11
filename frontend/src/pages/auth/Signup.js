@@ -1,24 +1,30 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getData } from "country-list";
+
 import AuthInput from "../../components/auth/AuthInput";
 import PasswordInput from "../../components/auth/PasswordInput";
 import AuthButton from "../../components/auth/AuthButton";
 import AuthFooter from "../../components/auth/AuthFooter";
-import "../../components/auth/itss-auth.css";
-import { useLanguage } from "../../context/LanguageContext";
 import LanguageSwitcher from "../../components/ui/LanguageSwitcher";
 
+import { useLanguage } from "../../context/LanguageContext";
+import "../../components/auth/itss-auth.css";
 
 function Signup() {
-
   const navigate = useNavigate();
   const { t } = useLanguage();
+
+  const countries = useMemo(() => {
+    return getData().sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     role: "candidate",
     country: "",
   });
@@ -37,7 +43,9 @@ function Signup() {
           : t("fullNameRequired");
     }
 
-    if (!form.email.trim()) newErrors.email = t("emailRequired");
+    if (!form.email.trim()) {
+      newErrors.email = t("emailRequired");
+    }
 
     if (!form.password.trim()) {
       newErrors.password = t("passwordRequired");
@@ -45,7 +53,15 @@ function Signup() {
       newErrors.password = t("passwordMinLength");
     }
 
-    if (!form.country.trim()) newErrors.country = t("countryRequired");
+    if (!form.confirmPassword.trim()) {
+      newErrors.confirmPassword = "Please confirm your password";
+    } else if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    if (!form.country.trim()) {
+      newErrors.country = t("countryRequired");
+    }
 
     return newErrors;
   };
@@ -60,7 +76,18 @@ function Signup() {
     try {
       setLoading(true);
 
-      await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/signup`, form);
+      const payload = {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role,
+        country: form.country,
+      };
+
+      await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/auth/signup`,
+        payload
+      );
 
       navigate("/verify-email", {
         state: {
@@ -80,10 +107,24 @@ function Signup() {
       role,
       name: "",
     }));
+
     setErrors((prev) => ({
       ...prev,
       name: "",
     }));
+
+    setMessage("");
+  };
+
+  const getNameLabel = () => {
+    if (form.role === "employer") return t("companyName");
+    return t("fullName");
+  };
+
+  const getNamePlaceholder = () => {
+    if (form.role === "employer") return t("companyNamePlaceholder");
+    if (form.role === "recruiter") return "Senior Technical Recruiter";
+    return t("fullNamePlaceholder");
   };
 
   return (
@@ -93,7 +134,7 @@ function Signup() {
           International Talent Space Station
         </Link>
 
-       <div className="itss-auth-nav-actions">
+        <div className="itss-auth-nav-actions">
           <LanguageSwitcher />
 
           <Link className="itss-auth-nav-link" to="/login">
@@ -106,24 +147,14 @@ function Signup() {
         <div className="itss-auth-left">
           <div className="itss-auth-badge">{t("panAfricanAccess")}</div>
 
-          <h1 className="itss-auth-title">
-            {t("signupHeroTitle")}
-          </h1>
+          <h1 className="itss-auth-title">{t("signupHeroTitle")}</h1>
 
-          <p className="itss-auth-subtitle">
-            {t("signupHeroSubtitle")}
-          </p>
+          <p className="itss-auth-subtitle">{t("signupHeroSubtitle")}</p>
 
           <div className="itss-auth-feature-list">
-            <div className="itss-auth-feature">
-              {t("signupFeature1")}
-            </div>
-            <div className="itss-auth-feature">
-              {t("signupFeature2")}
-            </div>
-            <div className="itss-auth-feature">
-              {t("signupFeature3")}
-            </div>
+            <div className="itss-auth-feature">{t("signupFeature1")}</div>
+            <div className="itss-auth-feature">{t("signupFeature2")}</div>
+            <div className="itss-auth-feature">{t("signupFeature3")}</div>
           </div>
         </div>
 
@@ -135,7 +166,7 @@ function Signup() {
 
           {message && <p className="itss-auth-message">{message}</p>}
 
-          <div className="itss-role-tabs">
+          <div className="itss-role-tabs itss-role-tabs-inline">
             <button
               type="button"
               className={`itss-role-tab ${
@@ -155,18 +186,29 @@ function Signup() {
             >
               {t("company")}
             </button>
+
+            <button
+              type="button"
+              className={`itss-role-tab ${
+                form.role === "recruiter" ? "active" : ""
+              }`}
+              onClick={() => setRole("recruiter")}
+            >
+              Recruiter
+            </button>
           </div>
 
           <AuthInput
-            label={form.role === "employer" ? t("companyName") : t("fullName")}
+            label={getNameLabel()}
             name="name"
-            placeholder={
-              form.role === "employer"
-                ? t("companyNamePlaceholder")
-                : t("fullNamePlaceholder")
-            }
+            placeholder={getNamePlaceholder()}
             value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
+            }
             error={errors.name}
           />
 
@@ -176,7 +218,12 @@ function Signup() {
             type="email"
             placeholder={t("emailExample")}
             value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                email: e.target.value,
+              })
+            }
             error={errors.email}
           />
 
@@ -185,18 +232,56 @@ function Signup() {
             name="password"
             placeholder={t("passwordCreate")}
             value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                password: e.target.value,
+              })
+            }
             error={errors.password}
           />
 
-          <AuthInput
-            label={t("country")}
-            name="country"
-            placeholder={form.role === "employer" ? "Kenya" : "Japan"}
-            value={form.country}
-            onChange={(e) => setForm({ ...form, country: e.target.value })}
-            error={errors.country}
+          <PasswordInput
+            label="Confirm Password"
+            name="confirmPassword"
+            placeholder="Re-enter your password"
+            value={form.confirmPassword}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                confirmPassword: e.target.value,
+              })
+            }
+            error={errors.confirmPassword}
           />
+
+          <label className="itss-auth-field">
+            <span>{t("country")}</span>
+
+            <select
+              name="country"
+              className={`itss-auth-input ${errors.country ? "error" : ""}`}
+              value={form.country}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  country: e.target.value,
+                })
+              }
+            >
+              <option value="">Select country</option>
+
+              {countries.map((country) => (
+                <option key={country.code} value={country.name}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+
+            {errors.country && (
+              <small className="itss-auth-error">{errors.country}</small>
+            )}
+          </label>
 
           <AuthButton onClick={handleSignup} loading={loading}>
             {t("createAccount")}
@@ -212,6 +297,5 @@ function Signup() {
     </div>
   );
 }
-
 
 export default Signup;

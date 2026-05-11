@@ -104,6 +104,778 @@ export const translations = {
     workMode: "Work Mode",
     postedOn: "Posted On",
 
+    recruiterSettings: {
+    title: "Recruiter Settings",
+    subtitle:
+        "Manage your profile, recruiter preferences, messaging templates, workflow defaults, and security settings.",
+
+    header: {
+        title: "Workspace Configuration",
+        subtitle:
+        "Customize how you work with candidates, employers, and recommendations.",
+    },
+
+    actions: {
+        reset: "Reset",
+        saving: "Saving...",
+        saveChanges: "Save Changes",
+        uploading: "Uploading...",
+        uploadProfileImage: "Upload Profile Image",
+        manageSecurity: "Manage Security",
+    },
+
+    states: {
+        loadingSettings: "Loading recruiter settings...",
+    },
+
+    stats: {
+        recommendations: "Recommendations",
+        totalSubmitted: "Total submitted",
+        accepted: "Accepted",
+        employerAccepted: "Employer accepted",
+        avgMatch: "Avg Match",
+        recommendationQuality: "Recommendation quality",
+        responseTime: "Response Time",
+        averageRecruiterResponse: "Average recruiter response",
+    },
+
+    profile: {
+        title: "Profile Settings",
+        subtitle:
+        "Your public recruiter identity and contact information.",
+    },
+
+    preferences: {
+        title: "Recruiter Preferences",
+        subtitle:
+        "Define the roles, countries, and candidate profiles you focus on.",
+    },
+
+    messaging: {
+        title: "Messaging Templates",
+        subtitle:
+        "Set reusable messages for candidates and employers.",
+    },
+
+    notifications: {
+        title: "Notifications",
+        subtitle:
+        "Choose what updates you want to receive.",
+
+        candidateAssigned: "New candidate assigned",
+        employerReplies: "Employer replies",
+        recommendationReviewed: "Recommendation reviewed",
+        candidateMessages: "Candidate messages",
+        jobMatchAlerts: "Job match alerts",
+        weeklySummary: "Weekly performance summary",
+    },
+
+    defaults: {
+        title: "Recommendation Defaults",
+        subtitle:
+        "Configure how recommendations are prepared.",
+
+        recruiter: "Recruiter",
+        autoIncludeAiNotes: "Auto-include AI notes",
+        autoNotifyEmployer: "Auto-notify employer",
+    },
+
+    security: {
+        title: "Security",
+        subtitle:
+        "Account security and access controls.",
+
+        password: "Password",
+        passwordManaged:
+        "Managed from account security",
+
+        twoFactor:
+        "Two-factor authentication",
+
+        notEnabled: "Not enabled",
+
+        activeSessions: "Active sessions",
+
+        currentSession:
+        "Current browser session",
+    },
+
+    fields: {
+        fullName: "Full Name",
+        email: "Email",
+        phone: "Phone",
+        professionalTitle:
+        "Professional Title",
+        city: "City",
+        country: "Country",
+
+        recruiterBio: "Recruiter Bio",
+
+        preferredIndustries:
+        "Preferred Industries",
+
+        preferredCountries:
+        "Preferred Candidate Countries",
+
+        preferredJobTypes:
+        "Preferred Job Types",
+
+        preferredWorkMode:
+        "Preferred Work Mode",
+
+        seniorityFocus:
+        "Seniority Focus",
+
+        specializationSkills:
+        "Specialization Skills",
+
+        defaultCandidateMessage:
+        "Default Candidate Message",
+
+        defaultEmployerMessage:
+        "Default Employer Follow-up Message",
+
+        autoSignature:
+        "Auto Signature",
+
+        availabilityStatus:
+        "Availability Status",
+
+        defaultRecommendationNote:
+        "Default Recommendation Note",
+
+        followUpDays:
+        "Follow-up reminder interval, days",
+    },
+
+    placeholders: {
+        professionalTitle:
+        "Senior Talent Recruiter",
+
+        recruiterBio:
+        "Write a short introduction about your recruiting focus.",
+    },
+
+    options: {
+        remote: "Remote",
+        hybrid: "Hybrid",
+        onsite: "Onsite",
+
+        junior: "Junior",
+        midLevel: "Mid-level",
+        senior: "Senior",
+        executive: "Executive",
+        all: "All",
+
+        available: "Available",
+        busy: "Busy",
+        away: "Away",
+    },
+
+    alerts: {
+        failedLoadSettings:
+        "Failed to load recruiter settings.",
+
+        invalidImage:
+        "Please upload a valid image file.",
+
+        imageUploaded:
+        "Profile image uploaded.",
+
+        failedUploadImage:
+        "Failed to upload image.",
+
+        settingsSaved:
+        "Recruiter settings saved successfully.",
+
+        failedSaveSettings:
+        "Failed to save settings.",
+
+        changesReset:
+        "Changes reset.",
+
+        securityComingSoon:
+        "Security settings will be available soon.",
+    },
+    },
+
+    recruiterRecommendations: {
+        title: "Talent Recommendations",
+        subtitle: "Track recommendation outcomes, employer feedback, AI insights, and recruiter performance.",
+
+        settings: {
+            poweredBySettings: "Recommendation messages and follow-up timing are powered by your recruiter settings.",
+        },
+
+        stats: {
+            total: "Total",
+            recommendationsSent: "Recommendations sent",
+            avgMatch: "Avg Match",
+            recommendationQuality: "Recommendation quality",
+            acceptance: "Acceptance",
+            accepted: "accepted",
+            employerViewed: "Employer Viewed",
+            engagementRate: "Engagement rate",
+        },
+
+        pipeline: {
+            title: "Recommendation Pipeline",
+            subtitle: "Open a recommendation for full details.",
+        },
+
+        filters: {
+            searchPlaceholder: "Search candidate, job, company...",
+            allStatus: "All status",
+            recommended: "Recommended",
+            reviewed: "Reviewed",
+            accepted: "Accepted",
+            rejected: "Rejected",
+            allScores: "All scores",
+            high: "High, 80%+",
+            medium: "Medium, 50-79%",
+            low: "Low, below 50%",
+            allStages: "All stages",
+            submitted: "Submitted",
+            employerReview: "Employer Review",
+            newest: "Newest",
+            highestMatch: "Highest match",
+            employerRating: "Employer rating",
+            fastestResponse: "Fastest response",
+        },
+
+        actions: {
+            reset: "Reset",
+            viewDetails: "View Details",
+            message: "Message",
+            close: "Close",
+            messageEmployer: "Message Employer",
+        },
+
+        labels: {
+            recommendationsFound: "recommendations found",
+            viewed: "Viewed",
+            notViewed: "Not viewed",
+            for: "for",
+            years: "years",
+            days: "days",
+        },
+
+        states: {
+            loadingRecommendations: "Loading recommendations...",
+            noRecommendations: "No recommendations found. Use Match Talent on the Jobs page to recommend candidates.",
+            notAvailable: "Not available",
+            noAiInsight: "No AI insight available yet.",
+            aiNotesDisabled: "AI notes are disabled in recruiter settings.",
+            pendingEmployerFeedback: "Pending employer feedback.",
+            noRatingYet: "No rating yet",
+            pending: "Pending",
+        },
+
+        defaults: {
+            candidate: "Candidate",
+            unnamedCandidate: "Unnamed Candidate",
+            untitledJob: "Untitled Job",
+            jobOpportunity: "Job opportunity",
+            company: "Company",
+            companyNotSpecified: "Company not specified",
+        },
+
+        modal: {
+            recommendationDetails: "Recommendation Details",
+        },
+
+        summary: {
+            matchScore: "Match Score",
+            status: "Status",
+            employerViewed: "Employer Viewed",
+            responseTime: "Response Time",
+        },
+
+        sections: {
+            candidateProfile: "Candidate Profile",
+            jobAndCompany: "Job and Company",
+            aiMatchAnalysis: "AI Match Analysis",
+            recruiterNotes: "Recruiter Notes",
+            employerFeedback: "Employer Feedback",
+            employerMessagePreview: "Employer Message Preview",
+            timeline: "Timeline",
+            workflowSignals: "Workflow Signals",
+        },
+
+        fields: {
+            name: "Name",
+            email: "Email",
+            title: "Title",
+            experience: "Experience",
+            country: "Country",
+            city: "City",
+            location: "Location",
+            workMode: "Work Mode",
+            employmentType: "Employment Type",
+            jobStatus: "Job Status",
+            employer: "Employer",
+            employerEmail: "Employer Email",
+        },
+
+        signals: {
+            workflowStage: "Workflow Stage",
+            employerViewed: "Employer Viewed",
+            followUpWindow: "Follow-up Window",
+            autoNotifyEmployer: "Auto Notify Employer",
+            aiNotes: "AI Notes",
+        },
+
+        timeline: {
+            recommended: "Recommended",
+            employerViewed: "Employer Viewed",
+            reviewed: "Reviewed",
+            accepted: "Accepted",
+            rejected: "Rejected",
+        },
+
+        stages: {
+            submitted: "Submitted",
+            employerReview: "Employer Review",
+            accepted: "Accepted",
+            rejected: "Rejected",
+            recommended: "Recommended",
+            reviewed: "Reviewed",
+        },
+
+        options: {
+            yes: "Yes",
+            no: "No",
+            enabled: "Enabled",
+            disabled: "Disabled",
+        },
+
+        message: {
+            aiMatchInsight: "AI Match Insight",
+            candidate: "Candidate",
+            role: "Role",
+            matchScore: "Match Score",
+            recommendationNote: "Recommendation Note",
+            followUp: "Follow-up",
+            checkBack: "I will check back in",
+        },
+
+        alerts: {
+            failedLoadRecommendations: "Failed to load recommendations.",
+            failedLoadData: "Failed to load recommendation data.",
+            filtersReset: "Filters reset.",
+            noEmployer: "No employer account is linked to this job yet.",
+            conversationOpened: "Employer conversation opened.",
+            redirectingMessages: "Could not open conversation. Redirecting to messages.",
+        },
+        },
+
+    recruiterJobs: {
+    title: "Recruiter Jobs",
+    subtitle: "Browse hiring opportunities, review job details, recommend talent, and post recruiter-led jobs.",
+
+    stats: {
+        totalJobs: "Total Jobs",
+        activeJobs: "Active Jobs",
+        remoteJobs: "Remote Jobs",
+        applications: "Applications",
+        availableRoles: "Available roles",
+        currentlyHiring: "Currently hiring",
+        flexibleRoles: "Flexible roles",
+        totalApplicants: "Total applicants",
+    },
+
+    pipeline: {
+        title: "Job Pipeline",
+        subtitle: "Manage open roles and recommend suitable candidates.",
+        postJob: "Post Job",
+    },
+
+    filters: {
+        searchPlaceholder: "Search jobs by title, company, skill, or location...",
+        allStatus: "All status",
+        active: "Active",
+        pending: "Pending",
+        closed: "Closed",
+        inactive: "Inactive",
+        allWorkModes: "All work modes",
+        remote: "Remote",
+        hybrid: "Hybrid",
+        onsite: "On-site",
+        reset: "Reset",
+        jobsFound: "jobs found",
+        sortBy: "Sort by:",
+        recentlyAdded: "Recently added",
+        mostApplications: "Most applications",
+        highestSalary: "Highest salary",
+    },
+
+    states: {
+        loadingJobs: "Loading jobs...",
+        noJobs: "No jobs found.",
+        noSkills: "No skills listed",
+        noDescription: "No job description provided.",
+        findingMatches: "Finding best matches...",
+        noCandidateMatches: "No candidate matches found.",
+        notSpecified: "Not specified",
+    },
+
+    defaults: {
+        untitledJob: "Untitled Job",
+        company: "Company",
+        companyNotSpecified: "Company not specified",
+        locationNotSpecified: "Location not specified",
+        employmentTypeNotSpecified: "Employment type not specified",
+        workModeNotSpecified: "Work mode not specified",
+        unnamedCandidate: "Unnamed Candidate",
+        roleNotSpecified: "Role not specified",
+    },
+
+    labels: {
+        applicants: "applicants",
+        years: "years",
+    },
+
+    actions: {
+        view: "View",
+        match: "Match",
+        message: "Message",
+        close: "Close",
+        cancel: "Cancel",
+        recommend: "Recommend",
+        matchTalent: "Match Talent",
+        messageEmployer: "Message Employer",
+        postJob: "Post Job",
+        posting: "Posting...",
+    },
+
+    modal: {
+        jobDetails: "Job Details",
+        description: "Description",
+        requiredSkills: "Required Skills",
+        benefits: "Benefits",
+        applicationInstructions: "Application Instructions",
+        matchedTalent: "Matched Talent",
+        recommendedCandidatesFor: "Recommended candidates for",
+        thisJob: "this job",
+        postJob: "Post a Job",
+        createOpening: "Create a recruiter-led job opening.",
+    },
+
+    fields: {
+        company: "Company",
+        location: "Location",
+        employmentType: "Employment Type",
+        workMode: "Work Mode",
+        experienceLevel: "Experience Level",
+        salary: "Salary",
+        status: "Status",
+        created: "Created",
+        expires: "Expires",
+        applications: "Applications",
+        jobTitle: "Job Title",
+        companyId: "Company ID",
+        salaryRange: "Salary Range",
+        requiredSkills: "Required Skills",
+        description: "Description",
+        benefits: "Benefits",
+        applicationInstructions: "Application Instructions",
+    },
+
+    placeholders: {
+        optionalIfRecruiterOwns: "Optional if recruiter owns posting",
+        salaryExample: "e.g. $1000 - $2500",
+        experienceExample: "Junior, Mid-level, Senior",
+        skillsExample: "React, Node.js, PostgreSQL",
+    },
+
+    alerts: {
+        failedLoadJobs: "Failed to load jobs",
+        failedLoadMatches: "Failed to load talent matches",
+        failedRecommend: "Failed to recommend candidate",
+        recommendSuccess: "Candidate recommended successfully.",
+        noEmployer: "No employer account is linked to this job yet.",
+        requiredFields: "Job title and description are required.",
+        failedPostJob: "Failed to post job",
+        recommendationNotes: "Add recommendation notes for",
+        thisCandidate: "this candidate",
+    },
+    },
+
+    recruiterOverview: {
+    title: "Recruiter Workspace",
+    subtitle:
+        "Manage assigned talent, evaluate readiness, and connect strong candidates to suitable opportunities.",
+
+    hero: {
+        badge: "Recruiter Command Center",
+        welcomeBack: "Welcome back",
+        text:
+        "Focus on quality matches, thoughtful recommendations, and timely employer follow-ups.",
+    },
+
+    actions: {
+        matchTalent: "Match Talent",
+        settings: "Settings",
+        viewAllRecommendations: "View all recommendations",
+    },
+
+    stats: {
+        assignedTalent: "Assigned Talent",
+        assignedTalentSubtitle: "Candidates available for review",
+
+        evaluatedTalent: "Evaluated Talent",
+        evaluatedTalentSubtitle: "Profiles reviewed or scored",
+
+        openJobs: "Open Jobs",
+        openJobsSubtitle: "Active employer opportunities",
+
+        recommendations: "Recommendations",
+        recommendationsSubtitle: "Talent recommendations sent",
+    },
+
+    performance: {
+        title: "Performance Snapshot",
+        subtitle:
+        "Recent recommendation quality and employer engagement.",
+
+        averageMatch: "Average Match",
+        acceptanceRate: "Acceptance Rate",
+        employerViewed: "Employer Viewed",
+        followUpWindow: "Follow-up Window",
+    },
+
+    health: {
+        title: "Workspace Health",
+        subtitle:
+        "Settings that control your recommendation workflow.",
+
+        defaultRecommendationNote: "Default recommendation note",
+        employerMessageTemplate: "Employer message template",
+        aiNotesEnabled: "AI notes enabled",
+        autoNotifyEmployer: "Auto notify employer",
+
+        ready: "Ready",
+        missing: "Missing",
+    },
+
+    mission: {
+        title: "Recruiter Mission",
+        subtitle:
+        "A simple workflow for high-quality talent support.",
+
+        step1Title: "Review candidate profiles",
+        step1Text:
+        "Check profile quality, skills, work preferences, and readiness.",
+
+        step2Title: "Evaluate career readiness",
+        step2Text:
+        "Add useful notes and identify the strongest candidate-job alignment.",
+
+        step3Title: "Recommend talent",
+        step3Text:
+        "Send focused recommendations to employers with clear match reasoning.",
+
+        step4Title: "Follow up",
+        step4Text:
+        "Track employer views, feedback, and outcomes after submission.",
+    },
+
+    recentRecommendations: {
+        title: "Recent Recommendations",
+        subtitle: "Latest candidates recommended to employers.",
+        empty: "No recent recommendations yet.",
+    },
+
+    defaults: {
+        unnamedCandidate: "Unnamed Candidate",
+        untitledJob: "Untitled Job",
+        company: "Company",
+    },
+
+    labels: {
+        days: "days",
+    },
+
+    errors: {
+        endpointsNotReady:
+        "Recruiter backend endpoints are not ready yet.",
+        failedLoadOverview:
+        "Failed to load recruiter overview.",
+    },
+    },
+
+    recruiterTalent: {
+    title: "Talent Management",
+    subtitle: "Create, assign, manage, evaluate, and support talent through the recruiter lifecycle.",
+
+    header: {
+        title: "Recruiter Talent Workspace",
+        subtitle: "Manage assigned candidates, add agency talent, and prepare profiles for matching.",
+    },
+
+    actions: {
+        bulkCreate: "Bulk Create",
+        createTalent: "Create Talent",
+        reset: "Reset",
+        view: "View",
+        message: "Message",
+        editTalent: "Edit Talent",
+        removeTalent: "Remove Talent",
+        openMenu: "Open menu",
+        remove: "Remove",
+        edit: "Edit",
+        openConversation: "Open Conversation",
+        saveChanges: "Save Changes",
+        cancel: "Cancel",
+        saving: "Saving...",
+        importing: "Importing...",
+        importTalent: "Import Talent",
+    },
+
+    stats: {
+        totalTalent: "Total Talent",
+        assignedToYou: "Assigned to you",
+        highReadiness: "High Readiness",
+        needsSupport: "Needs Support",
+        seniorTalent: "Senior Talent",
+        ofTotal: "of total",
+    },
+
+    filters: {
+        searchPlaceholder: "Search by name, role, skills, or country...",
+        allExperience: "All experience",
+        junior: "Junior, 0-2 years",
+        mid: "Mid-level, 3-5 years",
+        senior: "Senior, 6+ years",
+        allReadiness: "All readiness",
+        highReadiness: "High readiness",
+        mediumReadiness: "Medium readiness",
+        needsSupport: "Needs support",
+        sortBy: "Sort by:",
+        recentlyAdded: "Recently added",
+        readinessScore: "Readiness score",
+        experience: "Experience",
+    },
+
+    labels: {
+        resultsFound: "results found",
+        gridView: "Grid view",
+        listView: "List view",
+        yearsExperience: "years experience",
+        years: "years",
+        educationAdded: "Education added",
+        educationMissing: "Education missing",
+        readiness: "Readiness",
+    },
+
+    states: {
+        loadingTalent: "Loading talent...",
+        noTalent: "No talent found. Create talent manually or bulk import your agency list.",
+        noSkillsAdded: "No skills added",
+        notSpecified: "Not specified",
+        noSummary: "No summary provided.",
+    },
+
+    defaults: {
+        candidate: "Candidate",
+        unnamedCandidate: "Unnamed Candidate",
+        roleNotSpecified: "Role not specified",
+        locationNotSpecified: "Location not specified",
+    },
+
+    fields: {
+        fullName: "Full Name",
+        email: "Email",
+        phone: "Phone",
+        country: "Country",
+        city: "City",
+        location: "Location",
+        professionalTitle: "Professional Title",
+        desiredJobTitle: "Desired Job Title",
+        yearsOfExperience: "Years of Experience",
+        experience: "Experience",
+        skillsComma: "Skills, comma separated",
+        languages: "Languages",
+        availability: "Availability",
+        preferredWorkMode: "Preferred Work Mode",
+        preferredEmploymentType: "Preferred Employment Type",
+        preferredEmployment: "Preferred Employment",
+        expectedSalary: "Expected Salary",
+        salaryCurrency: "Salary Currency",
+        workAuthorization: "Work Authorization",
+        willingToRelocate: "Willing to Relocate",
+        professionalSummary: "Professional Summary",
+        source: "Source",
+        status: "Status",
+    },
+
+    modal: {
+        professionalSummary: "Professional Summary",
+        candidateDetails: "Candidate Details",
+        skills: "Skills",
+        education: "Education",
+        experience: "Experience",
+        certifications: "Certifications",
+        recruiterAssignment: "Recruiter Assignment",
+    },
+
+    form: {
+        createTitle: "Create Talent",
+        createSubtitle: "Create a candidate profile and automatically assign it to your recruiter workspace.",
+        editTitle: "Edit Talent",
+        editSubtitle: "Update candidate profile information and readiness data.",
+    },
+
+    bulk: {
+        title: "Bulk Create Talent",
+        subtitle: "Paste CSV-style rows. Each talent will be created as a candidate and assigned to you.",
+        validRecords: "valid records detected.",
+    },
+
+    placeholders: {
+        summary: "Write a short candidate summary...",
+    },
+
+    options: {
+        select: "Select",
+        remote: "Remote",
+        hybrid: "Hybrid",
+        onsite: "Onsite",
+        fullTime: "Full-time",
+        partTime: "Part-time",
+        contract: "Contract",
+        internship: "Internship",
+        yes: "Yes",
+        no: "No",
+    },
+
+    pagination: {
+        showing: "Showing",
+        of: "of",
+    },
+
+    confirm: {
+        removeTalent: "Remove this talent from your workspace? This will not delete the candidate globally.",
+    },
+
+    alerts: {
+        failedLoadTalent: "Failed to load talent",
+        filtersReset: "Filters reset.",
+        nameEmailRequired: "Name and email are required.",
+        talentCreated: "Talent created and assigned to you.",
+        failedCreateTalent: "Failed to create talent.",
+        talentUpdated: "Talent updated successfully.",
+        failedUpdateTalent: "Failed to update talent.",
+        talentRemoved: "Talent removed from your workspace.",
+        failedRemoveTalent: "Failed to remove talent.",
+        noValidRecords: "No valid talent records found.",
+        bulkCompleted: "Bulk import completed.",
+        created: "Created",
+        skipped: "skipped",
+        failedBulkCreateTalent: "Failed to bulk create talent.",
+    },
+    },
+
     keyCities: "Key Cities",
     topIndustries: "Top Industries",
     talentHighlights: "Talent Highlights",
@@ -1122,6 +1894,16 @@ export const translations = {
 
     individual: "Individual",
     company: "Company",
+
+    recruiterWorkspace: "Recruiter Workspace",
+    recruiterWorkspaceDesc:
+    "Manage talent evaluations, recommendations, and hiring workflows.",
+
+    talent: "Talent",
+    recommendations: "Recommendations",
+
+    searchPlaceholderRecruiter:
+    "Search talent, jobs, recommendations...",
 
     unreadNotifications: "unread",
     allCaughtUp: "All caught up",
@@ -2632,7 +3414,175 @@ export const translations = {
         },
 
 
+    recruiterRecommendations: {
+            title: "人才推荐",
+            subtitle: "跟踪推荐结果、雇主反馈、AI 洞察和招聘顾问表现。",
 
+            settings: {
+                poweredBySettings: "推荐消息和跟进时间由你的招聘顾问设置控制。",
+            },
+
+            stats: {
+                total: "总数",
+                recommendationsSent: "已发送推荐",
+                avgMatch: "平均匹配度",
+                recommendationQuality: "推荐质量",
+                acceptance: "接受率",
+                accepted: "已接受",
+                employerViewed: "雇主已查看",
+                engagementRate: "互动率",
+            },
+
+            pipeline: {
+                title: "推荐流程",
+                subtitle: "打开推荐记录查看完整详情。",
+            },
+
+            filters: {
+                searchPlaceholder: "搜索候选人、职位、公司...",
+                allStatus: "全部状态",
+                recommended: "已推荐",
+                reviewed: "已查看",
+                accepted: "已接受",
+                rejected: "已拒绝",
+                allScores: "全部评分",
+                high: "高，80% 以上",
+                medium: "中，50-79%",
+                low: "低，低于 50%",
+                allStages: "全部阶段",
+                submitted: "已提交",
+                employerReview: "雇主审核",
+                newest: "最新",
+                highestMatch: "匹配度最高",
+                employerRating: "雇主评分",
+                fastestResponse: "响应最快",
+            },
+
+            actions: {
+                reset: "重置",
+                viewDetails: "查看详情",
+                message: "消息",
+                close: "关闭",
+                messageEmployer: "联系雇主",
+            },
+
+            labels: {
+                recommendationsFound: "条推荐记录",
+                viewed: "已查看",
+                notViewed: "未查看",
+                for: "应聘",
+                years: "年",
+                days: "天",
+            },
+
+            states: {
+                loadingRecommendations: "正在加载推荐记录...",
+                noRecommendations: "未找到推荐记录。请在职位页面使用“匹配人才”来推荐候选人。",
+                notAvailable: "暂无信息",
+                noAiInsight: "暂无 AI 洞察。",
+                aiNotesDisabled: "AI 备注已在招聘顾问设置中关闭。",
+                pendingEmployerFeedback: "等待雇主反馈。",
+                noRatingYet: "暂无评分",
+                pending: "待处理",
+            },
+
+            defaults: {
+                candidate: "候选人",
+                unnamedCandidate: "未命名候选人",
+                untitledJob: "未命名职位",
+                jobOpportunity: "职位机会",
+                company: "公司",
+                companyNotSpecified: "未指定公司",
+            },
+
+            modal: {
+                recommendationDetails: "推荐详情",
+            },
+
+            summary: {
+                matchScore: "匹配分数",
+                status: "状态",
+                employerViewed: "雇主已查看",
+                responseTime: "响应时间",
+            },
+
+            sections: {
+                candidateProfile: "候选人档案",
+                jobAndCompany: "职位与公司",
+                aiMatchAnalysis: "AI 匹配分析",
+                recruiterNotes: "招聘顾问备注",
+                employerFeedback: "雇主反馈",
+                employerMessagePreview: "雇主消息预览",
+                timeline: "时间线",
+                workflowSignals: "流程信号",
+            },
+
+            fields: {
+                name: "姓名",
+                email: "邮箱",
+                title: "职位头衔",
+                experience: "工作经验",
+                country: "国家",
+                city: "城市",
+                location: "地点",
+                workMode: "工作模式",
+                employmentType: "雇佣类型",
+                jobStatus: "职位状态",
+                employer: "雇主",
+                employerEmail: "雇主邮箱",
+            },
+
+            signals: {
+                workflowStage: "流程阶段",
+                employerViewed: "雇主已查看",
+                followUpWindow: "跟进周期",
+                autoNotifyEmployer: "自动通知雇主",
+                aiNotes: "AI 备注",
+            },
+
+            timeline: {
+                recommended: "已推荐",
+                employerViewed: "雇主已查看",
+                reviewed: "已审核",
+                accepted: "已接受",
+                rejected: "已拒绝",
+            },
+
+            stages: {
+                submitted: "已提交",
+                employerReview: "雇主审核",
+                accepted: "已接受",
+                rejected: "已拒绝",
+                recommended: "已推荐",
+                reviewed: "已查看",
+            },
+
+            options: {
+                yes: "是",
+                no: "否",
+                enabled: "已启用",
+                disabled: "已禁用",
+            },
+
+            message: {
+                aiMatchInsight: "AI 匹配洞察",
+                candidate: "候选人",
+                role: "职位",
+                matchScore: "匹配分数",
+                recommendationNote: "推荐备注",
+                followUp: "跟进",
+                checkBack: "我将在以下时间后再次跟进：",
+            },
+
+            alerts: {
+                failedLoadRecommendations: "推荐记录加载失败。",
+                failedLoadData: "推荐数据加载失败。",
+                filtersReset: "筛选已重置。",
+                noEmployer: "该职位尚未关联雇主账号。",
+                conversationOpened: "雇主对话已打开。",
+                redirectingMessages: "无法打开对话，正在跳转到消息页面。",
+            },
+            },
     // zh
     createAccount: "创建账户",
     loginHeroTitle: "欢迎回到 International Talent Space Station",
@@ -2913,6 +3863,249 @@ export const translations = {
     searchApplicantsPlaceholder: "按姓名、职位、技能或国家搜索申请人...",
     allStatuses: "全部状态",
 
+    recruiterJobs: {
+    title: "招聘顾问职位",
+    subtitle: "浏览招聘机会，查看职位详情，推荐人才，并发布招聘顾问负责的职位。",
+
+    stats: {
+        totalJobs: "职位总数",
+        activeJobs: "开放职位",
+        remoteJobs: "远程职位",
+        applications: "申请数",
+        availableRoles: "可用岗位",
+        currentlyHiring: "正在招聘",
+        flexibleRoles: "灵活岗位",
+        totalApplicants: "申请人总数",
+    },
+
+    pipeline: {
+        title: "职位流程",
+        subtitle: "管理开放职位并推荐合适候选人。",
+        postJob: "发布职位",
+    },
+
+    filters: {
+        searchPlaceholder: "按职位、公司、技能或地点搜索...",
+        allStatus: "全部状态",
+        active: "开放中",
+        pending: "待审核",
+        closed: "已关闭",
+        inactive: "未激活",
+        allWorkModes: "全部工作模式",
+        remote: "远程",
+        hybrid: "混合",
+        onsite: "现场办公",
+        reset: "重置",
+        jobsFound: "个职位",
+        sortBy: "排序方式：",
+        recentlyAdded: "最近添加",
+        mostApplications: "申请最多",
+        highestSalary: "薪资最高",
+    },
+
+    pagination: {
+        showing: "显示",
+        of: "共",
+    },
+
+    states: {
+        loadingJobs: "正在加载职位...",
+        noJobs: "未找到职位。",
+        noSkills: "未列出技能",
+        noDescription: "未提供职位描述。",
+        findingMatches: "正在寻找最佳匹配...",
+        noCandidateMatches: "未找到匹配候选人。",
+        notSpecified: "未指定",
+        noBenefits: "未列出福利。",
+        noInstructions: "未提供申请说明。",
+        noDirectSkillOverlap: "暂无直接匹配技能",
+    },
+
+    defaults: {
+        untitledJob: "未命名职位",
+        company: "公司",
+        companyNotSpecified: "未指定公司",
+        locationNotSpecified: "未指定地点",
+        employmentTypeNotSpecified: "未指定雇佣类型",
+        workModeNotSpecified: "未指定工作模式",
+        candidate: "候选人",
+        unnamedCandidate: "未命名候选人",
+        roleNotSpecified: "未指定职位",
+    },
+
+    labels: {
+        applicants: "名申请人",
+        years: "年",
+    },
+
+    actions: {
+        view: "查看",
+        match: "匹配",
+        message: "消息",
+        close: "关闭",
+        cancel: "取消",
+        recommend: "推荐",
+        matchTalent: "匹配人才",
+        messageEmployer: "联系雇主",
+        postJob: "发布职位",
+        posting: "发布中...",
+    },
+
+    modal: {
+        jobDetails: "职位详情",
+        description: "职位描述",
+        requiredSkills: "所需技能",
+        benefits: "福利待遇",
+        applicationInstructions: "申请说明",
+        matchedTalent: "匹配人才",
+        recommendedCandidatesFor: "推荐候选人：",
+        thisJob: "该职位",
+        postJob: "发布职位",
+        createOpening: "创建由招聘顾问负责的职位空缺。",
+    },
+
+    fields: {
+        company: "公司",
+        location: "地点",
+        employmentType: "雇佣类型",
+        workMode: "工作模式",
+        experienceLevel: "经验级别",
+        salary: "薪资",
+        status: "状态",
+        created: "创建时间",
+        expires: "截止时间",
+        applications: "申请数",
+        jobTitle: "职位名称",
+        companyId: "公司 ID",
+        salaryRange: "薪资范围",
+        requiredSkills: "所需技能",
+        description: "职位描述",
+        benefits: "福利待遇",
+        applicationInstructions: "申请说明",
+    },
+
+    placeholders: {
+        optionalIfRecruiterOwns: "如由招聘顾问自行发布，可选填",
+        salaryExample: "例如：$1000 - $2500",
+        experienceExample: "初级、中级、高级",
+        skillsExample: "React、Node.js、PostgreSQL",
+    },
+
+    alerts: {
+        failedLoadJobs: "职位加载失败",
+        failedLoadMatches: "人才匹配加载失败",
+        failedRecommend: "推荐候选人失败",
+        recommendSuccess: "候选人推荐成功。",
+        noEmployer: "该职位尚未关联雇主账号。",
+        requiredFields: "职位名称和职位描述为必填项。",
+        failedPostJob: "职位发布失败",
+        recommendationNotes: "为以下候选人添加推荐备注：",
+        thisCandidate: "该候选人",
+    },
+    },
+
+    recruiterOverview: {
+    title: "招聘顾问工作区",
+    subtitle:
+        "管理已分配人才，评估候选人准备情况，并将优秀候选人与合适机会进行匹配。",
+
+    hero: {
+        badge: "招聘顾问控制中心",
+        welcomeBack: "欢迎回来",
+        text:
+        "专注于高质量匹配、精准推荐以及及时的雇主跟进。",
+    },
+
+    actions: {
+        matchTalent: "匹配人才",
+        settings: "设置",
+        viewAllRecommendations: "查看所有推荐",
+    },
+
+    stats: {
+        assignedTalent: "已分配人才",
+        assignedTalentSubtitle: "可供审核的候选人",
+
+        evaluatedTalent: "已评估人才",
+        evaluatedTalentSubtitle: "已审核或评分的档案",
+
+        openJobs: "开放职位",
+        openJobsSubtitle: "当前雇主招聘机会",
+
+        recommendations: "推荐数",
+        recommendationsSubtitle: "已发送的人才推荐",
+    },
+
+    performance: {
+        title: "绩效概览",
+        subtitle:
+        "近期推荐质量与雇主互动情况。",
+
+        averageMatch: "平均匹配度",
+        acceptanceRate: "接受率",
+        employerViewed: "雇主查看率",
+        followUpWindow: "跟进周期",
+    },
+
+    health: {
+        title: "工作区状态",
+        subtitle:
+        "控制推荐流程的相关设置。",
+
+        defaultRecommendationNote: "默认推荐备注",
+        employerMessageTemplate: "雇主消息模板",
+        aiNotesEnabled: "已启用 AI 备注",
+        autoNotifyEmployer: "自动通知雇主",
+
+        ready: "已配置",
+        missing: "未配置",
+    },
+
+    mission: {
+        title: "招聘顾问任务",
+        subtitle:
+        "高质量人才支持的简单工作流程。",
+
+        step1Title: "审核候选人档案",
+        step1Text:
+        "检查档案质量、技能、工作偏好及候选人准备情况。",
+
+        step2Title: "评估职业准备度",
+        step2Text:
+        "添加有价值的备注，并识别最佳候选人与职位匹配。",
+
+        step3Title: "推荐人才",
+        step3Text:
+        "向雇主发送精准推荐，并提供清晰的匹配理由。",
+
+        step4Title: "后续跟进",
+        step4Text:
+        "跟踪雇主查看情况、反馈及推荐结果。",
+    },
+
+    recentRecommendations: {
+        title: "最近推荐",
+        subtitle: "最近推荐给雇主的候选人。",
+        empty: "暂无最近推荐。",
+    },
+
+    defaults: {
+        unnamedCandidate: "未命名候选人",
+        untitledJob: "未命名职位",
+        company: "公司",
+    },
+
+    labels: {
+        days: "天",
+    },
+
+    errors: {
+        endpointsNotReady:
+        "招聘顾问后端接口尚未准备完成。",
+        failedLoadOverview:
+        "招聘顾问概览加载失败。",
+    },
+    },
     pending: "待处理",
     reviewed: "已查看",
     shortlisted: "已入围",
@@ -3039,6 +4232,396 @@ export const translations = {
     viewProfile: "查看资料",
     yearsExperience: "年经验",
     experienceNotSet: "未填写经验",
+
+
+    recruiterTalent: {
+    title: "人才管理",
+    subtitle: "在招聘顾问流程中创建、分配、管理、评估并支持人才。",
+
+    header: {
+        title: "招聘顾问人才工作区",
+        subtitle: "管理已分配候选人，添加机构人才，并为职位匹配完善档案。",
+    },
+
+    actions: {
+        bulkCreate: "批量创建",
+        createTalent: "创建人才",
+        reset: "重置",
+        view: "查看",
+        message: "消息",
+        editTalent: "编辑人才",
+        removeTalent: "移除人才",
+        openMenu: "打开菜单",
+        remove: "移除",
+        edit: "编辑",
+        openConversation: "打开对话",
+        saveChanges: "保存更改",
+        cancel: "取消",
+        saving: "保存中...",
+        importing: "导入中...",
+        importTalent: "导入人才",
+    },
+
+    stats: {
+        totalTalent: "人才总数",
+        assignedToYou: "已分配给你",
+        highReadiness: "高准备度",
+        needsSupport: "需要支持",
+        seniorTalent: "高级人才",
+        ofTotal: "占总数",
+    },
+
+    filters: {
+        searchPlaceholder: "按姓名、职位、技能或国家搜索...",
+        allExperience: "全部经验",
+        junior: "初级，0-2 年",
+        mid: "中级，3-5 年",
+        senior: "高级，6 年以上",
+        allReadiness: "全部准备度",
+        highReadiness: "高准备度",
+        mediumReadiness: "中等准备度",
+        needsSupport: "需要支持",
+        sortBy: "排序方式：",
+        recentlyAdded: "最近添加",
+        readinessScore: "准备度评分",
+        experience: "工作经验",
+    },
+
+    labels: {
+        resultsFound: "条结果",
+        gridView: "网格视图",
+        listView: "列表视图",
+        yearsExperience: "年工作经验",
+        years: "年",
+        educationAdded: "已添加教育经历",
+        educationMissing: "缺少教育经历",
+        readiness: "准备度",
+    },
+
+    states: {
+        loadingTalent: "正在加载人才...",
+        noTalent: "未找到人才。你可以手动创建人才，或批量导入机构人才名单。",
+        noSkillsAdded: "未添加技能",
+        notSpecified: "未指定",
+        noSummary: "未提供简介。",
+    },
+
+    defaults: {
+        candidate: "候选人",
+        unnamedCandidate: "未命名候选人",
+        roleNotSpecified: "未指定职位",
+        locationNotSpecified: "未指定地点",
+    },
+
+    fields: {
+        fullName: "姓名",
+        email: "邮箱",
+        phone: "电话",
+        country: "国家",
+        city: "城市",
+        location: "地点",
+        professionalTitle: "职业头衔",
+        desiredJobTitle: "期望职位",
+        yearsOfExperience: "工作年限",
+        experience: "工作经验",
+        skillsComma: "技能，用逗号分隔",
+        languages: "语言",
+        availability: "可入职时间",
+        preferredWorkMode: "偏好工作模式",
+        preferredEmploymentType: "偏好雇佣类型",
+        preferredEmployment: "偏好雇佣类型",
+        expectedSalary: "期望薪资",
+        salaryCurrency: "薪资货币",
+        workAuthorization: "工作许可",
+        willingToRelocate: "是否愿意搬迁",
+        professionalSummary: "职业简介",
+        source: "来源",
+        status: "状态",
+    },
+
+    modal: {
+        professionalSummary: "职业简介",
+        candidateDetails: "候选人详情",
+        skills: "技能",
+        education: "教育经历",
+        experience: "工作经历",
+        certifications: "证书",
+        recruiterAssignment: "招聘顾问分配信息",
+    },
+
+    form: {
+        createTitle: "创建人才",
+        createSubtitle: "创建候选人档案，并自动分配到你的招聘顾问工作区。",
+        editTitle: "编辑人才",
+        editSubtitle: "更新候选人档案信息和准备度数据。",
+    },
+
+    bulk: {
+        title: "批量创建人才",
+        subtitle: "粘贴 CSV 格式数据。每位人才都会被创建为候选人并分配给你。",
+        validRecords: "条有效记录已检测到。",
+    },
+
+    placeholders: {
+        summary: "填写简短的候选人简介...",
+    },
+
+    options: {
+        select: "请选择",
+        remote: "远程",
+        hybrid: "混合",
+        onsite: "现场办公",
+        fullTime: "全职",
+        partTime: "兼职",
+        contract: "合同工",
+        internship: "实习",
+        yes: "是",
+        no: "否",
+    },
+
+    pagination: {
+        showing: "显示",
+        of: "共",
+    },
+
+    confirm: {
+        removeTalent: "是否将该人才从你的工作区移除？这不会在全局删除该候选人。",
+    },
+
+    alerts: {
+        failedLoadTalent: "人才加载失败",
+        filtersReset: "筛选已重置。",
+        nameEmailRequired: "姓名和邮箱为必填项。",
+        talentCreated: "人才已创建并分配给你。",
+        failedCreateTalent: "创建人才失败。",
+        talentUpdated: "人才更新成功。",
+        failedUpdateTalent: "更新人才失败。",
+        talentRemoved: "人才已从你的工作区移除。",
+        failedRemoveTalent: "移除人才失败。",
+        noValidRecords: "未找到有效的人才记录。",
+        bulkCompleted: "批量导入完成。",
+        created: "已创建",
+        skipped: "已跳过",
+        failedBulkCreateTalent: "批量创建人才失败。",
+    },
+    },
+
+    recruiterSettings: {
+    title: "招聘顾问设置",
+    subtitle:
+        "管理你的个人资料、招聘偏好、消息模板、工作流默认设置和安全设置。",
+
+    header: {
+        title: "工作区配置",
+        subtitle:
+        "自定义你与候选人、雇主以及推荐流程的工作方式。",
+    },
+
+    actions: {
+        reset: "重置",
+        saving: "保存中...",
+        saveChanges: "保存更改",
+        uploading: "上传中...",
+        uploadProfileImage: "上传头像",
+        manageSecurity: "管理安全设置",
+    },
+
+    states: {
+        loadingSettings:
+        "正在加载招聘顾问设置...",
+    },
+
+    stats: {
+        recommendations: "推荐数量",
+        totalSubmitted: "总提交数",
+        accepted: "已接受",
+        employerAccepted: "雇主已接受",
+        avgMatch: "平均匹配度",
+        recommendationQuality: "推荐质量",
+        responseTime: "响应时间",
+        averageRecruiterResponse:
+        "平均招聘响应时间",
+    },
+
+    profile: {
+        title: "个人资料设置",
+        subtitle:
+        "你的公开招聘顾问身份和联系信息。",
+    },
+
+    preferences: {
+        title: "招聘偏好",
+        subtitle:
+        "定义你重点关注的职位、国家和候选人类型。",
+    },
+
+    messaging: {
+        title: "消息模板",
+        subtitle:
+        "为候选人和雇主设置可重复使用的消息模板。",
+    },
+
+    notifications: {
+        title: "通知",
+        subtitle:
+        "选择你希望接收的更新通知。",
+
+        candidateAssigned:
+        "新候选人已分配",
+
+        employerReplies:
+        "雇主回复",
+
+        recommendationReviewed:
+        "推荐已审核",
+
+        candidateMessages:
+        "候选人消息",
+
+        jobMatchAlerts:
+        "职位匹配提醒",
+
+        weeklySummary:
+        "每周绩效总结",
+    },
+
+    defaults: {
+        title: "推荐默认设置",
+        subtitle:
+        "配置推荐流程的默认行为。",
+
+        recruiter: "招聘顾问",
+
+        autoIncludeAiNotes:
+        "自动包含 AI 备注",
+
+        autoNotifyEmployer:
+        "自动通知雇主",
+    },
+
+    security: {
+        title: "安全设置",
+        subtitle:
+        "账户安全和访问控制。",
+
+        password: "密码",
+
+        passwordManaged:
+        "由账户安全模块管理",
+
+        twoFactor:
+        "双重身份验证",
+
+        notEnabled: "未启用",
+
+        activeSessions:
+        "活动会话",
+
+        currentSession:
+        "当前浏览器会话",
+    },
+
+    fields: {
+        fullName: "姓名",
+        email: "邮箱",
+        phone: "电话",
+
+        professionalTitle:
+        "职业头衔",
+
+        city: "城市",
+        country: "国家",
+
+        recruiterBio:
+        "招聘顾问简介",
+
+        preferredIndustries:
+        "偏好行业",
+
+        preferredCountries:
+        "偏好候选人国家",
+
+        preferredJobTypes:
+        "偏好职位类型",
+
+        preferredWorkMode:
+        "偏好工作模式",
+
+        seniorityFocus:
+        "职级重点",
+
+        specializationSkills:
+        "专业技能",
+
+        defaultCandidateMessage:
+        "默认候选人消息",
+
+        defaultEmployerMessage:
+        "默认雇主跟进消息",
+
+        autoSignature:
+        "自动签名",
+
+        availabilityStatus:
+        "可用状态",
+
+        defaultRecommendationNote:
+        "默认推荐备注",
+
+        followUpDays:
+        "跟进提醒间隔（天）",
+    },
+
+    placeholders: {
+        professionalTitle:
+        "高级人才招聘顾问",
+
+        recruiterBio:
+        "写一段关于你招聘方向的简短介绍。",
+    },
+
+    options: {
+        remote: "远程",
+        hybrid: "混合",
+        onsite: "现场办公",
+
+        junior: "初级",
+        midLevel: "中级",
+        senior: "高级",
+        executive: "高管",
+        all: "全部",
+
+        available: "可用",
+        busy: "忙碌",
+        away: "离开",
+    },
+
+    alerts: {
+        failedLoadSettings:
+        "加载招聘顾问设置失败。",
+
+        invalidImage:
+        "请上传有效的图片文件。",
+
+        imageUploaded:
+        "头像上传成功。",
+
+        failedUploadImage:
+        "头像上传失败。",
+
+        settingsSaved:
+        "招聘顾问设置已成功保存。",
+
+        failedSaveSettings:
+        "保存设置失败。",
+
+        changesReset:
+        "更改已重置。",
+
+        securityComingSoon:
+        "安全设置功能即将上线。",
+    },
+    },
 
     // SETTINGS PAGE
     settings: "设置",
@@ -3278,6 +4861,18 @@ export const translations = {
     "您确定要撤回“{{job}}”的申请吗？此操作无法撤销。",
     thisJob: "该职位",
 
+    recruiterWorkspace: "招聘顾问工作台",
+
+    recruiterWorkspaceDesc:
+    "管理人才评估、推荐流程和招聘工作。",
+
+    talent: "人才库",
+
+    recommendations: "推荐",
+
+    searchPlaceholderRecruiter:
+    "搜索人才、职位、推荐...",
+
     messagesPage: {
     title: "消息",
     subtitle: "与候选人和企业进行沟通。",
@@ -3303,6 +4898,8 @@ export const translations = {
         send: "发送消息失败"
     }
     },
+
+
     messages: "消息",
 
     countryDescriptions: {

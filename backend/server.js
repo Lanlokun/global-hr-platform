@@ -82,6 +82,10 @@ app.use("/api/messages", messageRoutes);
 const recommendationRoutes = require("./routes/recommendationRoutes");
 app.use("/api/recommendations", recommendationRoutes);
 
+const recruiterRoutes = require("./routes/recruiterRoutes");
+
+app.use("/api/recruiter", recruiterRoutes);
+
 // 404 catch-all
 app.use((req, res) => {
   res.status(404).json({ error: "Route not found" });

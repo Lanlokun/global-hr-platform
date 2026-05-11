@@ -20,6 +20,7 @@ function AdminUsers() {
     admins: 0,
     employers: 0,
     candidates: 0,
+    recruiters: 0,
   });
 
   const [search, setSearch] = useState("");
@@ -38,6 +39,7 @@ function AdminUsers() {
         admins: res.data.admins || 0,
         employers: res.data.employers || 0,
         candidates: res.data.candidates || 0,
+        recruiters: res.data.recruiters || 0,
       });
     } catch (error) {
       console.error("Failed to fetch summary:", error);
@@ -90,7 +92,6 @@ function AdminUsers() {
   const handleCreateUser = async (payload) => {
     try {
       await api.post("/api/admin/users", payload);
-
       setCreatingUser(false);
       await refresh();
     } catch (error) {
@@ -102,7 +103,6 @@ function AdminUsers() {
   const handleUpdateUser = async (userId, payload) => {
     try {
       await api.patch(`/api/admin/users/${userId}`, payload);
-
       setEditingUser(null);
       setSelectedUser(null);
       await refresh();
@@ -203,6 +203,13 @@ function AdminUsers() {
           )}
           color="#16a34a"
         />
+
+        <StatCard
+          title="Recruiters"
+          value={summary.recruiters}
+          subtitle={`${summary.recruiters} recruiter accounts`}
+          color="#7c3aed"
+        />
       </div>
 
       <Card
@@ -231,6 +238,7 @@ function AdminUsers() {
               <option value="admin">{t("adminUsers.roles.admin")}</option>
               <option value="employer">{t("adminUsers.roles.employer")}</option>
               <option value="candidate">{t("adminUsers.roles.candidate")}</option>
+              <option value="recruiter">Recruiter</option>
             </select>
 
             <Button type="submit">{t("adminUsers.directory.search")}</Button>
@@ -266,6 +274,11 @@ function AdminUsers() {
               value: "candidate",
               label: t("adminUsers.roles.candidates"),
               count: summary.candidates,
+            },
+            {
+              value: "recruiter",
+              label: "Recruiters",
+              count: summary.recruiters,
             },
           ].map((item) => (
             <button
@@ -355,6 +368,7 @@ function AdminUsers() {
                     <option value="candidate">
                       {t("adminUsers.roles.candidate")}
                     </option>
+                    <option value="recruiter">Recruiter</option>
                   </select>
                 </div>
 
@@ -397,11 +411,11 @@ function AdminUsers() {
             {t("adminUsers.actions.previous")}
           </Button>
 
-            <span style={pageTextStyle}>
-              {t("adminUsers.actions.page")
-                .replace("{{page}}", page)
-                .replace("{{total}}", totalPages)}
-            </span>
+          <span style={pageTextStyle}>
+            {t("adminUsers.actions.page")
+              .replace("{{page}}", page)
+              .replace("{{total}}", totalPages)}
+          </span>
 
           <Button
             variant="secondary"
@@ -644,6 +658,7 @@ function UserFormModal({ mode, user, t, onClose, onSubmit }) {
                 { value: "admin", label: t("adminUsers.roles.admin") },
                 { value: "employer", label: t("adminUsers.roles.employer") },
                 { value: "candidate", label: t("adminUsers.roles.candidate") },
+                { value: "recruiter", label: "Recruiter" },
               ]}
             />
 
@@ -832,6 +847,11 @@ function RolePill({ role, t }) {
       color: "#15803d",
       border: "1px solid #bbf7d0",
     },
+    recruiter: {
+      background: "#ede9fe",
+      color: "#6d28d9",
+      border: "1px solid #ddd6fe",
+    },
   };
 
   return (
@@ -878,6 +898,7 @@ function formatRole(role, t) {
     admin: t("adminUsers.roles.admin"),
     employer: t("adminUsers.roles.employer"),
     candidate: t("adminUsers.roles.candidate"),
+    recruiter: "Recruiter",
   };
 
   return roleMap[role] || role;

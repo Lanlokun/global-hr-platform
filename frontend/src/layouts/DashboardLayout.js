@@ -44,34 +44,34 @@ function DashboardLayout({ title, subtitle, children }) {
   }, []);
 
   useEffect(() => {
-  const fetchNotifications = async () => {
-    try {
-      const res = await api.get("/api/notifications");
-      setNotifications(res.data);
-    } catch (err) {
-      console.error("Failed to fetch notifications", err);
-    }
-  };
+    const fetchNotifications = async () => {
+      try {
+        const res = await api.get("/api/notifications");
+        setNotifications(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch notifications", err);
+      }
+    };
 
-  fetchNotifications();
-}, []);
+    fetchNotifications();
+  }, []);
 
   const unreadCount = notifications.filter((item) => !item.is_read).length;
 
   const markNotificationsRead = async () => {
-  try {
-    await api.patch("/api/notifications/read");
+    try {
+      await api.patch("/api/notifications/read");
 
-    setNotifications((prev) =>
-      prev.map((item) => ({
-        ...item,
-        is_read: true,
-      }))
-    );
-  } catch (err) {
-    console.error("Failed to mark notifications as read", err);
-  }
-};
+      setNotifications((prev) =>
+        prev.map((item) => ({
+          ...item,
+          is_read: true,
+        }))
+      );
+    } catch (err) {
+      console.error("Failed to mark notifications as read", err);
+    }
+  };
 
   const logout = () => {
     localStorage.removeItem("token");
@@ -87,7 +87,22 @@ function DashboardLayout({ title, subtitle, children }) {
       ? t("adminWorkspace")
       : user.role === "employer"
       ? t("companyWorkspace")
+      : user.role === "recruiter"
+      ? t("recruiterWorkspace")
       : t("candidateWorkspace");
+
+  const workspaceDescription =
+    user.role === "admin"
+      ? t("adminWorkspaceDesc") ||
+        "Manage users, companies, jobs, and system operations."
+      : user.role === "employer"
+      ? t("employerWorkspaceDesc") ||
+        "Manage your company, jobs, and discover talent."
+      : user.role === "recruiter"
+      ? t("recruiterWorkspaceDesc") ||
+        "Manage talent evaluations, recommendations, and hiring workflows."
+      : t("candidateWorkspaceDesc") ||
+        "Track jobs, applications, and grow your profile.";
 
   const firstName =
     user?.first_name ||
@@ -101,8 +116,7 @@ function DashboardLayout({ title, subtitle, children }) {
   }, [location.pathname]);
 
   const formattedPageName =
-    pageName.charAt(0).toUpperCase() +
-    pageName.slice(1).replace(/-/g, " ");
+    pageName.charAt(0).toUpperCase() + pageName.slice(1).replace(/-/g, " ");
 
   const candidateNav = [
     {
@@ -173,6 +187,40 @@ function DashboardLayout({ title, subtitle, children }) {
     },
   ];
 
+  const recruiterNav = [
+    {
+      to: "/dashboard/overview",
+      label: t("overview"),
+      icon: <LayoutDashboard size={18} />,
+      end: true,
+    },
+    {
+      to: "/dashboard/talent",
+      label: t("talent"),
+      icon: <Users size={18} />,
+    },
+    {
+      to: "/dashboard/jobs",
+      label: t("jobs"),
+      icon: <Briefcase size={18} />,
+    },
+    {
+      to: "/dashboard/recommendations",
+      label: t("recommendations"),
+      icon: <Sparkles size={18} />,
+    },
+    {
+      to: "/dashboard/messages",
+      label: t("messages"),
+      icon: <MessageCircle size={18} />,
+    },
+    {
+      to: "/dashboard/settings",
+      label: t("settings"),
+      icon: <Settings size={18} />,
+    },
+  ];
+
   const adminNav = [
     {
       to: "/admin",
@@ -212,6 +260,8 @@ function DashboardLayout({ title, subtitle, children }) {
       ? adminNav
       : user.role === "employer"
       ? employerNav
+      : user.role === "recruiter"
+      ? recruiterNav
       : candidateNav;
 
   const searchPlaceholder =
@@ -219,9 +269,11 @@ function DashboardLayout({ title, subtitle, children }) {
       ? t("searchPlaceholderAdmin")
       : user.role === "employer"
       ? t("searchPlaceholderEmployer")
+      : user.role === "recruiter"
+      ? t("searchPlaceholderRecruiter")
       : t("searchPlaceholderCandidate");
 
-  const handleNotificationClick = async (notification) => {
+  const handleNotificationClick = (notification) => {
     if (notification.action_url) {
       setNotificationsOpen(false);
       navigate(notification.action_url);
@@ -234,11 +286,7 @@ function DashboardLayout({ title, subtitle, children }) {
         <div className="dashboard-sidebar-top">
           <div className="dashboard-brand">
             <div className="dashboard-brand-icon">
-              {user.role === "admin" ? (
-                <Shield size={18} />
-              ) : (
-                <Globe2 size={18} />
-              )}
+              {user.role === "admin" ? <Shield size={18} /> : <Globe2 size={18} />}
             </div>
 
             <div className="dashboard-brand-copy">
@@ -276,14 +324,7 @@ function DashboardLayout({ title, subtitle, children }) {
             </strong>
 
             <p className="dashboard-workspace-text">
-              {user.role === "admin"
-                ? t("adminWorkspaceDesc") ||
-                  "Manage users, companies, jobs, and system operations."
-                : user.role === "employer"
-                ? t("employerWorkspaceDesc") ||
-                  "Manage your company, jobs, and discover talent."
-                : t("candidateWorkspaceDesc") ||
-                  "Track jobs, applications, and grow your profile."}
+              {workspaceDescription}
             </p>
           </div>
         </div>
@@ -472,6 +513,7 @@ function DashboardLayout({ title, subtitle, children }) {
                 </div>
               )}
             </div>
+
             <div className="dashboard-topbar-user">
               <div className="dashboard-topbar-avatar">
                 {(firstName || "U").charAt(0).toUpperCase()}
@@ -535,73 +577,66 @@ const styles = {
     fontSize: 14,
     margin: "14px 0 0",
   },
-
   notificationCount: {
-  position: "absolute",
-  top: -6,
-  right: -6,
-  minWidth: 18,
-  height: 18,
-  padding: "0 5px",
-  borderRadius: 999,
-  background: "#dc2626",
-  color: "#fff",
-  fontSize: 11,
-  fontWeight: 800,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  border: "2px solid #fff",
-},
-
-notificationSubtext: {
-  margin: "3px 0 0",
-  color: "#6b7280",
-  fontSize: 12,
-},
-
-notificationTotal: {
-  minWidth: 28,
-  height: 28,
-  borderRadius: 999,
-  background: "#eff6ff",
-  color: "#2563eb",
-  fontSize: 13,
-  fontWeight: 800,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-},
-
-notificationTopRow: {
-  display: "flex",
-  justifyContent: "space-between",
-  gap: 10,
-  alignItems: "center",
-},
-
-unreadPill: {
-  padding: "3px 7px",
-  borderRadius: 999,
-  background: "#dbeafe",
-  color: "#1d4ed8",
-  fontSize: 11,
-  fontWeight: 800,
-},
-
-notificationFooter: {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  gap: 10,
-  marginTop: 8,
-},
-
-openLink: {
-  color: "#2563eb",
-  fontSize: 12,
-  fontWeight: 800,
-},
+    position: "absolute",
+    top: -6,
+    right: -6,
+    minWidth: 18,
+    height: 18,
+    padding: "0 5px",
+    borderRadius: 999,
+    background: "#dc2626",
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: 800,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "2px solid #fff",
+  },
+  notificationSubtext: {
+    margin: "3px 0 0",
+    color: "#6b7280",
+    fontSize: 12,
+  },
+  notificationTotal: {
+    minWidth: 28,
+    height: 28,
+    borderRadius: 999,
+    background: "#eff6ff",
+    color: "#2563eb",
+    fontSize: 13,
+    fontWeight: 800,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notificationTopRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: 10,
+    alignItems: "center",
+  },
+  unreadPill: {
+    padding: "3px 7px",
+    borderRadius: 999,
+    background: "#dbeafe",
+    color: "#1d4ed8",
+    fontSize: 11,
+    fontWeight: 800,
+  },
+  notificationFooter: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 8,
+  },
+  openLink: {
+    color: "#2563eb",
+    fontSize: 12,
+    fontWeight: 800,
+  },
 };
 
 export default DashboardLayout;

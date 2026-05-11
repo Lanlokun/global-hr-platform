@@ -21,6 +21,7 @@ import AdminJobs from "./pages/admin/AdminJobs";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminCandidates from "./pages/admin/AdminCandidates";
 
+
 import { LanguageProvider } from "./context/LanguageContext";
 
 function App() {

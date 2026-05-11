@@ -10,59 +10,97 @@ const getConversations = async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT 
-        c.*,
-        j.title AS job_title,
+      SELECT
+        c.id,
+        c.sender_id,
+        c.receiver_id,
+        c.candidate_id,
+        c.employer_id,
+        c.job_id,
+        c.created_at,
+        c.updated_at,
 
-        candidate.id AS candidate_id,
-        candidate.name AS candidate_name,
-        candidate.email AS candidate_email,
-        candidate.profile_image AS candidate_image,
+        sender.name AS sender_name,
+        sender.email AS sender_email,
+        sender.profile_image AS sender_image,
+        sender.role AS sender_role,
 
-        employer.id AS employer_id,
-        employer.name AS employer_name,
-        employer.email AS employer_email,
-        employer.profile_image AS employer_image,
+        receiver.name AS receiver_name,
+        receiver.email AS receiver_email,
+        receiver.profile_image AS receiver_image,
+        receiver.role AS receiver_role,
 
-        last_msg.body AS last_message,
-        last_msg.created_at AS last_message_at,
+        CASE
+          WHEN c.sender_id = $1 THEN receiver.id
+          ELSE sender.id
+        END AS other_user_id,
+
+        CASE
+          WHEN c.sender_id = $1 THEN receiver.name
+          ELSE sender.name
+        END AS other_user_name,
+
+        CASE
+          WHEN c.sender_id = $1 THEN receiver.email
+          ELSE sender.email
+        END AS other_user_email,
+
+        CASE
+          WHEN c.sender_id = $1 THEN receiver.profile_image
+          ELSE sender.profile_image
+        END AS other_user_image,
+
+        jobs.title AS job_title,
+
+        latest.body AS last_message,
+        latest.created_at AS last_message_at,
 
         COALESCE(unread.unread_count, 0) AS unread_count
 
       FROM conversations c
 
-      JOIN users candidate ON candidate.id = c.candidate_id
-      JOIN users employer ON employer.id = c.employer_id
-      LEFT JOIN jobs j ON j.id = c.job_id
+      LEFT JOIN users sender
+        ON sender.id = c.sender_id
+
+      LEFT JOIN users receiver
+        ON receiver.id = c.receiver_id
+
+      LEFT JOIN jobs
+        ON jobs.id = c.job_id
 
       LEFT JOIN LATERAL (
         SELECT body, created_at
-        FROM messages m
-        WHERE m.conversation_id = c.id
-        ORDER BY m.created_at DESC
+        FROM messages
+        WHERE conversation_id = c.id
+        ORDER BY created_at DESC
         LIMIT 1
-      ) last_msg ON true
+      ) latest ON true
 
       LEFT JOIN LATERAL (
-        SELECT COUNT(*)::int AS unread_count
-        FROM messages m
-        WHERE m.conversation_id = c.id
-          AND m.receiver_id = $1
-          AND m.is_read = false
+        SELECT COUNT(*) AS unread_count
+        FROM messages
+        WHERE conversation_id = c.id
+          AND receiver_id = $1
+          AND is_read = false
       ) unread ON true
 
-      WHERE c.candidate_id = $1 OR c.employer_id = $1
-      ORDER BY COALESCE(last_msg.created_at, c.updated_at) DESC
+      WHERE c.sender_id = $1
+         OR c.receiver_id = $1
+         OR c.candidate_id = $1
+         OR c.employer_id = $1
+
+      ORDER BY COALESCE(latest.created_at, c.updated_at, c.created_at) DESC
       `,
       [userId]
     );
 
     res.json(result.rows);
-  } catch (error) {
-    console.error("Failed to fetch conversations:", error);
-    res.status(500).json({ error: "Failed to fetch conversations" });
+  } catch (err) {
+    console.error("Failed to load conversations:", err);
+    res.status(500).json({ error: "Failed to load conversations" });
   }
 };
+
 
 // =======================
 // GET CONVERSATION MESSAGES
@@ -77,7 +115,12 @@ const getConversationMessages = async (req, res) => {
       SELECT *
       FROM conversations
       WHERE id = $1
-        AND (candidate_id = $2 OR employer_id = $2)
+        AND (
+          sender_id = $2
+          OR receiver_id = $2
+          OR candidate_id = $2
+          OR employer_id = $2
+        )
       `,
       [conversationId, userId]
     );
@@ -113,106 +156,103 @@ const getConversationMessages = async (req, res) => {
 // =======================
 const startConversation = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const userRole = req.user.role;
+    const senderId = req.user.id;
+    const { receiver_id, job_id } = req.body;
 
-    const { candidateId, employerId, jobId, body } = req.body;
-
-    let finalCandidateId = candidateId;
-    let finalEmployerId = employerId;
-
-    if (userRole === "candidate") {
-      finalCandidateId = userId;
-    }
-
-    if (userRole === "employer") {
-      finalEmployerId = userId;
-    }
-
-    if (!finalCandidateId || !finalEmployerId) {
+    if (!receiver_id) {
       return res.status(400).json({
-        error: "Candidate and employer are required",
+        error: "receiver_id is required",
       });
     }
 
-    let conversationResult = await db.query(
+    if (Number(receiver_id) === Number(senderId)) {
+      return res.status(400).json({
+        error: "You cannot message yourself",
+      });
+    }
+
+    const senderResult = await db.query(
+      `
+      SELECT id, role, name
+      FROM users
+      WHERE id = $1
+      `,
+      [senderId]
+    );
+
+    const receiverResult = await db.query(
+      `
+      SELECT id, role, name
+      FROM users
+      WHERE id = $1
+      `,
+      [receiver_id]
+    );
+
+    if (senderResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Sender not found",
+      });
+    }
+
+    if (receiverResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Receiver not found",
+      });
+    }
+
+    const sender = senderResult.rows[0];
+    const receiver = receiverResult.rows[0];
+
+    const existingConversation = await db.query(
       `
       SELECT *
       FROM conversations
-      WHERE candidate_id = $1
-        AND employer_id = $2
-        AND (
-          job_id = $3 OR (job_id IS NULL AND $3::int IS NULL)
-        )
+      WHERE (
+        sender_id = $1 AND receiver_id = $2
+      ) OR (
+        sender_id = $2 AND receiver_id = $1
+      )
       LIMIT 1
       `,
-      [finalCandidateId, finalEmployerId, jobId || null]
+      [senderId, receiver_id]
     );
 
-    let conversation = conversationResult.rows[0];
-
-    if (!conversation) {
-      const insertResult = await db.query(
-        `
-        INSERT INTO conversations (
-          candidate_id,
-          employer_id,
-          job_id
-        )
-        VALUES ($1, $2, $3)
-        RETURNING *
-        `,
-        [finalCandidateId, finalEmployerId, jobId || null]
-      );
-
-      conversation = insertResult.rows[0];
-    }
-
-    if (body && body.trim()) {
-      const receiverId =
-        Number(userId) === Number(finalCandidateId)
-          ? finalEmployerId
-          : finalCandidateId;
-
-      if (!receiverId) {
-        return res.status(400).json({ error: "Receiver not found" });
-      }
-
-      await db.query(
-        `
-        INSERT INTO messages (
-          conversation_id,
-          sender_id,
-          receiver_id,
-          body
-        )
-        VALUES ($1, $2, $3, $4)
-        `,
-        [conversation.id, userId, receiverId, body.trim()]
-      );
-
-      await createNotification({
-        userId: receiverId,
-        title: "New message",
-        message: `${req.user.name || "Someone"} sent you a message about a job.`,
-        type: "info",
-        actionUrl: "/dashboard/messages",
+    if (existingConversation.rows.length > 0) {
+      return res.json({
+        success: true,
+        conversation: existingConversation.rows[0],
       });
-
-      await db.query(
-        `
-        UPDATE conversations
-        SET updated_at = CURRENT_TIMESTAMP
-        WHERE id = $1
-        `,
-        [conversation.id]
-      );
     }
 
-    res.status(201).json(conversation);
-  } catch (error) {
-    console.error("Failed to start conversation:", error);
-    res.status(500).json({ error: "Failed to start conversation" });
+    const result = await db.query(
+      `
+      INSERT INTO conversations (
+        sender_id,
+        receiver_id,
+        job_id,
+        created_at
+      )
+      VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
+      RETURNING *
+      `,
+      [
+        senderId,
+        receiver_id,
+        job_id || null,
+      ]
+    );
+
+    res.json({
+      success: true,
+      conversation: result.rows[0],
+    });
+  } catch (err) {
+    console.error("Failed to start conversation:", err);
+
+    res.status(500).json({
+      error: "Failed to start conversation",
+    });
   }
 };
 
@@ -226,28 +266,55 @@ const sendMessage = async (req, res) => {
     const { body } = req.body;
 
     if (!body || !body.trim()) {
-      return res.status(400).json({ error: "Message body is required" });
+      return res.status(400).json({
+        error: "Message body is required",
+      });
     }
 
-    const receiverResult = await db.query(
+    const conversationResult = await db.query(
       `
-      SELECT 
-        CASE 
-          WHEN candidate_id = $1 THEN employer_id
-          WHEN employer_id = $1 THEN candidate_id
-          ELSE NULL
-        END AS receiver_id
+      SELECT *
       FROM conversations
-      WHERE id = $2
-        AND (candidate_id = $1 OR employer_id = $1)
+      WHERE id = $1
+        AND (
+          sender_id = $2
+          OR receiver_id = $2
+          OR candidate_id = $2
+          OR employer_id = $2
+        )
       `,
-      [userId, conversationId]
+      [conversationId, userId]
     );
 
-    const receiverId = receiverResult.rows[0]?.receiver_id;
+    if (conversationResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Conversation not found",
+      });
+    }
+
+    const conversation = conversationResult.rows[0];
+
+    let receiverId = null;
+
+    // NEW flexible messaging logic
+    if (conversation.sender_id && conversation.receiver_id) {
+      receiverId =
+        Number(conversation.sender_id) === Number(userId)
+          ? conversation.receiver_id
+          : conversation.sender_id;
+    }
+    // fallback for legacy conversations
+    else if (conversation.candidate_id && conversation.employer_id) {
+      receiverId =
+        Number(conversation.candidate_id) === Number(userId)
+          ? conversation.employer_id
+          : conversation.candidate_id;
+    }
 
     if (!receiverId) {
-      return res.status(400).json({ error: "Receiver not found" });
+      return res.status(400).json({
+        error: "Receiver not found",
+      });
     }
 
     const messageResult = await db.query(
@@ -256,12 +323,19 @@ const sendMessage = async (req, res) => {
         conversation_id,
         sender_id,
         receiver_id,
-        body
+        body,
+        is_read,
+        created_at
       )
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4, false, CURRENT_TIMESTAMP)
       RETURNING *
       `,
-      [conversationId, userId, receiverId, body.trim()]
+      [
+        conversationId,
+        userId,
+        receiverId,
+        body.trim(),
+      ]
     );
 
     await db.query(
@@ -284,7 +358,10 @@ const sendMessage = async (req, res) => {
     res.json(messageResult.rows[0]);
   } catch (err) {
     console.error("Send message error:", err);
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
 
@@ -313,10 +390,57 @@ const markConversationRead = async (req, res) => {
   }
 };
 
+const getMessageContacts = async (req, res) => {
+  try {
+    const role = req.user.role;
+
+    let roles = [];
+
+    if (role === "recruiter") {
+      roles = ["employer", "candidate", "recruiter"];
+    } else if (role === "employer") {
+      roles = ["candidate", "recruiter"];
+    } else if (role === "candidate") {
+      roles = ["employer", "recruiter"];
+    } else if (role === "admin") {
+      roles = ["employer", "candidate", "recruiter", "admin"];
+    }
+
+    const result = await db.query(
+      `
+      SELECT
+        users.id,
+        users.name,
+        users.email,
+        users.role,
+        users.profile_image,
+        users.professional_title,
+        users.country,
+        users.city,
+        companies.name AS company_name,
+        companies.logo AS company_logo
+      FROM users
+      LEFT JOIN companies
+        ON companies.id = users.company_id
+      WHERE users.id != $1
+        AND users.role = ANY($2)
+      ORDER BY users.role ASC, users.name ASC
+      `,
+      [req.user.id, roles]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Failed to load message contacts:", err);
+    res.status(500).json({ error: "Failed to load contacts" });
+  }
+};
+
 module.exports = {
   getConversations,
   getConversationMessages,
   startConversation,
   sendMessage,
   markConversationRead,
+  getMessageContacts,
 };
