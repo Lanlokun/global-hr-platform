@@ -17,13 +17,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
-  X,
   Send,
 } from "lucide-react";
 
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Button from "../../components/ui/Button";
 import api from "../../services/api";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ITEMS_PER_PAGE = 16;
 
@@ -42,6 +42,12 @@ function useIsMobile() {
 function RecruiterJobs() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { t } = useLanguage();
+
+  const tt = (key, fallback) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -82,7 +88,7 @@ function RecruiterJobs() {
       setJobs(data);
     } catch (err) {
       console.error("Failed to load recruiter jobs:", err);
-      alert(err.response?.data?.error || "Failed to load jobs");
+      alert(err.response?.data?.error || tt("recruiterJobs.alerts.failedLoadJobs", "Failed to load jobs"));
     } finally {
       setLoading(false);
     }
@@ -181,7 +187,10 @@ function RecruiterJobs() {
       setMatches(res.data.matches || []);
     } catch (err) {
       console.error("Failed to load talent matches:", err);
-      alert(err.response?.data?.error || "Failed to load talent matches");
+      alert(
+        err.response?.data?.error ||
+          tt("recruiterJobs.alerts.failedLoadMatches", "Failed to load talent matches")
+      );
     } finally {
       setMatchingLoading(false);
     }
@@ -189,7 +198,9 @@ function RecruiterJobs() {
 
   const recommendCandidate = async (candidate, job) => {
     const notes = window.prompt(
-      `Add recommendation notes for ${candidate.name || "this candidate"}:`
+      `${tt("recruiterJobs.alerts.recommendationNotes", "Add recommendation notes for")} ${
+        candidate.name || tt("recruiterJobs.alerts.thisCandidate", "this candidate")
+      }:`
     );
 
     try {
@@ -200,47 +211,55 @@ function RecruiterJobs() {
         notes: notes || "",
       });
 
-      alert("Candidate recommended successfully.");
+      alert(tt("recruiterJobs.alerts.recommendSuccess", "Candidate recommended successfully."));
     } catch (err) {
       console.error("Failed to recommend candidate:", err);
-      alert(err.response?.data?.error || "Failed to recommend candidate");
+      alert(
+        err.response?.data?.error ||
+          tt("recruiterJobs.alerts.failedRecommend", "Failed to recommend candidate")
+      );
     }
   };
 
-    const messageEmployer = async (job) => {
+  const messageEmployer = async (job) => {
     const receiverId =
-        job.employer_id ||
-        job.user_id ||
-        job.created_by ||
-        job.company_user_id ||
-        job.company_owner_id;
+      job.employer_id ||
+      job.user_id ||
+      job.created_by ||
+      job.company_user_id ||
+      job.company_owner_id;
 
     if (!receiverId) {
-        alert("No employer account is linked to this job yet.");
-        return;
+      alert(
+        tt(
+          "recruiterJobs.alerts.noEmployer",
+          "No employer account is linked to this job yet."
+        )
+      );
+      return;
     }
 
     try {
-        const res = await api.post("/api/messages/conversations", {
+      const res = await api.post("/api/messages/conversations", {
         receiver_id: receiverId,
         job_id: job.id,
         context_type: "job",
         context_id: job.id,
-        });
+      });
 
-        const conversationId =
+      const conversationId =
         res.data?.conversation?.id ||
         res.data?.conversation_id ||
         res.data?.id;
 
-        navigate(
+      navigate(
         `/dashboard/messages?conversation=${conversationId}&employer=${receiverId}&job=${job.id}`
-        );
+      );
     } catch (err) {
-        console.error("Failed to start employer conversation:", err);
-        navigate(`/dashboard/messages?employer=${receiverId}&job=${job.id}`);
+      console.error("Failed to start employer conversation:", err);
+      navigate(`/dashboard/messages?employer=${receiverId}&job=${job.id}`);
     }
-    };
+  };
 
   const handleJobFormChange = (e) => {
     const { name, value } = e.target;
@@ -254,7 +273,12 @@ function RecruiterJobs() {
     e.preventDefault();
 
     if (!jobForm.title || !jobForm.description) {
-      alert("Job title and description are required.");
+      alert(
+        tt(
+          "recruiterJobs.alerts.requiredFields",
+          "Job title and description are required."
+        )
+      );
       return;
     }
 
@@ -285,7 +309,10 @@ function RecruiterJobs() {
       fetchJobs();
     } catch (err) {
       console.error("Failed to post job:", err);
-      alert(err.response?.data?.error || "Failed to post job");
+      alert(
+        err.response?.data?.error ||
+          tt("recruiterJobs.alerts.failedPostJob", "Failed to post job")
+      );
     } finally {
       setPostingJob(false);
     }
@@ -293,8 +320,11 @@ function RecruiterJobs() {
 
   return (
     <DashboardLayout
-      title="Recruiter Jobs"
-      subtitle="Browse hiring opportunities, review job details, recommend talent, and post recruiter-led jobs."
+      title={tt("recruiterJobs.title", "Recruiter Jobs")}
+      subtitle={tt(
+        "recruiterJobs.subtitle",
+        "Browse hiring opportunities, review job details, recommend talent, and post recruiter-led jobs."
+      )}
     >
       <div
         style={{
@@ -304,36 +334,36 @@ function RecruiterJobs() {
       >
         <StatCard
           icon={<Briefcase size={26} />}
-          title="Total Jobs"
+          title={tt("recruiterJobs.stats.totalJobs", "Total Jobs")}
           value={stats.total}
-          subtext="Available roles"
+          subtext={tt("recruiterJobs.stats.availableRoles", "Available roles")}
           color="#4f46e5"
           bg="#eef2ff"
         />
 
         <StatCard
           icon={<CheckCircle2 size={26} />}
-          title="Active Jobs"
+          title={tt("recruiterJobs.stats.activeJobs", "Active Jobs")}
           value={stats.active}
-          subtext="Currently hiring"
+          subtext={tt("recruiterJobs.stats.currentlyHiring", "Currently hiring")}
           color="#16a34a"
           bg="#dcfce7"
         />
 
         <StatCard
           icon={<MapPin size={26} />}
-          title="Remote Jobs"
+          title={tt("recruiterJobs.stats.remoteJobs", "Remote Jobs")}
           value={stats.remote}
-          subtext="Flexible roles"
+          subtext={tt("recruiterJobs.stats.flexibleRoles", "Flexible roles")}
           color="#2563eb"
           bg="#dbeafe"
         />
 
         <StatCard
           icon={<Users size={26} />}
-          title="Applications"
+          title={tt("recruiterJobs.stats.applications", "Applications")}
           value={stats.applications}
-          subtext="Total applicants"
+          subtext={tt("recruiterJobs.stats.totalApplicants", "Total applicants")}
           color="#f97316"
           bg="#ffedd5"
         />
@@ -342,15 +372,20 @@ function RecruiterJobs() {
       <section style={styles.panel}>
         <div style={styles.panelHeader}>
           <div>
-            <h2 style={styles.panelTitle}>Job Pipeline</h2>
+            <h2 style={styles.panelTitle}>
+              {tt("recruiterJobs.pipeline.title", "Job Pipeline")}
+            </h2>
             <p style={styles.panelSubtitle}>
-              Manage open roles and recommend suitable candidates.
+              {tt(
+                "recruiterJobs.pipeline.subtitle",
+                "Manage open roles and recommend suitable candidates."
+              )}
             </p>
           </div>
 
           <button style={styles.postJobButton} onClick={() => setPostJobOpen(true)}>
             <Plus size={17} />
-            Post Job
+            {tt("recruiterJobs.pipeline.postJob", "Post Job")}
           </button>
         </div>
 
@@ -365,7 +400,10 @@ function RecruiterJobs() {
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search jobs by title, company, skill, or location..."
+              placeholder={tt(
+                "recruiterJobs.filters.searchPlaceholder",
+                "Search jobs by title, company, skill, or location..."
+              )}
               style={styles.input}
             />
           </div>
@@ -384,11 +422,21 @@ function RecruiterJobs() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 style={styles.select}
               >
-                <option value="all">All status</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="closed">Closed</option>
-                <option value="inactive">Inactive</option>
+                <option value="all">
+                  {tt("recruiterJobs.filters.allStatus", "All status")}
+                </option>
+                <option value="active">
+                  {tt("recruiterJobs.filters.active", "Active")}
+                </option>
+                <option value="pending">
+                  {tt("recruiterJobs.filters.pending", "Pending")}
+                </option>
+                <option value="closed">
+                  {tt("recruiterJobs.filters.closed", "Closed")}
+                </option>
+                <option value="inactive">
+                  {tt("recruiterJobs.filters.inactive", "Inactive")}
+                </option>
               </select>
             </div>
 
@@ -398,10 +446,18 @@ function RecruiterJobs() {
                 onChange={(e) => setWorkModeFilter(e.target.value)}
                 style={styles.select}
               >
-                <option value="all">All work modes</option>
-                <option value="remote">Remote</option>
-                <option value="hybrid">Hybrid</option>
-                <option value="onsite">On-site</option>
+                <option value="all">
+                  {tt("recruiterJobs.filters.allWorkModes", "All work modes")}
+                </option>
+                <option value="remote">
+                  {tt("recruiterJobs.filters.remote", "Remote")}
+                </option>
+                <option value="hybrid">
+                  {tt("recruiterJobs.filters.hybrid", "Hybrid")}
+                </option>
+                <option value="onsite">
+                  {tt("recruiterJobs.filters.onsite", "On-site")}
+                </option>
               </select>
             </div>
 
@@ -410,7 +466,7 @@ function RecruiterJobs() {
               onClick={resetFilters}
             >
               <RotateCcw size={16} />
-              Reset
+              {tt("recruiterJobs.filters.reset", "Reset")}
             </button>
           </div>
         </div>
@@ -423,26 +479,39 @@ function RecruiterJobs() {
             gap: isMobile ? 12 : 0,
           }}
         >
-          <span>{filteredJobs.length} jobs found</span>
+          <span>
+            {filteredJobs.length}{" "}
+            {tt("recruiterJobs.filters.jobsFound", "jobs found")}
+          </span>
 
           <div style={styles.sortWrap}>
-            <span>Sort by:</span>
+            <span>{tt("recruiterJobs.filters.sortBy", "Sort by:")}</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               style={styles.sortSelect}
             >
-              <option value="recent">Recently added</option>
-              <option value="applications">Most applications</option>
-              <option value="salary">Highest salary</option>
+              <option value="recent">
+                {tt("recruiterJobs.filters.recentlyAdded", "Recently added")}
+              </option>
+              <option value="applications">
+                {tt("recruiterJobs.filters.mostApplications", "Most applications")}
+              </option>
+              <option value="salary">
+                {tt("recruiterJobs.filters.highestSalary", "Highest salary")}
+              </option>
             </select>
           </div>
         </div>
 
         {loading ? (
-          <div style={styles.emptyState}>Loading jobs...</div>
+          <div style={styles.emptyState}>
+            {tt("recruiterJobs.states.loadingJobs", "Loading jobs...")}
+          </div>
         ) : filteredJobs.length === 0 ? (
-          <div style={styles.emptyState}>No jobs found.</div>
+          <div style={styles.emptyState}>
+            {tt("recruiterJobs.states.noJobs", "No jobs found.")}
+          </div>
         ) : (
           <>
             <div
@@ -457,6 +526,7 @@ function RecruiterJobs() {
                 <JobCard
                   key={job.id}
                   job={job}
+                  tt={tt}
                   onView={() => setSelectedJob(job)}
                   onMatch={() => matchTalent(job)}
                   onMessage={() => messageEmployer(job)}
@@ -500,9 +570,10 @@ function RecruiterJobs() {
                 </button>
 
                 <span style={styles.paginationText}>
-                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
-                  {Math.min(currentPage * ITEMS_PER_PAGE, filteredJobs.length)} of{" "}
-                  {filteredJobs.length}
+                  {tt("recruiterJobs.pagination.showing", "Showing")}{" "}
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+                  {Math.min(currentPage * ITEMS_PER_PAGE, filteredJobs.length)}{" "}
+                  {tt("recruiterJobs.pagination.of", "of")} {filteredJobs.length}
                 </span>
               </div>
             )}
@@ -513,6 +584,7 @@ function RecruiterJobs() {
       {selectedJob && (
         <JobModal
           job={selectedJob}
+          tt={tt}
           onClose={() => setSelectedJob(null)}
           onMatch={() => matchTalent(selectedJob)}
           onMessage={() => messageEmployer(selectedJob)}
@@ -525,6 +597,7 @@ function RecruiterJobs() {
           job={matchJob}
           matches={matches}
           loading={matchingLoading}
+          tt={tt}
           onClose={() => {
             setMatchJob(null);
             setMatches([]);
@@ -538,6 +611,7 @@ function RecruiterJobs() {
         <PostJobModal
           form={jobForm}
           loading={postingJob}
+          tt={tt}
           onChange={handleJobFormChange}
           onSubmit={submitJob}
           onClose={() => setPostJobOpen(false)}
@@ -562,7 +636,7 @@ function StatCard({ icon, title, value, subtext, color, bg }) {
   );
 }
 
-function JobCard({ job, onView, onMatch, onMessage }) {
+function JobCard({ job, tt, onView, onMatch, onMessage }) {
   const skills = parseSkills(job.required_skills || job.skills);
   const salary = formatSalary(job);
 
@@ -572,7 +646,7 @@ function JobCard({ job, onView, onMatch, onMessage }) {
         {job.company_logo ? (
           <img
             src={job.company_logo}
-            alt={job.company_name || "Company"}
+            alt={job.company_name || tt("recruiterJobs.defaults.company", "Company")}
             style={styles.companyLogo}
             onError={(e) => {
               e.currentTarget.style.display = "none";
@@ -592,9 +666,12 @@ function JobCard({ job, onView, onMatch, onMessage }) {
         </div>
 
         <div>
-          <h3 style={styles.jobTitle}>{job.title || "Untitled Job"}</h3>
+          <h3 style={styles.jobTitle}>
+            {job.title || tt("recruiterJobs.defaults.untitledJob", "Untitled Job")}
+          </h3>
           <p style={styles.companyName}>
-            {job.company_name || "Company not specified"}
+            {job.company_name ||
+              tt("recruiterJobs.defaults.companyNotSpecified", "Company not specified")}
           </p>
         </div>
       </div>
@@ -602,23 +679,32 @@ function JobCard({ job, onView, onMatch, onMessage }) {
       <div style={styles.jobMeta}>
         <span>
           <MapPin size={14} />
-          {job.location || "Location not specified"}
+          {job.location ||
+            tt("recruiterJobs.defaults.locationNotSpecified", "Location not specified")}
         </span>
 
         <span>
           <Clock size={14} />
-          {job.employment_type || "Employment type not specified"}
+          {job.employment_type ||
+            tt(
+              "recruiterJobs.defaults.employmentTypeNotSpecified",
+              "Employment type not specified"
+            )}
         </span>
 
         <span>
           <Users size={14} />
-          {Number(job.application_count || 0)} applicants
+          {Number(job.application_count || 0)}{" "}
+          {tt("recruiterJobs.labels.applicants", "applicants")}
         </span>
       </div>
 
       <div style={styles.jobTags}>
         <span style={styles.statusTag}>{job.status || "active"}</span>
-        <span>{job.work_mode || "Work mode not specified"}</span>
+        <span>
+          {job.work_mode ||
+            tt("recruiterJobs.defaults.workModeNotSpecified", "Work mode not specified")}
+        </span>
         {salary && <span>{salary}</span>}
       </div>
 
@@ -627,12 +713,12 @@ function JobCard({ job, onView, onMatch, onMessage }) {
           ? `${job.description.slice(0, 140)}${
               job.description.length > 140 ? "..." : ""
             }`
-          : "No job description provided."}
+          : tt("recruiterJobs.states.noDescription", "No job description provided.")}
       </p>
 
       <div style={styles.skills}>
         {skills.length === 0 ? (
-          <span>No skills listed</span>
+          <span>{tt("recruiterJobs.states.noSkills", "No skills listed")}</span>
         ) : (
           <>
             {skills.slice(0, 4).map((skill, index) => (
@@ -646,46 +732,58 @@ function JobCard({ job, onView, onMatch, onMessage }) {
       <div style={styles.actions}>
         <button style={styles.viewButton} onClick={onView}>
           <Eye size={15} />
-          View
+          {tt("recruiterJobs.actions.view", "View")}
         </button>
 
         <button style={styles.matchButton} onClick={onMatch}>
           <Users size={15} />
-          Match
+          {tt("recruiterJobs.actions.match", "Match")}
         </button>
 
         <button style={styles.messageButton} onClick={onMessage}>
           <MessageCircle size={15} />
-          Message
+          {tt("recruiterJobs.actions.message", "Message")}
         </button>
       </div>
     </div>
   );
 }
 
-function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
+function JobModal({ job, tt, onClose, onMatch, onMessage, isMobile }) {
   const skills = parseSkills(job.required_skills || job.skills);
   const salary = formatSalary(job);
 
   const details = [
-    ["Company", job.company_name, <Building2 size={15} />],
-    ["Location", job.location, <MapPin size={15} />],
-    ["Employment Type", job.employment_type, <Briefcase size={15} />],
-    ["Work Mode", job.work_mode, <MapPin size={15} />],
-    ["Experience Level", job.experience_level, <AlertCircle size={15} />],
-    ["Salary", salary, <Briefcase size={15} />],
-    ["Status", job.status, <CheckCircle2 size={15} />],
+    [tt("recruiterJobs.fields.company", "Company"), job.company_name, <Building2 size={15} />],
+    [tt("recruiterJobs.fields.location", "Location"), job.location, <MapPin size={15} />],
     [
-      "Created",
+      tt("recruiterJobs.fields.employmentType", "Employment Type"),
+      job.employment_type,
+      <Briefcase size={15} />,
+    ],
+    [tt("recruiterJobs.fields.workMode", "Work Mode"), job.work_mode, <MapPin size={15} />],
+    [
+      tt("recruiterJobs.fields.experienceLevel", "Experience Level"),
+      job.experience_level,
+      <AlertCircle size={15} />,
+    ],
+    [tt("recruiterJobs.fields.salary", "Salary"), salary, <Briefcase size={15} />],
+    [tt("recruiterJobs.fields.status", "Status"), job.status, <CheckCircle2 size={15} />],
+    [
+      tt("recruiterJobs.fields.created", "Created"),
       job.created_at ? new Date(job.created_at).toLocaleDateString() : null,
       <Calendar size={15} />,
     ],
     [
-      "Expires",
+      tt("recruiterJobs.fields.expires", "Expires"),
       job.expires_at ? new Date(job.expires_at).toLocaleDateString() : null,
       <Calendar size={15} />,
     ],
-    ["Applications", Number(job.application_count || 0), <Users size={15} />],
+    [
+      tt("recruiterJobs.fields.applications", "Applications"),
+      Number(job.application_count || 0),
+      <Users size={15} />,
+    ],
   ];
 
   return (
@@ -693,9 +791,12 @@ function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
       <div style={styles.largeModal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.modalHero}>
           <div>
-            <h2 style={styles.modalTitle}>{job.title || "Untitled Job"}</h2>
+            <h2 style={styles.modalTitle}>
+              {job.title || tt("recruiterJobs.defaults.untitledJob", "Untitled Job")}
+            </h2>
             <p style={styles.modalSubtitle}>
-              {job.company_name || "Company not specified"}
+              {job.company_name ||
+                tt("recruiterJobs.defaults.companyNotSpecified", "Company not specified")}
             </p>
             <span style={styles.statusBadge}>{job.status || "active"}</span>
           </div>
@@ -707,7 +808,7 @@ function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
 
         <div style={styles.modalGrid}>
           <section style={styles.modalSection}>
-            <h3>Job Details</h3>
+            <h3>{tt("recruiterJobs.modal.jobDetails", "Job Details")}</h3>
 
             <div
               style={{
@@ -720,7 +821,10 @@ function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
                   <span style={styles.detailIcon}>{icon}</span>
                   <div>
                     <strong>{label}</strong>
-                    <p>{value || "Not specified"}</p>
+                    <p>
+                      {value ||
+                        tt("recruiterJobs.states.notSpecified", "Not specified")}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -728,15 +832,18 @@ function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Description</h3>
-            <p>{job.description || "No description provided."}</p>
+            <h3>{tt("recruiterJobs.modal.description", "Description")}</h3>
+            <p>
+              {job.description ||
+                tt("recruiterJobs.states.noDescription", "No description provided.")}
+            </p>
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Required Skills</h3>
+            <h3>{tt("recruiterJobs.modal.requiredSkills", "Required Skills")}</h3>
             <div style={styles.skills}>
               {skills.length === 0 ? (
-                <span>No skills listed</span>
+                <span>{tt("recruiterJobs.states.noSkills", "No skills listed")}</span>
               ) : (
                 skills.map((skill, index) => <span key={index}>{skill}</span>)
               )}
@@ -744,13 +851,21 @@ function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Benefits</h3>
-            <p>{job.benefits || "No benefits listed."}</p>
+            <h3>{tt("recruiterJobs.modal.benefits", "Benefits")}</h3>
+            <p>
+              {job.benefits ||
+                tt("recruiterJobs.states.noBenefits", "No benefits listed.")}
+            </p>
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Application Instructions</h3>
-            <p>{job.application_instructions || "No instructions provided."}</p>
+            <h3>
+              {tt("recruiterJobs.modal.applicationInstructions", "Application Instructions")}
+            </h3>
+            <p>
+              {job.application_instructions ||
+                tt("recruiterJobs.states.noInstructions", "No instructions provided.")}
+            </p>
           </section>
         </div>
 
@@ -761,17 +876,17 @@ function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
           }}
         >
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {tt("recruiterJobs.actions.close", "Close")}
           </Button>
 
           <Button onClick={onMatch}>
             <Users size={15} />
-            Match Talent
+            {tt("recruiterJobs.actions.matchTalent", "Match Talent")}
           </Button>
 
           <Button onClick={onMessage}>
             <MessageCircle size={15} />
-            Message Employer
+            {tt("recruiterJobs.actions.messageEmployer", "Message Employer")}
           </Button>
         </div>
       </div>
@@ -779,15 +894,21 @@ function JobModal({ job, onClose, onMatch, onMessage, isMobile }) {
   );
 }
 
-function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobile }) {
+function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobile, tt }) {
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
       <div style={styles.largeModal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.modalHero}>
           <div>
-            <h2 style={styles.modalTitle}>Matched Talent</h2>
+            <h2 style={styles.modalTitle}>
+              {tt("recruiterJobs.modal.matchedTalent", "Matched Talent")}
+            </h2>
             <p style={styles.modalSubtitle}>
-              Recommended candidates for {job.title || "this job"}
+              {tt(
+                "recruiterJobs.modal.recommendedCandidatesFor",
+                "Recommended candidates for"
+              )}{" "}
+              {job.title || tt("recruiterJobs.modal.thisJob", "this job")}
             </p>
           </div>
 
@@ -798,9 +919,13 @@ function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobil
 
         <div style={styles.modalGrid}>
           {loading ? (
-            <div style={styles.emptyState}>Finding best matches...</div>
+            <div style={styles.emptyState}>
+              {tt("recruiterJobs.states.findingMatches", "Finding best matches...")}
+            </div>
           ) : matches.length === 0 ? (
-            <div style={styles.emptyState}>No candidate matches found.</div>
+            <div style={styles.emptyState}>
+              {tt("recruiterJobs.states.noCandidateMatches", "No candidate matches found.")}
+            </div>
           ) : (
             <div style={styles.matchList}>
               {matches.map((candidate) => (
@@ -814,7 +939,10 @@ function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobil
                   <div style={styles.matchProfile}>
                     <img
                       src={candidate.profile_image || "/images/avatar.jpg"}
-                      alt={candidate.name || "Candidate"}
+                      alt={
+                        candidate.name ||
+                        tt("recruiterJobs.defaults.candidate", "Candidate")
+                      }
                       style={styles.matchAvatar}
                       onError={(e) => {
                         e.currentTarget.src = "/images/avatar.jpg";
@@ -823,12 +951,13 @@ function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobil
 
                     <div>
                       <h3 style={styles.matchName}>
-                        {candidate.name || "Unnamed Candidate"}
+                        {candidate.name ||
+                          tt("recruiterJobs.defaults.unnamedCandidate", "Unnamed Candidate")}
                       </h3>
                       <p style={styles.matchRole}>
                         {candidate.professional_title ||
                           candidate.desired_job_title ||
-                          "Role not specified"}
+                          tt("recruiterJobs.defaults.roleNotSpecified", "Role not specified")}
                       </p>
 
                       <div style={styles.matchMeta}>
@@ -836,18 +965,28 @@ function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobil
                           <MapPin size={13} />
                           {[candidate.city, candidate.country]
                             .filter(Boolean)
-                            .join(", ") || "Location not specified"}
+                            .join(", ") ||
+                            tt(
+                              "recruiterJobs.defaults.locationNotSpecified",
+                              "Location not specified"
+                            )}
                         </span>
 
                         <span>
                           <Briefcase size={13} />
-                          {candidate.years_of_experience || 0} years
+                          {candidate.years_of_experience || 0}{" "}
+                          {tt("recruiterJobs.labels.years", "years")}
                         </span>
                       </div>
 
                       <div style={styles.skills}>
                         {(candidate.matched_skills || []).length === 0 ? (
-                          <span>No direct skill overlap</span>
+                          <span>
+                            {tt(
+                              "recruiterJobs.states.noDirectSkillOverlap",
+                              "No direct skill overlap"
+                            )}
+                          </span>
                         ) : (
                           candidate.matched_skills.map((skill, index) => (
                             <span key={index}>{skill}</span>
@@ -867,7 +1006,7 @@ function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobil
                       onClick={() => onRecommend(candidate)}
                     >
                       <Send size={15} />
-                      Recommend
+                      {tt("recruiterJobs.actions.recommend", "Recommend")}
                     </button>
                   </div>
                 </div>
@@ -880,7 +1019,7 @@ function MatchTalentModal({ job, matches, loading, onClose, onRecommend, isMobil
   );
 }
 
-function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) {
+function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile, tt }) {
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
       <form
@@ -890,9 +1029,14 @@ function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) 
       >
         <div style={styles.modalHero}>
           <div>
-            <h2 style={styles.modalTitle}>Post a Job</h2>
+            <h2 style={styles.modalTitle}>
+              {tt("recruiterJobs.modal.postJob", "Post a Job")}
+            </h2>
             <p style={styles.modalSubtitle}>
-              Create a recruiter-led job opening.
+              {tt(
+                "recruiterJobs.modal.createOpening",
+                "Create a recruiter-led job opening."
+              )}
             </p>
           </div>
 
@@ -909,7 +1053,7 @@ function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) 
             }}
           >
             <FormField
-              label="Job Title"
+              label={tt("recruiterJobs.fields.jobTitle", "Job Title")}
               name="title"
               value={form.title}
               onChange={onChange}
@@ -917,30 +1061,36 @@ function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) 
             />
 
             <FormField
-              label="Company ID"
+              label={tt("recruiterJobs.fields.companyId", "Company ID")}
               name="company_id"
               value={form.company_id}
               onChange={onChange}
-              placeholder="Optional if recruiter owns posting"
+              placeholder={tt(
+                "recruiterJobs.placeholders.optionalIfRecruiterOwns",
+                "Optional if recruiter owns posting"
+              )}
             />
 
             <FormField
-              label="Location"
+              label={tt("recruiterJobs.fields.location", "Location")}
               name="location"
               value={form.location}
               onChange={onChange}
             />
 
             <FormField
-              label="Salary Range"
+              label={tt("recruiterJobs.fields.salaryRange", "Salary Range")}
               name="salary_range"
               value={form.salary_range}
               onChange={onChange}
-              placeholder="e.g. $1000 - $2500"
+              placeholder={tt(
+                "recruiterJobs.placeholders.salaryExample",
+                "e.g. $1000 - $2500"
+              )}
             />
 
             <label style={styles.formField}>
-              <span>Employment Type</span>
+              <span>{tt("recruiterJobs.fields.employmentType", "Employment Type")}</span>
               <select
                 name="employment_type"
                 value={form.employment_type}
@@ -955,7 +1105,7 @@ function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) 
             </label>
 
             <label style={styles.formField}>
-              <span>Work Mode</span>
+              <span>{tt("recruiterJobs.fields.workMode", "Work Mode")}</span>
               <select
                 name="work_mode"
                 value={form.work_mode}
@@ -969,24 +1119,30 @@ function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) 
             </label>
 
             <FormField
-              label="Experience Level"
+              label={tt("recruiterJobs.fields.experienceLevel", "Experience Level")}
               name="experience_level"
               value={form.experience_level}
               onChange={onChange}
-              placeholder="Junior, Mid-level, Senior"
+              placeholder={tt(
+                "recruiterJobs.placeholders.experienceExample",
+                "Junior, Mid-level, Senior"
+              )}
             />
 
             <FormField
-              label="Required Skills"
+              label={tt("recruiterJobs.fields.requiredSkills", "Required Skills")}
               name="required_skills"
               value={form.required_skills}
               onChange={onChange}
-              placeholder="React, Node.js, PostgreSQL"
+              placeholder={tt(
+                "recruiterJobs.placeholders.skillsExample",
+                "React, Node.js, PostgreSQL"
+              )}
             />
           </div>
 
           <TextAreaField
-            label="Description"
+            label={tt("recruiterJobs.fields.description", "Description")}
             name="description"
             value={form.description}
             onChange={onChange}
@@ -994,14 +1150,17 @@ function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) 
           />
 
           <TextAreaField
-            label="Benefits"
+            label={tt("recruiterJobs.fields.benefits", "Benefits")}
             name="benefits"
             value={form.benefits}
             onChange={onChange}
           />
 
           <TextAreaField
-            label="Application Instructions"
+            label={tt(
+              "recruiterJobs.fields.applicationInstructions",
+              "Application Instructions"
+            )}
             name="application_instructions"
             value={form.application_instructions}
             onChange={onChange}
@@ -1015,12 +1174,14 @@ function PostJobModal({ form, loading, onChange, onSubmit, onClose, isMobile }) 
           }}
         >
           <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
+            {tt("recruiterJobs.actions.cancel", "Cancel")}
           </Button>
 
           <Button type="submit" disabled={loading}>
             <Plus size={15} />
-            {loading ? "Posting..." : "Post Job"}
+            {loading
+              ? tt("recruiterJobs.actions.posting", "Posting...")
+              : tt("recruiterJobs.actions.postJob", "Post Job")}
           </Button>
         </div>
       </form>

@@ -1,729 +1,1141 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import {
-  User,
-  Bell,
-  MessageCircle,
-  ShieldCheck,
-  Briefcase,
   Save,
   RotateCcw,
-  Camera,
-  Globe2,
-  Mail,
-  Phone,
-  MapPin,
-  Star,
-  TrendingUp,
-  CheckCircle2,
-  Clock,
+  ShieldCheck,
+  Bell,
+  User,
+  Settings2,
   Upload,
+  Brain,
+  Lock,
+  Briefcase,
+  Globe2,
+  Clock3,
+  CheckCircle2,
+  TrendingUp,
+  Activity,
 } from "lucide-react";
 
 import DashboardLayout from "../../layouts/DashboardLayout";
+import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import api from "../../services/api";
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+import { useLanguage } from "../../context/LanguageContext";
 
 const defaultSettings = {
   name: "",
   email: "",
   phone: "",
-  country: "",
   city: "",
-  profile_image: "",
+  country: "",
   professional_title: "",
   recruiter_bio: "",
+  profile_image: "",
 
-  preferred_industries: "",
-  preferred_countries: "",
-  preferred_job_types: "",
-  preferred_work_mode: "Remote",
-  seniority_focus: "Mid-level",
-  specialization_skills: "",
+  preferred_industries: [],
+  preferred_candidate_countries: [],
+  preferred_job_types: [],
+  preferred_work_mode: [],
+  seniority_focus: "All",
+  specialization_skills: [],
 
   default_candidate_message:
     "Hello, I reviewed your profile and believe you may be suitable for new opportunities on our platform.",
+
   default_employer_message:
     "Hello, I would like to recommend a candidate who may be a strong fit for your role.",
+
   auto_signature: "Best regards,\nRecruitment Team",
   availability_status: "Available",
 
-  notify_candidate_assigned: true,
-  notify_employer_replies: true,
-  notify_recommendation_reviewed: true,
-  notify_candidate_messages: true,
-  notify_job_match_alerts: true,
-  notify_weekly_summary: true,
+  notifications_candidate_assigned: true,
+  notifications_employer_replies: true,
+  notifications_recommendation_reviewed: true,
+  notifications_candidate_messages: true,
+  notifications_job_match_alerts: true,
+  notifications_weekly_summary: true,
 
   default_recommendation_note:
     "Recommended based on skills, experience, and role alignment.",
+
   auto_include_ai_notes: true,
   auto_notify_employer: true,
   follow_up_days: 3,
 };
 
 function RecruiterSettings() {
+  const { t } = useLanguage();
+
+  const tt = (key, fallback) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
+
+  const fileInputRef = useRef(null);
+
   const [settings, setSettings] = useState(defaultSettings);
   const [initialSettings, setInitialSettings] = useState(defaultSettings);
+
+  const [stats, setStats] = useState({
+    recommendations: 0,
+    accepted: 0,
+    avgMatch: 0,
+    responseTime: 0,
+  });
+
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  const [performance, setPerformance] = useState({
-    totalRecommendations: 0,
-    acceptedRecommendations: 0,
-    averageMatchScore: 0,
-    employerResponseRate: 0,
-    averageResponseTime: 0,
-  });
+  useEffect(() => {
+    loadSettings();
+  }, []);
 
-  const getImageSrc = (imagePath) => {
-     return imagePath || "";
-    };
   const loadSettings = async () => {
     try {
       setLoading(true);
 
-      const [settingsRes, recommendationsRes] = await Promise.allSettled([
+      const [settingsRes, overviewRes] = await Promise.allSettled([
         api.get("/api/recruiter/settings"),
-        api.get("/api/recruiter/recommendations"),
+        api.get("/api/recruiter/overview"),
       ]);
 
       if (settingsRes.status === "fulfilled") {
-        const data = settingsRes.value.data || {};
         const merged = {
           ...defaultSettings,
-          ...data,
+          ...(settingsRes.value.data || {}),
         };
 
         setSettings(merged);
         setInitialSettings(merged);
       }
 
-      if (recommendationsRes.status === "fulfilled") {
-        const data = Array.isArray(recommendationsRes.value.data)
-          ? recommendationsRes.value.data
-          : recommendationsRes.value.data?.recommendations || [];
-
-        const total = data.length;
-        const accepted = data.filter(
-          (item) => item.status === "accepted"
-        ).length;
-        const viewed = data.filter((item) => item.employer_viewed).length;
-
-        const avgScore =
-          total > 0
-            ? Math.round(
-                data.reduce(
-                  (sum, item) => sum + Number(item.match_score || 0),
-                  0
-                ) / total
-              )
-            : 0;
-
-        const avgResponse =
-          total > 0
-            ? Math.round(
-                data.reduce(
-                  (sum, item) =>
-                    sum + Number(item.recruiter_response_time_hours || 0),
-                  0
-                ) / total
-              )
-            : 0;
-
-        setPerformance({
-          totalRecommendations: total,
-          acceptedRecommendations: accepted,
-          averageMatchScore: avgScore,
-          employerResponseRate:
-            total > 0 ? Math.round((viewed / total) * 100) : 0,
-          averageResponseTime: avgResponse,
+      if (overviewRes.status === "fulfilled") {
+        setStats({
+          recommendations:
+            overviewRes.value.data?.recommendations || 0,
+          accepted:
+            overviewRes.value.data?.acceptedRecommendations || 0,
+          avgMatch:
+            overviewRes.value.data?.averageMatch || 0,
+          responseTime:
+            overviewRes.value.data?.averageResponseTime || 0,
         });
       }
     } catch (err) {
       console.error("Failed to load recruiter settings:", err);
-      toast.error("Failed to load recruiter settings.");
+
+      toast.error(
+        tt(
+          "recruiterSettings.alerts.failedLoadSettings",
+          "Failed to load recruiter settings."
+        )
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const hasChanges = useMemo(() => {
-    return JSON.stringify(settings) !== JSON.stringify(initialSettings);
-  }, [settings, initialSettings]);
-
-  const updateField = (name, value) => {
+  const updateField = (field, value) => {
     setSettings((prev) => ({
       ...prev,
-      [name]: value,
+      [field]: value,
     }));
   };
 
-  const toggleField = (name) => {
-    setSettings((prev) => ({
-      ...prev,
-      [name]: !prev[name],
-    }));
+  const handleImageUpload = async (file) => {
+    try {
+      if (!file.type.startsWith("image/")) {
+        toast.error(
+          tt(
+            "recruiterSettings.alerts.invalidImage",
+            "Please upload a valid image file."
+          )
+        );
+        return;
+      }
+
+      setUploadingImage(true);
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await api.post(
+        "/api/upload/profile-image",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      updateField("profile_image", res.data?.url);
+
+      toast.success(
+        tt(
+          "recruiterSettings.alerts.imageUploaded",
+          "Profile image uploaded."
+        )
+      );
+    } catch (err) {
+      console.error("Failed to upload image:", err);
+
+      toast.error(
+        err.response?.data?.error ||
+          tt(
+            "recruiterSettings.alerts.failedUploadImage",
+            "Failed to upload image."
+          )
+      );
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
-const uploadProfileImage = async (file) => {
-  if (!file) return;
-
-  if (!file.type.startsWith("image/")) {
-    toast.error("Please upload a valid image file.");
-    return;
-  }
-
-  try {
-    setUploadingImage(true);
-
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await api.post("/api/uploads/profile-image", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    updateField("profile_image", res.data.url);
-    toast.success("Profile image uploaded.");
-  } catch (err) {
-    console.error("Image upload failed:", err);
-    toast.error(err.response?.data?.error || "Failed to upload image.");
-  } finally {
-    setUploadingImage(false);
-  }
-};
-
-  const saveSettings = async (e) => {
-    e.preventDefault();
-
+  const handleSave = async () => {
     try {
       setSaving(true);
 
-      const res = await api.patch("/api/recruiter/settings", settings);
-      const updated = {
-        ...settings,
-        ...(res.data || {}),
-      };
+      await api.put("/api/recruiter/settings", settings);
 
-      setSettings(updated);
-      setInitialSettings(updated);
-      toast.success("Recruiter settings saved successfully.");
+      setInitialSettings(settings);
+
+      toast.success(
+        tt(
+          "recruiterSettings.alerts.settingsSaved",
+          "Recruiter settings saved successfully."
+        )
+      );
     } catch (err) {
       console.error("Failed to save recruiter settings:", err);
-      toast.error(err.response?.data?.error || "Failed to save settings.");
+
+      toast.error(
+        err.response?.data?.error ||
+          tt(
+            "recruiterSettings.alerts.failedSaveSettings",
+            "Failed to save settings."
+          )
+      );
     } finally {
       setSaving(false);
     }
   };
 
-  const resetChanges = () => {
+  const handleReset = () => {
     setSettings(initialSettings);
-    toast("Changes reset.");
+
+    toast(
+      tt(
+        "recruiterSettings.alerts.changesReset",
+        "Changes reset."
+      )
+    );
   };
+
+  const hasChanges = useMemo(
+    () => JSON.stringify(settings) !== JSON.stringify(initialSettings),
+    [settings, initialSettings]
+  );
 
   return (
     <DashboardLayout
-      title="Recruiter Settings"
-      subtitle="Manage your profile, recruiter preferences, messaging templates, workflow defaults, and security settings."
+      title={tt(
+        "recruiterSettings.title",
+        "Recruiter Settings"
+      )}
+      subtitle={tt(
+        "recruiterSettings.subtitle",
+        "Manage your profile, recruiter preferences, messaging templates, workflow defaults, and security settings."
+      )}
     >
       <Toaster position="top-right" />
 
-      <form onSubmit={saveSettings} style={styles.page}>
-        <div style={styles.headerActions}>
-          <div>
-            <h2 style={styles.pageTitle}>Workspace Configuration</h2>
-            <p style={styles.pageSubtitle}>
-              Customize how you work with candidates, employers, and
-              recommendations.
-            </p>
-          </div>
-
-          <div style={styles.actionButtons}>
-            <button
-              type="button"
-              style={styles.secondaryButton}
-              onClick={resetChanges}
-              disabled={!hasChanges || saving}
-            >
-              <RotateCcw size={16} />
-              Reset
-            </button>
-
-            <Button type="submit" disabled={!hasChanges || saving}>
-              <Save size={16} />
-              {saving ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
+      {loading ? (
+        <div style={styles.emptyState}>
+          {tt(
+            "recruiterSettings.states.loadingSettings",
+            "Loading recruiter settings..."
+          )}
         </div>
+      ) : (
+        <>
+          <div style={styles.pageHeader}>
+            <div>
+              <h2 style={styles.pageTitle}>
+                {tt(
+                  "recruiterSettings.header.title",
+                  "Workspace Configuration"
+                )}
+              </h2>
 
-        {loading ? (
-          <div style={styles.emptyState}>Loading recruiter settings...</div>
-        ) : (
-          <>
-            <div style={styles.statsGrid}>
-              <StatCard
-                icon={<Star size={24} />}
-                title="Recommendations"
-                value={performance.totalRecommendations}
-                subtext="Total submitted"
-                color="#4f46e5"
-                bg="#eef2ff"
-              />
-
-              <StatCard
-                icon={<CheckCircle2 size={24} />}
-                title="Accepted"
-                value={performance.acceptedRecommendations}
-                subtext="Employer accepted"
-                color="#16a34a"
-                bg="#dcfce7"
-              />
-
-              <StatCard
-                icon={<TrendingUp size={24} />}
-                title="Avg Match"
-                value={`${performance.averageMatchScore}%`}
-                subtext="Recommendation quality"
-                color="#2563eb"
-                bg="#dbeafe"
-              />
-
-              <StatCard
-                icon={<Clock size={24} />}
-                title="Response Time"
-                value={`${performance.averageResponseTime}h`}
-                subtext="Average recruiter response"
-                color="#f97316"
-                bg="#ffedd5"
-              />
+              <p style={styles.pageSubtitle}>
+                {tt(
+                  "recruiterSettings.header.subtitle",
+                  "Customize how you work with candidates, employers, and recommendations."
+                )}
+              </p>
             </div>
 
-            <div style={styles.layout}>
-              <section style={styles.mainColumn}>
-                <SettingsPanel
-                  icon={<User size={20} />}
-                  title="Profile Settings"
-                  subtitle="Your public recruiter identity and contact information."
-                >
-                  <div style={styles.profileTop}>
-                    <div style={styles.avatarWrap}>
-                      {settings.profile_image ? (
-                        <img
-                          src={getImageSrc(settings.profile_image)}
-                          alt={settings.name || "Recruiter"}
-                          style={styles.avatar}
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        <div style={styles.avatarFallback}>
-                          {(settings.name || "R").charAt(0).toUpperCase()}
-                        </div>
-                      )}
+            <div style={styles.headerActions}>
+              <button
+                type="button"
+                style={styles.secondaryButton}
+                onClick={handleReset}
+              >
+                <RotateCcw size={16} />
+                {tt("recruiterSettings.actions.reset", "Reset")}
+              </button>
 
-                      <label style={styles.cameraBadge}>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            uploadProfileImage(e.target.files?.[0])
-                          }
-                          style={{ display: "none" }}
-                        />
-                        <Camera size={14} />
-                      </label>
-                    </div>
+              <Button
+                onClick={handleSave}
+                disabled={!hasChanges || saving}
+              >
+                <Save size={16} />
+                {saving
+                  ? tt(
+                      "recruiterSettings.actions.saving",
+                      "Saving..."
+                    )
+                  : tt(
+                      "recruiterSettings.actions.saveChanges",
+                      "Save Changes"
+                    )}
+              </Button>
+            </div>
+          </div>
 
-                    <div style={styles.profileFields}>
-                      <label style={styles.uploadBox}>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) =>
-                            uploadProfileImage(e.target.files?.[0])
-                          }
-                          style={{ display: "none" }}
-                        />
+          <div style={styles.statsGrid}>
+            <StatCard
+              icon={<Briefcase size={24} />}
+              title={tt(
+                "recruiterSettings.stats.recommendations",
+                "Recommendations"
+              )}
+              value={stats.recommendations}
+              subtext={tt(
+                "recruiterSettings.stats.totalSubmitted",
+                "Total submitted"
+              )}
+              color="#4f46e5"
+              bg="#eef2ff"
+            />
 
-                        <Upload size={16} />
+            <StatCard
+              icon={<CheckCircle2 size={24} />}
+              title={tt(
+                "recruiterSettings.stats.accepted",
+                "Accepted"
+              )}
+              value={stats.accepted}
+              subtext={tt(
+                "recruiterSettings.stats.employerAccepted",
+                "Employer accepted"
+              )}
+              color="#16a34a"
+              bg="#dcfce7"
+            />
 
-                        <span>
-                          {uploadingImage
-                            ? "Uploading..."
-                            : "Upload Profile Image"}
-                        </span>
-                      </label>
+            <StatCard
+              icon={<TrendingUp size={24} />}
+              title={tt(
+                "recruiterSettings.stats.avgMatch",
+                "Avg Match"
+              )}
+              value={`${stats.avgMatch}%`}
+              subtext={tt(
+                "recruiterSettings.stats.recommendationQuality",
+                "Recommendation quality"
+              )}
+              color="#2563eb"
+              bg="#dbeafe"
+            />
 
-                      {settings.profile_image && (
-                        <p style={styles.imageHint}>
-                          {settings.profile_image}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+            <StatCard
+              icon={<Activity size={24} />}
+              title={tt(
+                "recruiterSettings.stats.responseTime",
+                "Response Time"
+              )}
+              value={`${stats.responseTime}h`}
+              subtext={tt(
+                "recruiterSettings.stats.averageRecruiterResponse",
+                "Average recruiter response"
+              )}
+              color="#f97316"
+              bg="#ffedd5"
+            />
+          </div>
 
-                  <div style={styles.formGrid}>
-                    <InputField
-                      icon={<User size={15} />}
-                      label="Full Name"
-                      name="name"
-                      value={settings.name}
-                      onChange={updateField}
-                    />
-
-                    <InputField
-                      icon={<Mail size={15} />}
-                      label="Email"
-                      name="email"
-                      value={settings.email}
-                      onChange={updateField}
-                      disabled
-                    />
-
-                    <InputField
-                      icon={<Phone size={15} />}
-                      label="Phone"
-                      name="phone"
-                      value={settings.phone}
-                      onChange={updateField}
-                    />
-
-                    <InputField
-                      icon={<Briefcase size={15} />}
-                      label="Professional Title"
-                      name="professional_title"
-                      value={settings.professional_title}
-                      onChange={updateField}
-                      placeholder="Senior Talent Recruiter"
-                    />
-
-                    <InputField
-                      icon={<MapPin size={15} />}
-                      label="City"
-                      name="city"
-                      value={settings.city}
-                      onChange={updateField}
-                    />
-
-                    <InputField
-                      icon={<Globe2 size={15} />}
-                      label="Country"
-                      name="country"
-                      value={settings.country}
-                      onChange={updateField}
-                    />
-                  </div>
-
-                  <TextAreaField
-                    label="Recruiter Bio"
-                    name="recruiter_bio"
-                    value={settings.recruiter_bio}
-                    onChange={updateField}
-                    placeholder="Write a short introduction about your recruiting focus."
+          <div style={styles.layout}>
+            <div style={styles.mainColumn}>
+              <SettingsPanel
+                icon={<User size={18} />}
+                title={tt(
+                  "recruiterSettings.profile.title",
+                  "Profile Settings"
+                )}
+                subtitle={tt(
+                  "recruiterSettings.profile.subtitle",
+                  "Your public recruiter identity and contact information."
+                )}
+              >
+                <div style={styles.profileHeader}>
+                  <img
+                    src={
+                      settings.profile_image ||
+                      "/images/avatar.jpg"
+                    }
+                    alt={
+                      settings.name ||
+                      tt(
+                        "recruiterSettings.defaults.recruiter",
+                        "Recruiter"
+                      )
+                    }
+                    style={styles.avatar}
                   />
-                </SettingsPanel>
 
-                <SettingsPanel
-                  icon={<Briefcase size={20} />}
-                  title="Recruiter Preferences"
-                  subtitle="Define the roles, countries, and candidate profiles you focus on."
-                >
-                  <div style={styles.formGrid}>
-                    <InputField
-                      label="Preferred Industries"
-                      name="preferred_industries"
-                      value={settings.preferred_industries}
-                      onChange={updateField}
-                      placeholder="Technology, Finance, Healthcare"
-                    />
+                  <div>
+                    <button
+                      type="button"
+                      style={styles.uploadButton}
+                      onClick={() =>
+                        fileInputRef.current?.click()
+                      }
+                    >
+                      <Upload size={15} />
 
-                    <InputField
-                      label="Preferred Candidate Countries"
-                      name="preferred_countries"
-                      value={settings.preferred_countries}
-                      onChange={updateField}
-                      placeholder="Nigeria, Ghana, Kenya, Gambia"
-                    />
+                      {uploadingImage
+                        ? tt(
+                            "recruiterSettings.actions.uploading",
+                            "Uploading..."
+                          )
+                        : tt(
+                            "recruiterSettings.actions.uploadProfileImage",
+                            "Upload Profile Image"
+                          )}
+                    </button>
 
-                    <InputField
-                      label="Preferred Job Types"
-                      name="preferred_job_types"
-                      value={settings.preferred_job_types}
-                      onChange={updateField}
-                      placeholder="Software, Product, Operations"
-                    />
-
-                    <SelectField
-                      label="Preferred Work Mode"
-                      name="preferred_work_mode"
-                      value={settings.preferred_work_mode}
-                      onChange={updateField}
-                      options={["Remote", "Hybrid", "Onsite"]}
-                    />
-
-                    <SelectField
-                      label="Seniority Focus"
-                      name="seniority_focus"
-                      value={settings.seniority_focus}
-                      onChange={updateField}
-                      options={[
-                        "Junior",
-                        "Mid-level",
-                        "Senior",
-                        "Executive",
-                        "All",
-                      ]}
-                    />
-
-                    <InputField
-                      label="Specialization Skills"
-                      name="specialization_skills"
-                      value={settings.specialization_skills}
-                      onChange={updateField}
-                      placeholder="React, Node.js, AI, Data, Sales"
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: "none" }}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload(file);
+                      }}
                     />
                   </div>
-                </SettingsPanel>
+                </div>
 
-                <SettingsPanel
-                  icon={<MessageCircle size={20} />}
-                  title="Messaging Templates"
-                  subtitle="Set reusable messages for candidates and employers."
-                >
-                  <TextAreaField
-                    label="Default Candidate Message"
-                    name="default_candidate_message"
-                    value={settings.default_candidate_message}
-                    onChange={updateField}
-                  />
-
-                  <TextAreaField
-                    label="Default Employer Follow-up Message"
-                    name="default_employer_message"
-                    value={settings.default_employer_message}
-                    onChange={updateField}
-                  />
-
-                  <TextAreaField
-                    label="Auto Signature"
-                    name="auto_signature"
-                    value={settings.auto_signature}
-                    onChange={updateField}
-                  />
-
-                  <SelectField
-                    label="Availability Status"
-                    name="availability_status"
-                    value={settings.availability_status}
-                    onChange={updateField}
-                    options={["Available", "Busy", "Away"]}
-                  />
-                </SettingsPanel>
-              </section>
-
-              <aside style={styles.sideColumn}>
-                <SettingsPanel
-                  icon={<Bell size={20} />}
-                  title="Notifications"
-                  subtitle="Choose what updates you want to receive."
-                >
-                  <ToggleRow
-                    label="New candidate assigned"
-                    checked={settings.notify_candidate_assigned}
-                    onClick={() => toggleField("notify_candidate_assigned")}
-                  />
-
-                  <ToggleRow
-                    label="Employer replies"
-                    checked={settings.notify_employer_replies}
-                    onClick={() => toggleField("notify_employer_replies")}
-                  />
-
-                  <ToggleRow
-                    label="Recommendation reviewed"
-                    checked={settings.notify_recommendation_reviewed}
-                    onClick={() =>
-                      toggleField("notify_recommendation_reviewed")
+                <div style={styles.formGrid}>
+                  <Input
+                    label={tt(
+                      "recruiterSettings.fields.fullName",
+                      "Full Name"
+                    )}
+                    value={settings.name}
+                    onChange={(v) =>
+                      updateField("name", v)
                     }
                   />
 
-                  <ToggleRow
-                    label="Candidate messages"
-                    checked={settings.notify_candidate_messages}
-                    onClick={() => toggleField("notify_candidate_messages")}
+                  <Input
+                    label={tt(
+                      "recruiterSettings.fields.email",
+                      "Email"
+                    )}
+                    value={settings.email}
+                    onChange={(v) =>
+                      updateField("email", v)
+                    }
                   />
 
-                  <ToggleRow
-                    label="Job match alerts"
-                    checked={settings.notify_job_match_alerts}
-                    onClick={() => toggleField("notify_job_match_alerts")}
+                  <Input
+                    label={tt(
+                      "recruiterSettings.fields.phone",
+                      "Phone"
+                    )}
+                    value={settings.phone}
+                    onChange={(v) =>
+                      updateField("phone", v)
+                    }
                   />
 
-                  <ToggleRow
-                    label="Weekly performance summary"
-                    checked={settings.notify_weekly_summary}
-                    onClick={() => toggleField("notify_weekly_summary")}
-                  />
-                </SettingsPanel>
-
-                <SettingsPanel
-                  icon={<ShieldCheck size={20} />}
-                  title="Recommendation Defaults"
-                  subtitle="Configure how recommendations are prepared."
-                >
-                  <TextAreaField
-                    label="Default Recommendation Note"
-                    name="default_recommendation_note"
-                    value={settings.default_recommendation_note}
-                    onChange={updateField}
-                  />
-
-                  <ToggleRow
-                    label="Auto-include AI notes"
-                    checked={settings.auto_include_ai_notes}
-                    onClick={() => toggleField("auto_include_ai_notes")}
+                  <Input
+                    label={tt(
+                      "recruiterSettings.fields.professionalTitle",
+                      "Professional Title"
+                    )}
+                    value={settings.professional_title}
+                    placeholder={tt(
+                      "recruiterSettings.placeholders.professionalTitle",
+                      "Senior Talent Recruiter"
+                    )}
+                    onChange={(v) =>
+                      updateField(
+                        "professional_title",
+                        v
+                      )
+                    }
                   />
 
-                  <ToggleRow
-                    label="Auto-notify employer"
-                    checked={settings.auto_notify_employer}
-                    onClick={() => toggleField("auto_notify_employer")}
+                  <Input
+                    label={tt(
+                      "recruiterSettings.fields.city",
+                      "City"
+                    )}
+                    value={settings.city}
+                    onChange={(v) =>
+                      updateField("city", v)
+                    }
                   />
 
-                  <InputField
-                    label="Follow-up reminder interval, days"
-                    name="follow_up_days"
-                    type="number"
-                    value={settings.follow_up_days}
-                    onChange={updateField}
+                  <Input
+                    label={tt(
+                      "recruiterSettings.fields.country",
+                      "Country"
+                    )}
+                    value={settings.country}
+                    onChange={(v) =>
+                      updateField("country", v)
+                    }
                   />
-                </SettingsPanel>
+                </div>
 
-                <SettingsPanel
-                  icon={<ShieldCheck size={20} />}
-                  title="Security"
-                  subtitle="Account security and access controls."
-                >
-                  <SecurityItem
-                    label="Password"
-                    value="Managed from account security"
-                  />
-                  <SecurityItem
-                    label="Two-factor authentication"
-                    value="Not enabled"
-                  />
-                  <SecurityItem
-                    label="Active sessions"
-                    value="Current browser session"
-                  />
+                <Textarea
+                  label={tt(
+                    "recruiterSettings.fields.recruiterBio",
+                    "Recruiter Bio"
+                  )}
+                  value={settings.recruiter_bio}
+                  placeholder={tt(
+                    "recruiterSettings.placeholders.recruiterBio",
+                    "Write a short introduction about your recruiting focus."
+                  )}
+                  onChange={(v) =>
+                    updateField("recruiter_bio", v)
+                  }
+                />
+              </SettingsPanel>
 
-                    <button
-                    type="button"
-                    style={styles.securityButton}
-                    onClick={() => toast("Security settings will be available soon.")}
-                    >
-                    Manage Security
-                    </button>
-                </SettingsPanel>
-              </aside>
+              <SettingsPanel
+                icon={<Globe2 size={18} />}
+                title={tt(
+                  "recruiterSettings.preferences.title",
+                  "Recruiter Preferences"
+                )}
+                subtitle={tt(
+                  "recruiterSettings.preferences.subtitle",
+                  "Define the roles, countries, and candidate profiles you focus on."
+                )}
+              >
+                <TagInput
+                  label={tt(
+                    "recruiterSettings.fields.preferredIndustries",
+                    "Preferred Industries"
+                  )}
+                  value={settings.preferred_industries}
+                  onChange={(v) =>
+                    updateField(
+                      "preferred_industries",
+                      v
+                    )
+                  }
+                />
+
+                <TagInput
+                  label={tt(
+                    "recruiterSettings.fields.preferredCountries",
+                    "Preferred Candidate Countries"
+                  )}
+                  value={
+                    settings.preferred_candidate_countries
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "preferred_candidate_countries",
+                      v
+                    )
+                  }
+                />
+
+                <TagInput
+                  label={tt(
+                    "recruiterSettings.fields.preferredJobTypes",
+                    "Preferred Job Types"
+                  )}
+                  value={settings.preferred_job_types}
+                  onChange={(v) =>
+                    updateField(
+                      "preferred_job_types",
+                      v
+                    )
+                  }
+                />
+
+                <MultiSelect
+                  label={tt(
+                    "recruiterSettings.fields.preferredWorkMode",
+                    "Preferred Work Mode"
+                  )}
+                  value={settings.preferred_work_mode}
+                  options={[
+                    tt(
+                      "recruiterSettings.options.remote",
+                      "Remote"
+                    ),
+                    tt(
+                      "recruiterSettings.options.hybrid",
+                      "Hybrid"
+                    ),
+                    tt(
+                      "recruiterSettings.options.onsite",
+                      "Onsite"
+                    ),
+                  ]}
+                  onChange={(v) =>
+                    updateField(
+                      "preferred_work_mode",
+                      v
+                    )
+                  }
+                />
+
+                <Select
+                  label={tt(
+                    "recruiterSettings.fields.seniorityFocus",
+                    "Seniority Focus"
+                  )}
+                  value={settings.seniority_focus}
+                  options={[
+                    tt(
+                      "recruiterSettings.options.junior",
+                      "Junior"
+                    ),
+                    tt(
+                      "recruiterSettings.options.midLevel",
+                      "Mid-level"
+                    ),
+                    tt(
+                      "recruiterSettings.options.senior",
+                      "Senior"
+                    ),
+                    tt(
+                      "recruiterSettings.options.executive",
+                      "Executive"
+                    ),
+                    tt(
+                      "recruiterSettings.options.all",
+                      "All"
+                    ),
+                  ]}
+                  onChange={(v) =>
+                    updateField(
+                      "seniority_focus",
+                      v
+                    )
+                  }
+                />
+
+                <TagInput
+                  label={tt(
+                    "recruiterSettings.fields.specializationSkills",
+                    "Specialization Skills"
+                  )}
+                  value={
+                    settings.specialization_skills
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "specialization_skills",
+                      v
+                    )
+                  }
+                />
+              </SettingsPanel>
+
+              <SettingsPanel
+                icon={<Brain size={18} />}
+                title={tt(
+                  "recruiterSettings.messaging.title",
+                  "Messaging Templates"
+                )}
+                subtitle={tt(
+                  "recruiterSettings.messaging.subtitle",
+                  "Set reusable messages for candidates and employers."
+                )}
+              >
+                <Textarea
+                  label={tt(
+                    "recruiterSettings.fields.defaultCandidateMessage",
+                    "Default Candidate Message"
+                  )}
+                  value={
+                    settings.default_candidate_message
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "default_candidate_message",
+                      v
+                    )
+                  }
+                />
+
+                <Textarea
+                  label={tt(
+                    "recruiterSettings.fields.defaultEmployerMessage",
+                    "Default Employer Follow-up Message"
+                  )}
+                  value={
+                    settings.default_employer_message
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "default_employer_message",
+                      v
+                    )
+                  }
+                />
+
+                <Textarea
+                  label={tt(
+                    "recruiterSettings.fields.autoSignature",
+                    "Auto Signature"
+                  )}
+                  value={settings.auto_signature}
+                  onChange={(v) =>
+                    updateField(
+                      "auto_signature",
+                      v
+                    )
+                  }
+                />
+
+                <Select
+                  label={tt(
+                    "recruiterSettings.fields.availabilityStatus",
+                    "Availability Status"
+                  )}
+                  value={settings.availability_status}
+                  options={[
+                    tt(
+                      "recruiterSettings.options.available",
+                      "Available"
+                    ),
+                    tt(
+                      "recruiterSettings.options.busy",
+                      "Busy"
+                    ),
+                    tt(
+                      "recruiterSettings.options.away",
+                      "Away"
+                    ),
+                  ]}
+                  onChange={(v) =>
+                    updateField(
+                      "availability_status",
+                      v
+                    )
+                  }
+                />
+              </SettingsPanel>
             </div>
-          </>
-        )}
-      </form>
+
+            <div style={styles.sideColumn}>
+              <SettingsPanel
+                icon={<Bell size={18} />}
+                title={tt(
+                  "recruiterSettings.notifications.title",
+                  "Notifications"
+                )}
+                subtitle={tt(
+                  "recruiterSettings.notifications.subtitle",
+                  "Choose what updates you want to receive."
+                )}
+              >
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.notifications.candidateAssigned",
+                    "New candidate assigned"
+                  )}
+                  checked={
+                    settings.notifications_candidate_assigned
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "notifications_candidate_assigned",
+                      v
+                    )
+                  }
+                />
+
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.notifications.employerReplies",
+                    "Employer replies"
+                  )}
+                  checked={
+                    settings.notifications_employer_replies
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "notifications_employer_replies",
+                      v
+                    )
+                  }
+                />
+
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.notifications.recommendationReviewed",
+                    "Recommendation reviewed"
+                  )}
+                  checked={
+                    settings.notifications_recommendation_reviewed
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "notifications_recommendation_reviewed",
+                      v
+                    )
+                  }
+                />
+
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.notifications.candidateMessages",
+                    "Candidate messages"
+                  )}
+                  checked={
+                    settings.notifications_candidate_messages
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "notifications_candidate_messages",
+                      v
+                    )
+                  }
+                />
+
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.notifications.jobMatchAlerts",
+                    "Job match alerts"
+                  )}
+                  checked={
+                    settings.notifications_job_match_alerts
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "notifications_job_match_alerts",
+                      v
+                    )
+                  }
+                />
+
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.notifications.weeklySummary",
+                    "Weekly performance summary"
+                  )}
+                  checked={
+                    settings.notifications_weekly_summary
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "notifications_weekly_summary",
+                      v
+                    )
+                  }
+                />
+              </SettingsPanel>
+
+              <SettingsPanel
+                icon={<Settings2 size={18} />}
+                title={tt(
+                  "recruiterSettings.defaults.title",
+                  "Recommendation Defaults"
+                )}
+                subtitle={tt(
+                  "recruiterSettings.defaults.subtitle",
+                  "Configure how recommendations are prepared."
+                )}
+              >
+                <Textarea
+                  label={tt(
+                    "recruiterSettings.fields.defaultRecommendationNote",
+                    "Default Recommendation Note"
+                  )}
+                  value={
+                    settings.default_recommendation_note
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "default_recommendation_note",
+                      v
+                    )
+                  }
+                />
+
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.defaults.autoIncludeAiNotes",
+                    "Auto-include AI notes"
+                  )}
+                  checked={
+                    settings.auto_include_ai_notes
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "auto_include_ai_notes",
+                      v
+                    )
+                  }
+                />
+
+                <Toggle
+                  label={tt(
+                    "recruiterSettings.defaults.autoNotifyEmployer",
+                    "Auto-notify employer"
+                  )}
+                  checked={
+                    settings.auto_notify_employer
+                  }
+                  onChange={(v) =>
+                    updateField(
+                      "auto_notify_employer",
+                      v
+                    )
+                  }
+                />
+
+                <Input
+                  type="number"
+                  label={tt(
+                    "recruiterSettings.fields.followUpDays",
+                    "Follow-up reminder interval, days"
+                  )}
+                  value={settings.follow_up_days}
+                  onChange={(v) =>
+                    updateField(
+                      "follow_up_days",
+                      v
+                    )
+                  }
+                />
+              </SettingsPanel>
+
+              <SettingsPanel
+                icon={<Lock size={18} />}
+                title={tt(
+                  "recruiterSettings.security.title",
+                  "Security"
+                )}
+                subtitle={tt(
+                  "recruiterSettings.security.subtitle",
+                  "Account security and access controls."
+                )}
+              >
+                <SecurityRow
+                  label={tt(
+                    "recruiterSettings.security.password",
+                    "Password"
+                  )}
+                  value={tt(
+                    "recruiterSettings.security.passwordManaged",
+                    "Managed from account security"
+                  )}
+                />
+
+                <SecurityRow
+                  label={tt(
+                    "recruiterSettings.security.twoFactor",
+                    "Two-factor authentication"
+                  )}
+                  value={tt(
+                    "recruiterSettings.security.notEnabled",
+                    "Not enabled"
+                  )}
+                />
+
+                <SecurityRow
+                  label={tt(
+                    "recruiterSettings.security.activeSessions",
+                    "Active sessions"
+                  )}
+                  value={tt(
+                    "recruiterSettings.security.currentSession",
+                    "Current browser session"
+                  )}
+                />
+
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    toast(
+                      tt(
+                        "recruiterSettings.alerts.securityComingSoon",
+                        "Security settings will be available soon."
+                      )
+                    )
+                  }
+                >
+                  <ShieldCheck size={15} />
+
+                  {tt(
+                    "recruiterSettings.actions.manageSecurity",
+                    "Manage Security"
+                  )}
+                </Button>
+              </SettingsPanel>
+            </div>
+          </div>
+        </>
+      )}
     </DashboardLayout>
   );
 }
 
-function SettingsPanel({ icon, title, subtitle, children }) {
+function SettingsPanel({
+  icon,
+  title,
+  subtitle,
+  children,
+}) {
   return (
-    <div style={styles.panel}>
+    <Card style={styles.panel}>
       <div style={styles.panelHeader}>
-        <div style={styles.panelIcon}>{icon}</div>
+        <div style={styles.panelIcon}>
+          {icon}
+        </div>
 
         <div>
-          <h3 style={styles.panelTitle}>{title}</h3>
-          <p style={styles.panelSubtitle}>{subtitle}</p>
+          <h3 style={styles.panelTitle}>
+            {title}
+          </h3>
+          <p style={styles.panelSubtitle}>
+            {subtitle}
+          </p>
         </div>
       </div>
 
-      <div style={styles.panelBody}>{children}</div>
-    </div>
+      <div style={styles.panelBody}>
+        {children}
+      </div>
+    </Card>
   );
 }
 
-function StatCard({ icon, title, value, subtext, color, bg }) {
+function StatCard({
+  icon,
+  title,
+  value,
+  subtext,
+  color,
+  bg,
+}) {
   return (
     <div style={styles.statCard}>
-      <div style={{ ...styles.statIcon, background: bg, color }}>{icon}</div>
+      <div
+        style={{
+          ...styles.statIcon,
+          background: bg,
+          color,
+        }}
+      >
+        {icon}
+      </div>
 
       <div>
-        <p style={styles.statTitle}>{title}</p>
-        <h2 style={styles.statValue}>{value}</h2>
-        <span style={styles.statSubtext}>{subtext}</span>
+        <p style={styles.statTitle}>
+          {title}
+        </p>
+
+        <h2 style={styles.statValue}>
+          {value}
+        </h2>
+
+        <span style={styles.statSubtext}>
+          {subtext}
+        </span>
       </div>
     </div>
   );
 }
 
-function InputField({
-  icon,
+function Input({
   label,
-  name,
   value,
   onChange,
   placeholder,
-  disabled,
   type = "text",
 }) {
   return (
     <label style={styles.field}>
-      <span style={styles.fieldLabel}>{label}</span>
+      <span>{label}</span>
 
-      <div style={styles.inputWrap}>
-        {icon && <span style={styles.inputIcon}>{icon}</span>}
-
-        <input
-          type={type}
-          name={name}
-          value={value || ""}
-          disabled={disabled}
-          placeholder={placeholder}
-          onChange={(e) => onChange(name, e.target.value)}
-          style={{
-            ...styles.input,
-            paddingLeft: icon ? 38 : 14,
-            opacity: disabled ? 0.65 : 1,
-          }}
-        />
-      </div>
+      <input
+        type={type}
+        value={value || ""}
+        placeholder={placeholder}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        style={styles.input}
+      />
     </label>
   );
 }
 
-function SelectField({ label, name, value, onChange, options }) {
+function Textarea({
+  label,
+  value,
+  onChange,
+  placeholder,
+}) {
   return (
     <label style={styles.field}>
-      <span style={styles.fieldLabel}>{label}</span>
+      <span>{label}</span>
+
+      <textarea
+        value={value || ""}
+        placeholder={placeholder}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        style={styles.textarea}
+      />
+    </label>
+  );
+}
+
+function Select({
+  label,
+  value,
+  options,
+  onChange,
+}) {
+  return (
+    <label style={styles.field}>
+      <span>{label}</span>
 
       <select
-        name={name}
         value={value || ""}
-        onChange={(e) => onChange(name, e.target.value)}
-        style={styles.select}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        style={styles.input}
       >
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option
+            key={option}
+            value={option}
+          >
             {option}
           </option>
         ))}
@@ -732,65 +1144,133 @@ function SelectField({ label, name, value, onChange, options }) {
   );
 }
 
-function TextAreaField({ label, name, value, onChange, placeholder }) {
+function MultiSelect({ label, value, options, onChange }) {
+  const safeValue = Array.isArray(value)
+    ? value
+    : typeof value === "string" && value.trim()
+    ? value.split(",").map((v) => v.trim()).filter(Boolean)
+    : [];
+
+  const toggle = (option) => {
+    if (safeValue.includes(option)) {
+      onChange(safeValue.filter((v) => v !== option));
+    } else {
+      onChange([...safeValue, option]);
+    }
+  };
+
+  return (
+    <div style={styles.field}>
+      <span>{label}</span>
+
+      <div style={styles.tagWrap}>
+        {options.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => toggle(option)}
+            style={{
+              ...styles.tag,
+              ...(safeValue.includes(option) ? styles.tagActive : {}),
+            }}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TagInput({ label, value, onChange }) {
+  const safeValue = Array.isArray(value)
+    ? value
+    : typeof value === "string" && value.trim()
+    ? value.split(",").map((v) => v.trim()).filter(Boolean)
+    : [];
+
   return (
     <label style={styles.field}>
-      <span style={styles.fieldLabel}>{label}</span>
+      <span>{label}</span>
 
-      <textarea
-        name={name}
-        value={value || ""}
-        placeholder={placeholder}
-        onChange={(e) => onChange(name, e.target.value)}
-        style={styles.textarea}
+      <input
+        value={safeValue.join(", ")}
+        onChange={(e) =>
+          onChange(
+            e.target.value
+              .split(",")
+              .map((v) => v.trim())
+              .filter(Boolean)
+          )
+        }
+        style={styles.input}
       />
     </label>
   );
 }
 
-function ToggleRow({ label, checked, onClick }) {
+function Toggle({
+  label,
+  checked,
+  onChange,
+}) {
   return (
-    <button type="button" style={styles.toggleRow} onClick={onClick}>
+    <div style={styles.toggleRow}>
       <span>{label}</span>
 
-      <span
+      <button
+        type="button"
         style={{
-          ...styles.toggleTrack,
-          background: checked ? "#2563eb" : "#cbd5e1",
+          ...styles.toggle,
+          ...(checked
+            ? styles.toggleActive
+            : {}),
         }}
+        onClick={() =>
+          onChange(!checked)
+        }
       >
-        <span
+        <div
           style={{
-            ...styles.toggleDot,
-            transform: checked ? "translateX(20px)" : "translateX(0)",
+            ...styles.toggleCircle,
+            ...(checked
+              ? styles.toggleCircleActive
+              : {}),
           }}
         />
-      </span>
-    </button>
+      </button>
+    </div>
   );
 }
 
-function SecurityItem({ label, value }) {
+function SecurityRow({
+  label,
+  value,
+}) {
   return (
-    <div style={styles.securityItem}>
-      <span>{label}</span>
-      <strong>{value}</strong>
+    <div style={styles.securityRow}>
+      <div>
+        <strong>{label}</strong>
+        <p>{value}</p>
+      </div>
     </div>
   );
 }
 
 const styles = {
-  page: {
-    display: "grid",
-    gap: 22,
+  emptyState: {
+    padding: 80,
+    textAlign: "center",
+    color: "#64748b",
+    fontWeight: 700,
   },
 
-  headerActions: {
+  pageHeader: {
     display: "flex",
     justifyContent: "space-between",
-    gap: 16,
-    alignItems: "center",
+    gap: 20,
     flexWrap: "wrap",
+    marginBottom: 22,
   },
 
   pageTitle: {
@@ -799,93 +1279,78 @@ const styles = {
   },
 
   pageSubtitle: {
-    margin: "6px 0 0",
+    marginTop: 6,
     color: "#64748b",
   },
 
-  actionButtons: {
+  headerActions: {
     display: "flex",
-    gap: 10,
-    flexWrap: "wrap",
+    gap: 12,
+    alignItems: "center",
   },
 
   secondaryButton: {
-    height: 42,
+    height: 46,
+    borderRadius: 14,
     border: "1px solid #dbe3ef",
-    borderRadius: 13,
     background: "#fff",
-    color: "#334155",
-    fontWeight: 800,
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 7,
     padding: "0 16px",
-  },
-
-  emptyState: {
-    padding: 60,
-    textAlign: "center",
-    color: "#64748b",
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    cursor: "pointer",
     fontWeight: 700,
-    background: "#fff",
-    borderRadius: 24,
-    border: "1px solid #e5e7eb",
   },
 
   statsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gridTemplateColumns:
+      "repeat(auto-fit,minmax(220px,1fr))",
     gap: 18,
+    marginBottom: 24,
   },
 
   statCard: {
-    minHeight: 112,
     background: "#fff",
-    border: "1px solid #e8edf5",
+    border: "1px solid #e5e7eb",
     borderRadius: 24,
     padding: 20,
     display: "flex",
     gap: 16,
     alignItems: "center",
-    boxShadow: "0 20px 50px rgba(15, 23, 42, 0.06)",
   },
 
   statIcon: {
-    width: 58,
-    height: 58,
-    borderRadius: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
   },
 
   statTitle: {
     margin: 0,
-    color: "#475569",
-    fontSize: 14,
+    color: "#64748b",
     fontWeight: 700,
   },
 
   statValue: {
-    margin: "6px 0 2px",
+    margin: "5px 0",
     fontSize: 28,
     color: "#0f172a",
-    lineHeight: 1,
   },
 
   statSubtext: {
-    color: "#64748b",
+    color: "#94a3b8",
     fontSize: 13,
-    fontWeight: 600,
   },
 
   layout: {
     display: "grid",
-    gridTemplateColumns: "minmax(0, 1.4fr) minmax(320px, 0.8fr)",
+    gridTemplateColumns:
+      "minmax(0,1.5fr) minmax(320px,0.9fr)",
     gap: 20,
-    alignItems: "start",
   },
 
   mainColumn: {
@@ -896,251 +1361,175 @@ const styles = {
   sideColumn: {
     display: "grid",
     gap: 20,
+    alignSelf: "start",
   },
 
   panel: {
-    background: "#fff",
-    border: "1px solid #e8edf5",
-    borderRadius: 24,
-    padding: 20,
-    boxShadow: "0 18px 45px rgba(15, 23, 42, 0.055)",
+    borderRadius: 26,
+    border: "1px solid #e5e7eb",
   },
 
   panelHeader: {
     display: "flex",
-    gap: 12,
-    alignItems: "flex-start",
+    gap: 14,
     marginBottom: 18,
-    paddingBottom: 16,
-    borderBottom: "1px solid #eef2f7",
   },
 
   panelIcon: {
-    width: 42,
-    height: 42,
+    width: 44,
+    height: 44,
     borderRadius: 14,
     background: "#eff6ff",
     color: "#2563eb",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    flexShrink: 0,
   },
 
   panelTitle: {
     margin: 0,
     color: "#0f172a",
-    fontSize: 18,
   },
 
   panelSubtitle: {
     margin: "5px 0 0",
     color: "#64748b",
-    fontSize: 13,
+    fontSize: 14,
   },
 
   panelBody: {
     display: "grid",
-    gap: 16,
-  },
-
-  profileTop: {
-    display: "grid",
-    gridTemplateColumns: "96px 1fr",
     gap: 18,
-    alignItems: "center",
   },
 
-  avatarWrap: {
-    width: 86,
-    height: 86,
-    position: "relative",
+  profileHeader: {
+    display: "flex",
+    alignItems: "center",
+    gap: 18,
   },
 
   avatar: {
-    width: 86,
-    height: 86,
+    width: 88,
+    height: 88,
     borderRadius: 26,
     objectFit: "cover",
-    border: "1px solid #e5e7eb",
     background: "#eef2ff",
   },
 
-  avatarFallback: {
-    width: 86,
-    height: 86,
-    borderRadius: 26,
-    background: "linear-gradient(135deg, #2563eb, #4f46e5)",
-    color: "#fff",
+  uploadButton: {
+    height: 42,
+    borderRadius: 12,
+    border: "1px solid #dbe3ef",
+    background: "#fff",
+    padding: "0 14px",
     display: "flex",
     alignItems: "center",
-    justifyContent: "center",
-    fontSize: 30,
-    fontWeight: 900,
-  },
-
-  cameraBadge: {
-    position: "absolute",
-    right: -4,
-    bottom: -4,
-    width: 30,
-    height: 30,
-    borderRadius: "50%",
-    background: "#0f172a",
-    color: "#fff",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "3px solid #fff",
-    cursor: "pointer",
-  },
-
-  profileFields: {
-    minWidth: 0,
-    display: "grid",
     gap: 8,
-  },
-
-  uploadBox: {
-    height: 46,
-    border: "1px dashed #94a3b8",
-    borderRadius: 14,
-    background: "#f8fafc",
-    color: "#334155",
-    fontWeight: 800,
     cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: "0 16px",
-  },
-
-  imageHint: {
-    margin: 0,
-    color: "#64748b",
-    fontSize: 12,
-    wordBreak: "break-all",
+    fontWeight: 700,
   },
 
   formGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))",
-    gap: 14,
+    gridTemplateColumns:
+      "repeat(auto-fit,minmax(220px,1fr))",
+    gap: 16,
   },
 
   field: {
     display: "grid",
     gap: 7,
-  },
-
-  fieldLabel: {
+    fontWeight: 700,
     color: "#334155",
-    fontSize: 13,
-    fontWeight: 800,
-  },
-
-  inputWrap: {
-    position: "relative",
-  },
-
-  inputIcon: {
-    position: "absolute",
-    left: 13,
-    top: "50%",
-    transform: "translateY(-50%)",
-    color: "#64748b",
-    display: "flex",
   },
 
   input: {
-    width: "100%",
-    height: 46,
-    border: "1px solid #dbe3ef",
+    height: 48,
     borderRadius: 14,
-    outline: "none",
-    color: "#0f172a",
-    background: "#fff",
-    fontWeight: 600,
-  },
-
-  select: {
-    width: "100%",
-    height: 46,
     border: "1px solid #dbe3ef",
-    borderRadius: 14,
-    outline: "none",
-    color: "#0f172a",
     background: "#fff",
-    padding: "0 12px",
-    fontWeight: 700,
+    padding: "0 14px",
+    fontSize: 14,
+    outline: "none",
   },
 
   textarea: {
-    width: "100%",
-    minHeight: 110,
+    minHeight: 120,
+    borderRadius: 16,
     border: "1px solid #dbe3ef",
-    borderRadius: 14,
-    outline: "none",
-    color: "#0f172a",
     background: "#fff",
-    padding: 12,
+    padding: 14,
+    fontSize: 14,
     resize: "vertical",
-    lineHeight: 1.6,
-    fontWeight: 600,
+    outline: "none",
+  },
+
+  tagWrap: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 10,
+  },
+
+  tag: {
+    border: "1px solid #dbe3ef",
+    background: "#fff",
+    color: "#475569",
+    borderRadius: 999,
+    padding: "8px 14px",
+    cursor: "pointer",
+    fontWeight: 700,
+  },
+
+  tagActive: {
+    background: "#2563eb",
+    borderColor: "#2563eb",
+    color: "#fff",
   },
 
   toggleRow: {
-    width: "100%",
-    border: "1px solid #e5e7eb",
-    borderRadius: 16,
-    background: "#fff",
-    padding: 14,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 12,
-    cursor: "pointer",
-    color: "#334155",
-    fontWeight: 800,
-    textAlign: "left",
-  },
-
-  toggleTrack: {
-    width: 44,
-    height: 24,
-    borderRadius: 999,
-    padding: 2,
-    transition: "0.2s ease",
-    flexShrink: 0,
-  },
-
-  toggleDot: {
-    width: 20,
-    height: 20,
-    borderRadius: "50%",
-    background: "#fff",
-    display: "block",
-    transition: "0.2s ease",
-  },
-
-  securityItem: {
-    border: "1px solid #e5e7eb",
+    gap: 16,
+    border: "1px solid #edf2f7",
     borderRadius: 16,
     padding: 14,
-    display: "grid",
-    gap: 4,
-    color: "#64748b",
   },
 
-  securityButton: {
-    height: 42,
+  toggle: {
+    width: 56,
+    height: 30,
+    borderRadius: 999,
     border: "none",
-    borderRadius: 13,
-    background: "#0f172a",
-    color: "#fff",
-    fontWeight: 800,
+    background: "#cbd5e1",
+    position: "relative",
     cursor: "pointer",
+    transition: "0.2s",
+  },
+
+  toggleActive: {
+    background: "#2563eb",
+  },
+
+  toggleCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: "50%",
+    background: "#fff",
+    position: "absolute",
+    top: 3,
+    left: 3,
+    transition: "0.2s",
+  },
+
+  toggleCircleActive: {
+    left: 29,
+  },
+
+  securityRow: {
+    border: "1px solid #edf2f7",
+    borderRadius: 16,
+    padding: 14,
   },
 };
 

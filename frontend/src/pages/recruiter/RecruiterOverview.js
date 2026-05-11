@@ -13,7 +13,6 @@ import {
   Settings,
   ArrowRight,
   Activity,
-  Target,
   ShieldCheck,
 } from "lucide-react";
 
@@ -21,9 +20,16 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 import api from "../../services/api";
+import { useLanguage } from "../../context/LanguageContext";
 
 function RecruiterOverview() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const tt = (key, fallback) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
   const [stats, setStats] = useState({
     assignedTalent: 0,
@@ -44,9 +50,9 @@ function RecruiterOverview() {
 
       const [overviewRes, recommendationsRes, settingsRes] =
         await Promise.allSettled([
-            api.get("/api/recruiter/overview"),
-            api.get("/api/recruiter/recommendations"),
-            api.get("/api/recruiter/settings"),
+          api.get("/api/recruiter/overview"),
+          api.get("/api/recruiter/recommendations"),
+          api.get("/api/recruiter/settings"),
         ]);
 
       if (overviewRes.status === "fulfilled") {
@@ -74,11 +80,21 @@ function RecruiterOverview() {
         overviewRes.status === "rejected" &&
         recommendationsRes.status === "rejected"
       ) {
-        setError("Recruiter backend endpoints are not ready yet.");
+        setError(
+          tt(
+            "recruiterOverview.errors.endpointsNotReady",
+            "Recruiter backend endpoints are not ready yet."
+          )
+        );
       }
     } catch (err) {
       console.error("Failed to load recruiter overview:", err);
-      setError("Failed to load recruiter overview.");
+      setError(
+        tt(
+          "recruiterOverview.errors.failedLoadOverview",
+          "Failed to load recruiter overview."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -118,27 +134,40 @@ function RecruiterOverview() {
 
   return (
     <DashboardLayout
-      title="Recruiter Workspace"
-      subtitle="Manage assigned talent, evaluate readiness, and connect strong candidates to suitable opportunities."
+      title={tt("recruiterOverview.title", "Recruiter Workspace")}
+      subtitle={tt(
+        "recruiterOverview.subtitle",
+        "Manage assigned talent, evaluate readiness, and connect strong candidates to suitable opportunities."
+      )}
     >
       {error && <div style={styles.alert}>{error}</div>}
 
       <section style={styles.hero}>
         <div>
-          <span style={styles.heroBadge}>Recruiter Command Center</span>
+          <span style={styles.heroBadge}>
+            {tt(
+              "recruiterOverview.hero.badge",
+              "Recruiter Command Center"
+            )}
+          </span>
+
           <h2 style={styles.heroTitle}>
-            Welcome back{settings?.name ? `, ${settings.name}` : ""}
+            {tt("recruiterOverview.hero.welcomeBack", "Welcome back")}
+            {settings?.name ? `, ${settings.name}` : ""}
           </h2>
+
           <p style={styles.heroText}>
-            Focus on quality matches, thoughtful recommendations, and timely
-            employer follow-ups.
+            {tt(
+              "recruiterOverview.hero.text",
+              "Focus on quality matches, thoughtful recommendations, and timely employer follow-ups."
+            )}
           </p>
         </div>
 
         <div style={styles.heroActions}>
           <Button onClick={() => navigate("/dashboard/jobs")}>
             <Search size={16} />
-            Match Talent
+            {tt("recruiterOverview.actions.matchTalent", "Match Talent")}
           </Button>
 
           <button
@@ -147,7 +176,7 @@ function RecruiterOverview() {
             onClick={() => navigate("/dashboard/settings")}
           >
             <Settings size={16} />
-            Settings
+            {tt("recruiterOverview.actions.settings", "Settings")}
           </button>
         </div>
       </section>
@@ -155,9 +184,12 @@ function RecruiterOverview() {
       <div style={styles.grid}>
         <StatCard
           icon={<Users size={24} />}
-          title="Assigned Talent"
+          title={tt("recruiterOverview.stats.assignedTalent", "Assigned Talent")}
           value={stats.assignedTalent}
-          subtitle="Candidates available for review"
+          subtitle={tt(
+            "recruiterOverview.stats.assignedTalentSubtitle",
+            "Candidates available for review"
+          )}
           color="#2563eb"
           bg="#dbeafe"
           loading={loading}
@@ -165,9 +197,12 @@ function RecruiterOverview() {
 
         <StatCard
           icon={<UserCheck size={24} />}
-          title="Evaluated Talent"
+          title={tt("recruiterOverview.stats.evaluatedTalent", "Evaluated Talent")}
           value={stats.evaluatedTalent}
-          subtitle="Profiles reviewed or scored"
+          subtitle={tt(
+            "recruiterOverview.stats.evaluatedTalentSubtitle",
+            "Profiles reviewed or scored"
+          )}
           color="#16a34a"
           bg="#dcfce7"
           loading={loading}
@@ -175,9 +210,12 @@ function RecruiterOverview() {
 
         <StatCard
           icon={<Briefcase size={24} />}
-          title="Open Jobs"
+          title={tt("recruiterOverview.stats.openJobs", "Open Jobs")}
           value={stats.openJobs}
-          subtitle="Active employer opportunities"
+          subtitle={tt(
+            "recruiterOverview.stats.openJobsSubtitle",
+            "Active employer opportunities"
+          )}
           color="#7c3aed"
           bg="#ede9fe"
           loading={loading}
@@ -185,9 +223,12 @@ function RecruiterOverview() {
 
         <StatCard
           icon={<Star size={24} />}
-          title="Recommendations"
+          title={tt("recruiterOverview.stats.recommendations", "Recommendations")}
           value={stats.recommendations}
-          subtitle="Talent recommendations sent"
+          subtitle={tt(
+            "recruiterOverview.stats.recommendationsSubtitle",
+            "Talent recommendations sent"
+          )}
           color="#f97316"
           bg="#ffedd5"
           loading={loading}
@@ -196,53 +237,96 @@ function RecruiterOverview() {
 
       <div style={styles.twoColumn}>
         <Card
-          title="Performance Snapshot"
-          subtitle="Recent recommendation quality and employer engagement."
+          title={tt(
+            "recruiterOverview.performance.title",
+            "Performance Snapshot"
+          )}
+          subtitle={tt(
+            "recruiterOverview.performance.subtitle",
+            "Recent recommendation quality and employer engagement."
+          )}
         >
           <div style={styles.performanceGrid}>
             <Metric
               icon={<TrendingUp size={18} />}
-              label="Average Match"
+              label={tt("recruiterOverview.performance.averageMatch", "Average Match")}
               value={`${performance.avgScore}%`}
             />
+
             <Metric
               icon={<CheckCircle2 size={18} />}
-              label="Acceptance Rate"
+              label={tt(
+                "recruiterOverview.performance.acceptanceRate",
+                "Acceptance Rate"
+              )}
               value={`${performance.acceptanceRate}%`}
             />
+
             <Metric
               icon={<Activity size={18} />}
-              label="Employer Viewed"
+              label={tt(
+                "recruiterOverview.performance.employerViewed",
+                "Employer Viewed"
+              )}
               value={`${performance.viewedRate}%`}
             />
+
             <Metric
               icon={<Clock size={18} />}
-              label="Follow-up Window"
-              value={`${settings?.follow_up_days || 3} days`}
+              label={tt(
+                "recruiterOverview.performance.followUpWindow",
+                "Follow-up Window"
+              )}
+              value={`${settings?.follow_up_days || 3} ${tt(
+                "recruiterOverview.labels.days",
+                "days"
+              )}`}
             />
           </div>
         </Card>
 
         <Card
-          title="Workspace Health"
-          subtitle="Settings that control your recommendation workflow."
+          title={tt("recruiterOverview.health.title", "Workspace Health")}
+          subtitle={tt(
+            "recruiterOverview.health.subtitle",
+            "Settings that control your recommendation workflow."
+          )}
         >
           <div style={styles.healthList}>
             <HealthItem
-              label="Default recommendation note"
+              label={tt(
+                "recruiterOverview.health.defaultRecommendationNote",
+                "Default recommendation note"
+              )}
               active={Boolean(settings?.default_recommendation_note)}
+              tt={tt}
             />
+
             <HealthItem
-              label="Employer message template"
+              label={tt(
+                "recruiterOverview.health.employerMessageTemplate",
+                "Employer message template"
+              )}
               active={Boolean(settings?.default_employer_message)}
+              tt={tt}
             />
+
             <HealthItem
-              label="AI notes enabled"
+              label={tt(
+                "recruiterOverview.health.aiNotesEnabled",
+                "AI notes enabled"
+              )}
               active={Boolean(settings?.auto_include_ai_notes)}
+              tt={tt}
             />
+
             <HealthItem
-              label="Auto notify employer"
+              label={tt(
+                "recruiterOverview.health.autoNotifyEmployer",
+                "Auto notify employer"
+              )}
               active={Boolean(settings?.auto_notify_employer)}
+              tt={tt}
             />
           </div>
         </Card>
@@ -250,40 +334,76 @@ function RecruiterOverview() {
 
       <div style={styles.twoColumn}>
         <Card
-          title="Recruiter Mission"
-          subtitle="A simple workflow for high-quality talent support."
+          title={tt("recruiterOverview.mission.title", "Recruiter Mission")}
+          subtitle={tt(
+            "recruiterOverview.mission.subtitle",
+            "A simple workflow for high-quality talent support."
+          )}
         >
           <div style={styles.missionList}>
             <MissionStep
               number="01"
-              title="Review candidate profiles"
-              text="Check profile quality, skills, work preferences, and readiness."
+              title={tt(
+                "recruiterOverview.mission.step1Title",
+                "Review candidate profiles"
+              )}
+              text={tt(
+                "recruiterOverview.mission.step1Text",
+                "Check profile quality, skills, work preferences, and readiness."
+              )}
             />
+
             <MissionStep
               number="02"
-              title="Evaluate career readiness"
-              text="Add useful notes and identify the strongest candidate-job alignment."
+              title={tt(
+                "recruiterOverview.mission.step2Title",
+                "Evaluate career readiness"
+              )}
+              text={tt(
+                "recruiterOverview.mission.step2Text",
+                "Add useful notes and identify the strongest candidate-job alignment."
+              )}
             />
+
             <MissionStep
               number="03"
-              title="Recommend talent"
-              text="Send focused recommendations to employers with clear match reasoning."
+              title={tt(
+                "recruiterOverview.mission.step3Title",
+                "Recommend talent"
+              )}
+              text={tt(
+                "recruiterOverview.mission.step3Text",
+                "Send focused recommendations to employers with clear match reasoning."
+              )}
             />
+
             <MissionStep
               number="04"
-              title="Follow up"
-              text="Track employer views, feedback, and outcomes after submission."
+              title={tt("recruiterOverview.mission.step4Title", "Follow up")}
+              text={tt(
+                "recruiterOverview.mission.step4Text",
+                "Track employer views, feedback, and outcomes after submission."
+              )}
             />
           </div>
         </Card>
 
         <Card
-          title="Recent Recommendations"
-          subtitle="Latest candidates recommended to employers."
+          title={tt(
+            "recruiterOverview.recentRecommendations.title",
+            "Recent Recommendations"
+          )}
+          subtitle={tt(
+            "recruiterOverview.recentRecommendations.subtitle",
+            "Latest candidates recommended to employers."
+          )}
         >
           {recommendations.length === 0 ? (
             <div style={styles.emptyState}>
-              No recent recommendations yet.
+              {tt(
+                "recruiterOverview.recentRecommendations.empty",
+                "No recent recommendations yet."
+              )}
             </div>
           ) : (
             <div style={styles.recentList}>
@@ -294,10 +414,20 @@ function RecruiterOverview() {
                   </div>
 
                   <div style={styles.recentBody}>
-                    <strong>{item.candidate_name || "Unnamed Candidate"}</strong>
+                    <strong>
+                      {item.candidate_name ||
+                        tt(
+                          "recruiterOverview.defaults.unnamedCandidate",
+                          "Unnamed Candidate"
+                        )}
+                    </strong>
+
                     <span>
-                      {item.job_title || "Untitled Job"} ·{" "}
-                      {item.company_name || "Company"}
+                      {item.job_title ||
+                        tt("recruiterOverview.defaults.untitledJob", "Untitled Job")}{" "}
+                      ·{" "}
+                      {item.company_name ||
+                        tt("recruiterOverview.defaults.company", "Company")}
                     </span>
                   </div>
 
@@ -314,7 +444,10 @@ function RecruiterOverview() {
             style={styles.linkButton}
             onClick={() => navigate("/dashboard/recommendations")}
           >
-            View all recommendations
+            {tt(
+              "recruiterOverview.actions.viewAllRecommendations",
+              "View all recommendations"
+            )}
             <ArrowRight size={15} />
           </button>
         </Card>
@@ -347,7 +480,7 @@ function Metric({ icon, label, value }) {
   );
 }
 
-function HealthItem({ label, active }) {
+function HealthItem({ label, active, tt }) {
   return (
     <div style={styles.healthItem}>
       <div style={active ? styles.healthIconActive : styles.healthIcon}>
@@ -357,7 +490,9 @@ function HealthItem({ label, active }) {
       <span>{label}</span>
 
       <strong style={active ? styles.activeText : styles.inactiveText}>
-        {active ? "Ready" : "Missing"}
+        {active
+          ? tt("recruiterOverview.health.ready", "Ready")
+          : tt("recruiterOverview.health.missing", "Missing")}
       </strong>
     </div>
   );

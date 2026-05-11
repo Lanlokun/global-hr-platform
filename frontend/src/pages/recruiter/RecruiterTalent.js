@@ -35,6 +35,7 @@ import {
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Button from "../../components/ui/Button";
 import api from "../../services/api";
+import { useLanguage } from "../../context/LanguageContext";
 
 const ITEMS_PER_PAGE = 16;
 
@@ -62,19 +63,21 @@ const emptyTalentForm = {
 const getProfileImage = (candidate) =>
   candidate.profile_image || candidate.avatar || candidate.image || "/images/avatar.jpg";
 
-const formatJsonLike = (value) => {
-  if (!value) return "Not specified";
+const formatJsonLike = (value, tt) => {
+  if (!value) return tt("recruiterTalent.states.notSpecified", "Not specified");
 
   if (typeof value === "string") {
     try {
-      return formatJsonLike(JSON.parse(value));
+      return formatJsonLike(JSON.parse(value), tt);
     } catch {
       return value;
     }
   }
 
   if (Array.isArray(value)) {
-    if (value.length === 0) return "Not specified";
+    if (value.length === 0) {
+      return tt("recruiterTalent.states.notSpecified", "Not specified");
+    }
 
     return value
       .map((item) => {
@@ -95,6 +98,12 @@ const formatJsonLike = (value) => {
 
 function RecruiterTalent() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const tt = (key, fallback) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
   const [talent, setTalent] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -120,7 +129,10 @@ function RecruiterTalent() {
       setTalent(data);
     } catch (err) {
       console.error("Failed to load talent:", err);
-      toast.error(err.response?.data?.error || "Failed to load talent");
+      toast.error(
+        err.response?.data?.error ||
+          tt("recruiterTalent.alerts.failedLoadTalent", "Failed to load talent")
+      );
     } finally {
       setLoading(false);
     }
@@ -194,7 +206,9 @@ function RecruiterTalent() {
     }
 
     if (sortBy === "recent") {
-      result.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+      result.sort(
+        (a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)
+      );
     }
 
     return result;
@@ -222,13 +236,19 @@ function RecruiterTalent() {
     return { total, highReadiness, needsSupport, seniorTalent };
   }, [talent]);
 
+  const percentOfTotal = (value) =>
+    `${stats.total ? Math.round((value / stats.total) * 100) : 0}% ${tt(
+      "recruiterTalent.stats.ofTotal",
+      "of total"
+    )}`;
+
   const resetFilters = () => {
     setSearchTerm("");
     setExperienceFilter("all");
     setReadinessFilter("all");
     setSortBy("recent");
     setCurrentPage(1);
-    toast("Filters reset.");
+    toast(tt("recruiterTalent.alerts.filtersReset", "Filters reset."));
   };
 
   const messageCandidate = async (candidateId) => {
@@ -255,7 +275,9 @@ function RecruiterTalent() {
       const payload = normalizeTalentPayload(form);
 
       if (!payload.name || !payload.email) {
-        toast.error("Name and email are required.");
+        toast.error(
+          tt("recruiterTalent.alerts.nameEmailRequired", "Name and email are required.")
+        );
         return;
       }
 
@@ -268,11 +290,19 @@ function RecruiterTalent() {
         await fetchTalent();
       }
 
-      toast.success("Talent created and assigned to you.");
+      toast.success(
+        tt(
+          "recruiterTalent.alerts.talentCreated",
+          "Talent created and assigned to you."
+        )
+      );
       setShowCreateModal(false);
     } catch (err) {
       console.error("Failed to create talent:", err);
-      toast.error(err.response?.data?.error || "Failed to create talent.");
+      toast.error(
+        err.response?.data?.error ||
+          tt("recruiterTalent.alerts.failedCreateTalent", "Failed to create talent.")
+      );
     }
   };
 
@@ -291,17 +321,25 @@ function RecruiterTalent() {
         prev?.id === candidateId ? { ...prev, ...updated } : prev
       );
 
-      toast.success("Talent updated successfully.");
+      toast.success(
+        tt("recruiterTalent.alerts.talentUpdated", "Talent updated successfully.")
+      );
       setEditingCandidate(null);
     } catch (err) {
       console.error("Failed to update talent:", err);
-      toast.error(err.response?.data?.error || "Failed to update talent.");
+      toast.error(
+        err.response?.data?.error ||
+          tt("recruiterTalent.alerts.failedUpdateTalent", "Failed to update talent.")
+      );
     }
   };
 
   const removeTalent = async (candidateId) => {
     const confirmed = window.confirm(
-      "Remove this talent from your workspace? This will not delete the candidate globally."
+      tt(
+        "recruiterTalent.confirm.removeTalent",
+        "Remove this talent from your workspace? This will not delete the candidate globally."
+      )
     );
 
     if (!confirmed) return;
@@ -315,17 +353,27 @@ function RecruiterTalent() {
         setSelectedCandidate(null);
       }
 
-      toast.success("Talent removed from your workspace.");
+      toast.success(
+        tt(
+          "recruiterTalent.alerts.talentRemoved",
+          "Talent removed from your workspace."
+        )
+      );
     } catch (err) {
       console.error("Failed to remove talent:", err);
-      toast.error(err.response?.data?.error || "Failed to remove talent.");
+      toast.error(
+        err.response?.data?.error ||
+          tt("recruiterTalent.alerts.failedRemoveTalent", "Failed to remove talent.")
+      );
     }
   };
 
   const bulkCreateTalent = async (items) => {
     try {
       if (!items.length) {
-        toast.error("No valid talent records found.");
+        toast.error(
+          tt("recruiterTalent.alerts.noValidRecords", "No valid talent records found.")
+        );
         return;
       }
 
@@ -334,31 +382,49 @@ function RecruiterTalent() {
       });
 
       toast.success(
-        `Bulk import completed. Created ${res.data?.createdCount || 0}, skipped ${
-          res.data?.skippedCount || 0
-        }.`
+        `${tt("recruiterTalent.alerts.bulkCompleted", "Bulk import completed.")} ${tt(
+          "recruiterTalent.alerts.created",
+          "Created"
+        )} ${res.data?.createdCount || 0}, ${tt(
+          "recruiterTalent.alerts.skipped",
+          "skipped"
+        )} ${res.data?.skippedCount || 0}.`
       );
 
       setShowBulkModal(false);
       await fetchTalent();
     } catch (err) {
       console.error("Failed to bulk create talent:", err);
-      toast.error(err.response?.data?.error || "Failed to bulk create talent.");
+      toast.error(
+        err.response?.data?.error ||
+          tt(
+            "recruiterTalent.alerts.failedBulkCreateTalent",
+            "Failed to bulk create talent."
+          )
+      );
     }
   };
 
   return (
     <DashboardLayout
-      title="Talent Management"
-      subtitle="Create, assign, manage, evaluate, and support talent through the recruiter lifecycle."
+      title={tt("recruiterTalent.title", "Talent Management")}
+      subtitle={tt(
+        "recruiterTalent.subtitle",
+        "Create, assign, manage, evaluate, and support talent through the recruiter lifecycle."
+      )}
     >
       <Toaster position="top-right" />
 
       <div style={styles.pageHeader}>
         <div>
-          <h2 style={styles.pageTitle}>Recruiter Talent Workspace</h2>
+          <h2 style={styles.pageTitle}>
+            {tt("recruiterTalent.header.title", "Recruiter Talent Workspace")}
+          </h2>
           <p style={styles.pageSubtitle}>
-            Manage assigned candidates, add agency talent, and prepare profiles for matching.
+            {tt(
+              "recruiterTalent.header.subtitle",
+              "Manage assigned candidates, add agency talent, and prepare profiles for matching."
+            )}
           </p>
         </div>
 
@@ -369,12 +435,12 @@ function RecruiterTalent() {
             onClick={() => setShowBulkModal(true)}
           >
             <Upload size={16} />
-            Bulk Create
+            {tt("recruiterTalent.actions.bulkCreate", "Bulk Create")}
           </button>
 
           <Button onClick={() => setShowCreateModal(true)}>
             <Plus size={16} />
-            Create Talent
+            {tt("recruiterTalent.actions.createTalent", "Create Talent")}
           </Button>
         </div>
       </div>
@@ -382,36 +448,36 @@ function RecruiterTalent() {
       <div style={styles.statsGrid}>
         <StatCard
           icon={<Users size={26} />}
-          title="Total Talent"
+          title={tt("recruiterTalent.stats.totalTalent", "Total Talent")}
           value={stats.total}
-          subtext="Assigned to you"
+          subtext={tt("recruiterTalent.stats.assignedToYou", "Assigned to you")}
           color="#4f46e5"
           bg="#eef2ff"
         />
 
         <StatCard
           icon={<CheckCircle2 size={26} />}
-          title="High Readiness"
+          title={tt("recruiterTalent.stats.highReadiness", "High Readiness")}
           value={stats.highReadiness}
-          subtext={`${stats.total ? Math.round((stats.highReadiness / stats.total) * 100) : 0}% of total`}
+          subtext={percentOfTotal(stats.highReadiness)}
           color="#16a34a"
           bg="#dcfce7"
         />
 
         <StatCard
           icon={<AlertCircle size={26} />}
-          title="Needs Support"
+          title={tt("recruiterTalent.stats.needsSupport", "Needs Support")}
           value={stats.needsSupport}
-          subtext={`${stats.total ? Math.round((stats.needsSupport / stats.total) * 100) : 0}% of total`}
+          subtext={percentOfTotal(stats.needsSupport)}
           color="#f97316"
           bg="#ffedd5"
         />
 
         <StatCard
           icon={<Briefcase size={26} />}
-          title="Senior Talent"
+          title={tt("recruiterTalent.stats.seniorTalent", "Senior Talent")}
           value={stats.seniorTalent}
-          subtext={`${stats.total ? Math.round((stats.seniorTalent / stats.total) * 100) : 0}% of total`}
+          subtext={percentOfTotal(stats.seniorTalent)}
           color="#2563eb"
           bg="#dbeafe"
         />
@@ -424,7 +490,10 @@ function RecruiterTalent() {
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, role, skills, or country..."
+              placeholder={tt(
+                "recruiterTalent.filters.searchPlaceholder",
+                "Search by name, role, skills, or country..."
+              )}
               style={styles.input}
             />
           </div>
@@ -437,10 +506,18 @@ function RecruiterTalent() {
                 onChange={(e) => setExperienceFilter(e.target.value)}
                 style={styles.select}
               >
-                <option value="all">All experience</option>
-                <option value="junior">Junior, 0-2 years</option>
-                <option value="mid">Mid-level, 3-5 years</option>
-                <option value="senior">Senior, 6+ years</option>
+                <option value="all">
+                  {tt("recruiterTalent.filters.allExperience", "All experience")}
+                </option>
+                <option value="junior">
+                  {tt("recruiterTalent.filters.junior", "Junior, 0-2 years")}
+                </option>
+                <option value="mid">
+                  {tt("recruiterTalent.filters.mid", "Mid-level, 3-5 years")}
+                </option>
+                <option value="senior">
+                  {tt("recruiterTalent.filters.senior", "Senior, 6+ years")}
+                </option>
               </select>
             </div>
 
@@ -450,33 +527,50 @@ function RecruiterTalent() {
                 onChange={(e) => setReadinessFilter(e.target.value)}
                 style={styles.select}
               >
-                <option value="all">All readiness</option>
-                <option value="high">High readiness</option>
-                <option value="medium">Medium readiness</option>
-                <option value="low">Needs support</option>
+                <option value="all">
+                  {tt("recruiterTalent.filters.allReadiness", "All readiness")}
+                </option>
+                <option value="high">
+                  {tt("recruiterTalent.filters.highReadiness", "High readiness")}
+                </option>
+                <option value="medium">
+                  {tt("recruiterTalent.filters.mediumReadiness", "Medium readiness")}
+                </option>
+                <option value="low">
+                  {tt("recruiterTalent.filters.needsSupport", "Needs support")}
+                </option>
               </select>
             </div>
 
             <button type="button" style={styles.resetButton} onClick={resetFilters}>
               <RotateCcw size={16} />
-              Reset
+              {tt("recruiterTalent.actions.reset", "Reset")}
             </button>
           </div>
         </div>
 
         <div style={styles.panelMeta}>
-          <span>{filteredTalent.length} results found</span>
+          <span>
+            {filteredTalent.length}{" "}
+            {tt("recruiterTalent.labels.resultsFound", "results found")}
+          </span>
 
           <div style={styles.sortWrap}>
-            <span>Sort by:</span>
+            <span>{tt("recruiterTalent.filters.sortBy", "Sort by:")}</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               style={styles.sortSelect}
             >
-              <option value="recent">Recently added</option>
-              <option value="readiness">Readiness score</option>
-              <option value="experience">Experience</option>
+              <option value="recent">
+                {tt("recruiterTalent.filters.recentlyAdded", "Recently added")}
+              </option>
+              <option value="readiness">
+                {tt("recruiterTalent.filters.readinessScore", "Readiness score")}
+              </option>
+              <option value="experience">
+                {tt("recruiterTalent.filters.experience", "Experience")}
+              </option>
             </select>
 
             <div style={styles.viewButtons}>
@@ -484,6 +578,7 @@ function RecruiterTalent() {
                 type="button"
                 style={viewMode === "grid" ? styles.activeViewButton : styles.viewButton}
                 onClick={() => setViewMode("grid")}
+                aria-label={tt("recruiterTalent.labels.gridView", "Grid view")}
               >
                 <Grid2X2 size={16} />
               </button>
@@ -492,6 +587,7 @@ function RecruiterTalent() {
                 type="button"
                 style={viewMode === "list" ? styles.activeViewButton : styles.viewButton}
                 onClick={() => setViewMode("list")}
+                aria-label={tt("recruiterTalent.labels.listView", "List view")}
               >
                 <List size={16} />
               </button>
@@ -500,27 +596,33 @@ function RecruiterTalent() {
         </div>
 
         {loading ? (
-          <div style={styles.emptyState}>Loading talent...</div>
+          <div style={styles.emptyState}>
+            {tt("recruiterTalent.states.loadingTalent", "Loading talent...")}
+          </div>
         ) : filteredTalent.length === 0 ? (
           <div style={styles.emptyState}>
-            No talent found. Create talent manually or bulk import your agency list.
+            {tt(
+              "recruiterTalent.states.noTalent",
+              "No talent found. Create talent manually or bulk import your agency list."
+            )}
           </div>
         ) : (
           <>
             <div style={viewMode === "grid" ? styles.talentGrid : styles.talentList}>
               {paginatedTalent.map((candidate) => (
-                    <CandidateCard
-                    key={candidate.id}
-                    candidate={candidate}
-                    viewMode={viewMode}
-                    readinessScore={getReadinessScore(candidate)}
-                    openMenu={openMenu}
-                    setOpenMenu={setOpenMenu}
-                    onView={() => setSelectedCandidate(candidate)}
-                    onEdit={() => setEditingCandidate(candidate)}
-                    onRemove={() => removeTalent(candidate.id)}
-                    onMessage={() => messageCandidate(candidate.id)}
-                    />
+                <CandidateCard
+                  key={candidate.id}
+                  candidate={candidate}
+                  viewMode={viewMode}
+                  readinessScore={getReadinessScore(candidate)}
+                  openMenu={openMenu}
+                  setOpenMenu={setOpenMenu}
+                  onView={() => setSelectedCandidate(candidate)}
+                  onEdit={() => setEditingCandidate(candidate)}
+                  onRemove={() => removeTalent(candidate.id)}
+                  onMessage={() => messageCandidate(candidate.id)}
+                  tt={tt}
+                />
               ))}
             </div>
 
@@ -561,9 +663,10 @@ function RecruiterTalent() {
                 </button>
 
                 <span style={styles.paginationText}>
-                  Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
-                  {Math.min(currentPage * ITEMS_PER_PAGE, filteredTalent.length)} of{" "}
-                  {filteredTalent.length}
+                  {tt("recruiterTalent.pagination.showing", "Showing")}{" "}
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+                  {Math.min(currentPage * ITEMS_PER_PAGE, filteredTalent.length)}{" "}
+                  {tt("recruiterTalent.pagination.of", "of")} {filteredTalent.length}
                 </span>
               </div>
             )}
@@ -579,28 +682,37 @@ function RecruiterTalent() {
           onEdit={() => setEditingCandidate(selectedCandidate)}
           onRemove={() => removeTalent(selectedCandidate.id)}
           onMessage={() => messageCandidate(selectedCandidate.id)}
+          tt={tt}
         />
       )}
 
       {showCreateModal && (
         <TalentFormModal
-          title="Create Talent"
-          subtitle="Create a candidate profile and automatically assign it to your recruiter workspace."
+          title={tt("recruiterTalent.form.createTitle", "Create Talent")}
+          subtitle={tt(
+            "recruiterTalent.form.createSubtitle",
+            "Create a candidate profile and automatically assign it to your recruiter workspace."
+          )}
           initialValues={emptyTalentForm}
-          submitLabel="Create Talent"
+          submitLabel={tt("recruiterTalent.actions.createTalent", "Create Talent")}
           onSubmit={createTalent}
           onClose={() => setShowCreateModal(false)}
+          tt={tt}
         />
       )}
 
       {editingCandidate && (
         <TalentFormModal
-          title="Edit Talent"
-          subtitle="Update candidate profile information and readiness data."
+          title={tt("recruiterTalent.form.editTitle", "Edit Talent")}
+          subtitle={tt(
+            "recruiterTalent.form.editSubtitle",
+            "Update candidate profile information and readiness data."
+          )}
           initialValues={candidateToForm(editingCandidate)}
-          submitLabel="Save Changes"
+          submitLabel={tt("recruiterTalent.actions.saveChanges", "Save Changes")}
           onSubmit={(form) => updateTalent(editingCandidate.id, form)}
           onClose={() => setEditingCandidate(null)}
+          tt={tt}
         />
       )}
 
@@ -608,6 +720,7 @@ function RecruiterTalent() {
         <BulkCreateModal
           onClose={() => setShowBulkModal(false)}
           onSubmit={bulkCreateTalent}
+          tt={tt}
         />
       )}
     </DashboardLayout>
@@ -682,6 +795,7 @@ function CandidateCard({
   onMessage,
   openMenu,
   setOpenMenu,
+  tt,
 }) {
   const skills = String(candidate.skills || "")
     .split(",")
@@ -690,94 +804,97 @@ function CandidateCard({
 
   return (
     <div style={viewMode === "list" ? styles.candidateListItem : styles.candidateCard}>
- <div style={styles.cardHeader}>
-  <div style={styles.profileRow}>
-    <img
-      src={getProfileImage(candidate)}
-      alt={candidate.name || "Candidate"}
-      style={styles.avatarImage}
-      onError={(e) => {
-        e.currentTarget.src = "/images/avatar.jpg";
-      }}
-    />
+      <div style={styles.cardHeader}>
+        <div style={styles.profileRow}>
+          <img
+            src={getProfileImage(candidate)}
+            alt={candidate.name || tt("recruiterTalent.defaults.candidate", "Candidate")}
+            style={styles.avatarImage}
+            onError={(e) => {
+              e.currentTarget.src = "/images/avatar.jpg";
+            }}
+          />
 
-    <div>
-      <h3 style={styles.name}>
-        {candidate.name || "Unnamed Candidate"}
-      </h3>
+          <div>
+            <h3 style={styles.name}>
+              {candidate.name ||
+                tt("recruiterTalent.defaults.unnamedCandidate", "Unnamed Candidate")}
+            </h3>
 
-      <p style={styles.role}>
-        {candidate.professional_title ||
-          candidate.desired_job_title ||
-          "Role not specified"}
-      </p>
-    </div>
-  </div>
+            <p style={styles.role}>
+              {candidate.professional_title ||
+                candidate.desired_job_title ||
+                tt("recruiterTalent.defaults.roleNotSpecified", "Role not specified")}
+            </p>
+          </div>
+        </div>
 
-  <div style={styles.menuWrapper}>
-    <button
-      type="button"
-      style={styles.menuButton}
-      onClick={() =>
-        setOpenMenu((prev) =>
-          prev === candidate.id ? null : candidate.id
-        )
-      }
-    >
-      <MoreVertical size={18} />
-    </button>
+        <div style={styles.menuWrapper}>
+          <button
+            type="button"
+            style={styles.menuButton}
+            onClick={() =>
+              setOpenMenu((prev) => (prev === candidate.id ? null : candidate.id))
+            }
+            aria-label={tt("recruiterTalent.actions.openMenu", "Open menu")}
+          >
+            <MoreVertical size={18} />
+          </button>
 
-    {openMenu === candidate.id && (
-      <div style={styles.dropdownMenu}>
-        <button
-          type="button"
-          style={styles.dropdownItem}
-          onClick={() => {
-            setOpenMenu(null);
-            onEdit();
-          }}
-        >
-          <Pencil size={15} />
-          Edit Talent
-        </button>
+          {openMenu === candidate.id && (
+            <div style={styles.dropdownMenu}>
+              <button
+                type="button"
+                style={styles.dropdownItem}
+                onClick={() => {
+                  setOpenMenu(null);
+                  onEdit();
+                }}
+              >
+                <Pencil size={15} />
+                {tt("recruiterTalent.actions.editTalent", "Edit Talent")}
+              </button>
 
-        <button
-          type="button"
-          style={styles.dropdownDelete}
-          onClick={() => {
-            setOpenMenu(null);
-            onRemove();
-          }}
-        >
-          <Trash2 size={15} />
-          Remove Talent
-        </button>
+              <button
+                type="button"
+                style={styles.dropdownDelete}
+                onClick={() => {
+                  setOpenMenu(null);
+                  onRemove();
+                }}
+              >
+                <Trash2 size={15} />
+                {tt("recruiterTalent.actions.removeTalent", "Remove Talent")}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    )}
-  </div>
-</div>
 
       <div style={styles.metaList}>
         <span>
           <MapPin size={14} />
           {[candidate.city, candidate.country].filter(Boolean).join(", ") ||
-            "Location not specified"}
+            tt("recruiterTalent.defaults.locationNotSpecified", "Location not specified")}
         </span>
 
         <span>
           <Briefcase size={14} />
-          {candidate.years_of_experience || 0} years experience
+          {candidate.years_of_experience || 0}{" "}
+          {tt("recruiterTalent.labels.yearsExperience", "years experience")}
         </span>
 
         <span>
           <GraduationCap size={14} />
-          {candidate.education ? "Education added" : "Education missing"}
+          {candidate.education
+            ? tt("recruiterTalent.labels.educationAdded", "Education added")
+            : tt("recruiterTalent.labels.educationMissing", "Education missing")}
         </span>
       </div>
 
       <div style={styles.readinessBlock}>
         <div style={styles.readinessTop}>
-          <span>Readiness</span>
+          <span>{tt("recruiterTalent.labels.readiness", "Readiness")}</span>
           <strong>{readinessScore}%</strong>
         </div>
 
@@ -793,7 +910,7 @@ function CandidateCard({
 
       <div style={styles.skills}>
         {skills.length === 0 ? (
-          <span>No skills added</span>
+          <span>{tt("recruiterTalent.states.noSkillsAdded", "No skills added")}</span>
         ) : (
           <>
             {skills.slice(0, 3).map((skill, index) => (
@@ -804,18 +921,17 @@ function CandidateCard({
         )}
       </div>
 
-<div style={styles.actions}>
-  <button type="button" style={styles.viewProfileButton} onClick={onView}>
-    <Eye size={15} />
-    View
-  </button>
+      <div style={styles.actions}>
+        <button type="button" style={styles.viewProfileButton} onClick={onView}>
+          <Eye size={15} />
+          {tt("recruiterTalent.actions.view", "View")}
+        </button>
 
-  <button type="button" style={styles.messageButton} onClick={onMessage}>
-    <MessageCircle size={15} />
-    Message
-  </button>
-
-</div>
+        <button type="button" style={styles.messageButton} onClick={onMessage}>
+          <MessageCircle size={15} />
+          {tt("recruiterTalent.actions.message", "Message")}
+        </button>
+      </div>
     </div>
   );
 }
@@ -827,42 +943,59 @@ function CandidateModal({
   onEdit,
   onRemove,
   onMessage,
+  tt,
 }) {
   const details = [
-    ["Email", candidate.email, <Mail size={15} />],
-    ["Phone", candidate.phone, <Phone size={15} />],
+    [tt("recruiterTalent.fields.email", "Email"), candidate.email, <Mail size={15} />],
+    [tt("recruiterTalent.fields.phone", "Phone"), candidate.phone, <Phone size={15} />],
     [
-      "Location",
+      tt("recruiterTalent.fields.location", "Location"),
       [candidate.city, candidate.country].filter(Boolean).join(", "),
       <MapPin size={15} />,
     ],
     [
-      "Experience",
-      `${candidate.years_of_experience || 0} years`,
+      tt("recruiterTalent.fields.experience", "Experience"),
+      `${candidate.years_of_experience || 0} ${tt("recruiterTalent.labels.years", "years")}`,
       <Briefcase size={15} />,
     ],
-    ["Languages", candidate.languages, <Languages size={15} />],
-    ["Availability", candidate.availability, <Calendar size={15} />],
-    ["Work Authorization", candidate.work_authorization, <Award size={15} />],
     [
-      "Expected Salary",
+      tt("recruiterTalent.fields.languages", "Languages"),
+      candidate.languages,
+      <Languages size={15} />,
+    ],
+    [
+      tt("recruiterTalent.fields.availability", "Availability"),
+      candidate.availability,
+      <Calendar size={15} />,
+    ],
+    [
+      tt("recruiterTalent.fields.workAuthorization", "Work Authorization"),
+      candidate.work_authorization,
+      <Award size={15} />,
+    ],
+    [
+      tt("recruiterTalent.fields.expectedSalary", "Expected Salary"),
       candidate.expected_salary
         ? `${candidate.expected_salary} ${candidate.salary_currency || ""}`
         : null,
       <Briefcase size={15} />,
     ],
     [
-      "Preferred Employment",
+      tt("recruiterTalent.fields.preferredEmployment", "Preferred Employment"),
       candidate.preferred_employment_type,
       <Briefcase size={15} />,
     ],
-    ["Preferred Work Mode", candidate.preferred_work_mode, <Briefcase size={15} />],
     [
-      "Willing to Relocate",
+      tt("recruiterTalent.fields.preferredWorkMode", "Preferred Work Mode"),
+      candidate.preferred_work_mode,
+      <Briefcase size={15} />,
+    ],
+    [
+      tt("recruiterTalent.fields.willingToRelocate", "Willing to Relocate"),
       candidate.willing_to_relocate === true
-        ? "Yes"
+        ? tt("recruiterTalent.options.yes", "Yes")
         : candidate.willing_to_relocate === false
-        ? "No"
+        ? tt("recruiterTalent.options.no", "No")
         : null,
       <MapPin size={15} />,
     ],
@@ -875,7 +1008,7 @@ function CandidateModal({
           <div style={styles.modalProfileLeft}>
             <img
               src={getProfileImage(candidate)}
-              alt={candidate.name || "Candidate"}
+              alt={candidate.name || tt("recruiterTalent.defaults.candidate", "Candidate")}
               style={styles.modalProfileImage}
               onError={(e) => {
                 e.currentTarget.src = "/images/avatar.jpg";
@@ -884,14 +1017,17 @@ function CandidateModal({
 
             <div>
               <h2 style={styles.modalTitle}>
-                {candidate.name || "Unnamed Candidate"}
+                {candidate.name ||
+                  tt("recruiterTalent.defaults.unnamedCandidate", "Unnamed Candidate")}
               </h2>
               <p style={styles.modalSubtitle}>
                 {candidate.professional_title ||
                   candidate.desired_job_title ||
-                  "Candidate"}
+                  tt("recruiterTalent.defaults.candidate", "Candidate")}
               </p>
-              <span style={styles.readinessBadge}>Readiness {readinessScore}%</span>
+              <span style={styles.readinessBadge}>
+                {tt("recruiterTalent.labels.readiness", "Readiness")} {readinessScore}%
+              </span>
             </div>
           </div>
 
@@ -902,12 +1038,15 @@ function CandidateModal({
 
         <div style={styles.modalGrid}>
           <section style={styles.modalSection}>
-            <h3>Professional Summary</h3>
-            <p>{candidate.professional_summary || "No summary provided."}</p>
+            <h3>{tt("recruiterTalent.modal.professionalSummary", "Professional Summary")}</h3>
+            <p>
+              {candidate.professional_summary ||
+                tt("recruiterTalent.states.noSummary", "No summary provided.")}
+            </p>
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Candidate Details</h3>
+            <h3>{tt("recruiterTalent.modal.candidateDetails", "Candidate Details")}</h3>
 
             <div style={styles.detailGrid}>
               {details.map(([label, value, icon]) => (
@@ -916,7 +1055,10 @@ function CandidateModal({
 
                   <div>
                     <strong>{label}</strong>
-                    <p>{value || "Not specified"}</p>
+                    <p>
+                      {value ||
+                        tt("recruiterTalent.states.notSpecified", "Not specified")}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -924,9 +1066,12 @@ function CandidateModal({
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Skills</h3>
+            <h3>{tt("recruiterTalent.modal.skills", "Skills")}</h3>
             <div style={styles.skills}>
-              {String(candidate.skills || "No skills added")
+              {String(
+                candidate.skills ||
+                  tt("recruiterTalent.states.noSkillsAdded", "No skills added")
+              )
                 .split(",")
                 .map((skill, index) => (
                   <span key={index}>{skill.trim()}</span>
@@ -936,30 +1081,36 @@ function CandidateModal({
 
           <section style={styles.modalTwoColumns}>
             <div style={styles.modalSection}>
-              <h3>Education</h3>
-              <pre style={styles.preBlock}>{formatJsonLike(candidate.education)}</pre>
+              <h3>{tt("recruiterTalent.modal.education", "Education")}</h3>
+              <pre style={styles.preBlock}>
+                {formatJsonLike(candidate.education, tt)}
+              </pre>
             </div>
 
             <div style={styles.modalSection}>
-              <h3>Experience</h3>
-              <pre style={styles.preBlock}>{formatJsonLike(candidate.experience)}</pre>
+              <h3>{tt("recruiterTalent.modal.experience", "Experience")}</h3>
+              <pre style={styles.preBlock}>
+                {formatJsonLike(candidate.experience, tt)}
+              </pre>
             </div>
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Certifications</h3>
-            <pre style={styles.preBlock}>{formatJsonLike(candidate.certifications)}</pre>
+            <h3>{tt("recruiterTalent.modal.certifications", "Certifications")}</h3>
+            <pre style={styles.preBlock}>
+              {formatJsonLike(candidate.certifications, tt)}
+            </pre>
           </section>
 
           <section style={styles.modalSection}>
-            <h3>Recruiter Assignment</h3>
+            <h3>{tt("recruiterTalent.modal.recruiterAssignment", "Recruiter Assignment")}</h3>
             <div style={styles.detailGrid}>
               <div style={styles.detailItem}>
                 <span style={styles.detailIcon}>
                   <UserPlus size={15} />
                 </span>
                 <div>
-                  <strong>Source</strong>
+                  <strong>{tt("recruiterTalent.fields.source", "Source")}</strong>
                   <p>{candidate.assignment_source || "assigned"}</p>
                 </div>
               </div>
@@ -969,7 +1120,7 @@ function CandidateModal({
                   <CheckCircle2 size={15} />
                 </span>
                 <div>
-                  <strong>Status</strong>
+                  <strong>{tt("recruiterTalent.fields.status", "Status")}</strong>
                   <p>{candidate.assignment_status || "assigned"}</p>
                 </div>
               </div>
@@ -980,17 +1131,17 @@ function CandidateModal({
         <div style={styles.modalFooter}>
           <button type="button" style={styles.removeOutlineButton} onClick={onRemove}>
             <Trash2 size={15} />
-            Remove
+            {tt("recruiterTalent.actions.remove", "Remove")}
           </button>
 
           <Button variant="secondary" onClick={onEdit}>
             <Pencil size={15} />
-            Edit
+            {tt("recruiterTalent.actions.edit", "Edit")}
           </Button>
 
           <Button onClick={onMessage}>
             <MessageCircle size={15} />
-            Open Conversation
+            {tt("recruiterTalent.actions.openConversation", "Open Conversation")}
           </Button>
         </div>
       </div>
@@ -1005,6 +1156,7 @@ function TalentFormModal({
   submitLabel,
   onSubmit,
   onClose,
+  tt,
 }) {
   const [form, setForm] = useState(initialValues);
   const [saving, setSaving] = useState(false);
@@ -1029,7 +1181,11 @@ function TalentFormModal({
 
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
-      <form style={styles.formModal} onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
+      <form
+        style={styles.formModal}
+        onSubmit={handleSubmit}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div style={styles.formHeader}>
           <div>
             <h2>{title}</h2>
@@ -1042,58 +1198,153 @@ function TalentFormModal({
         </div>
 
         <div style={styles.formBody}>
-          <Input label="Full Name" value={form.name} onChange={(v) => update("name", v)} required />
-          <Input label="Email" type="email" value={form.email} onChange={(v) => update("email", v)} required />
-          <Input label="Phone" value={form.phone} onChange={(v) => update("phone", v)} />
-          <Input label="Country" value={form.country} onChange={(v) => update("country", v)} />
-          <Input label="City" value={form.city} onChange={(v) => update("city", v)} />
-          <Input label="Professional Title" value={form.professional_title} onChange={(v) => update("professional_title", v)} />
-          <Input label="Desired Job Title" value={form.desired_job_title} onChange={(v) => update("desired_job_title", v)} />
-          <Input label="Years of Experience" type="number" value={form.years_of_experience} onChange={(v) => update("years_of_experience", v)} />
-          <Input label="Skills, comma separated" value={form.skills} onChange={(v) => update("skills", v)} />
-          <Input label="Languages" value={form.languages} onChange={(v) => update("languages", v)} />
-          <Input label="Availability" value={form.availability} onChange={(v) => update("availability", v)} />
-          <Select label="Preferred Work Mode" value={form.preferred_work_mode} onChange={(v) => update("preferred_work_mode", v)}>
-            <option value="">Select</option>
-            <option value="Remote">Remote</option>
-            <option value="Hybrid">Hybrid</option>
-            <option value="Onsite">Onsite</option>
+          <Input
+            label={tt("recruiterTalent.fields.fullName", "Full Name")}
+            value={form.name}
+            onChange={(v) => update("name", v)}
+            required
+          />
+          <Input
+            label={tt("recruiterTalent.fields.email", "Email")}
+            type="email"
+            value={form.email}
+            onChange={(v) => update("email", v)}
+            required
+          />
+          <Input
+            label={tt("recruiterTalent.fields.phone", "Phone")}
+            value={form.phone}
+            onChange={(v) => update("phone", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.country", "Country")}
+            value={form.country}
+            onChange={(v) => update("country", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.city", "City")}
+            value={form.city}
+            onChange={(v) => update("city", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.professionalTitle", "Professional Title")}
+            value={form.professional_title}
+            onChange={(v) => update("professional_title", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.desiredJobTitle", "Desired Job Title")}
+            value={form.desired_job_title}
+            onChange={(v) => update("desired_job_title", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.yearsOfExperience", "Years of Experience")}
+            type="number"
+            value={form.years_of_experience}
+            onChange={(v) => update("years_of_experience", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.skillsComma", "Skills, comma separated")}
+            value={form.skills}
+            onChange={(v) => update("skills", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.languages", "Languages")}
+            value={form.languages}
+            onChange={(v) => update("languages", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.availability", "Availability")}
+            value={form.availability}
+            onChange={(v) => update("availability", v)}
+          />
+
+          <Select
+            label={tt("recruiterTalent.fields.preferredWorkMode", "Preferred Work Mode")}
+            value={form.preferred_work_mode}
+            onChange={(v) => update("preferred_work_mode", v)}
+          >
+            <option value="">{tt("recruiterTalent.options.select", "Select")}</option>
+            <option value="Remote">{tt("recruiterTalent.options.remote", "Remote")}</option>
+            <option value="Hybrid">{tt("recruiterTalent.options.hybrid", "Hybrid")}</option>
+            <option value="Onsite">{tt("recruiterTalent.options.onsite", "Onsite")}</option>
           </Select>
-          <Select label="Preferred Employment Type" value={form.preferred_employment_type} onChange={(v) => update("preferred_employment_type", v)}>
-            <option value="">Select</option>
-            <option value="Full-time">Full-time</option>
-            <option value="Part-time">Part-time</option>
-            <option value="Contract">Contract</option>
-            <option value="Internship">Internship</option>
+
+          <Select
+            label={tt(
+              "recruiterTalent.fields.preferredEmploymentType",
+              "Preferred Employment Type"
+            )}
+            value={form.preferred_employment_type}
+            onChange={(v) => update("preferred_employment_type", v)}
+          >
+            <option value="">{tt("recruiterTalent.options.select", "Select")}</option>
+            <option value="Full-time">
+              {tt("recruiterTalent.options.fullTime", "Full-time")}
+            </option>
+            <option value="Part-time">
+              {tt("recruiterTalent.options.partTime", "Part-time")}
+            </option>
+            <option value="Contract">
+              {tt("recruiterTalent.options.contract", "Contract")}
+            </option>
+            <option value="Internship">
+              {tt("recruiterTalent.options.internship", "Internship")}
+            </option>
           </Select>
-          <Input label="Expected Salary" type="number" value={form.expected_salary} onChange={(v) => update("expected_salary", v)} />
-          <Input label="Salary Currency" value={form.salary_currency} onChange={(v) => update("salary_currency", v)} />
-          <Input label="Work Authorization" value={form.work_authorization} onChange={(v) => update("work_authorization", v)} />
-          <Select label="Willing to Relocate" value={form.willing_to_relocate} onChange={(v) => update("willing_to_relocate", v)}>
-            <option value="">Not specified</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
+
+          <Input
+            label={tt("recruiterTalent.fields.expectedSalary", "Expected Salary")}
+            type="number"
+            value={form.expected_salary}
+            onChange={(v) => update("expected_salary", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.salaryCurrency", "Salary Currency")}
+            value={form.salary_currency}
+            onChange={(v) => update("salary_currency", v)}
+          />
+          <Input
+            label={tt("recruiterTalent.fields.workAuthorization", "Work Authorization")}
+            value={form.work_authorization}
+            onChange={(v) => update("work_authorization", v)}
+          />
+
+          <Select
+            label={tt("recruiterTalent.fields.willingToRelocate", "Willing to Relocate")}
+            value={form.willing_to_relocate}
+            onChange={(v) => update("willing_to_relocate", v)}
+          >
+            <option value="">
+              {tt("recruiterTalent.states.notSpecified", "Not specified")}
+            </option>
+            <option value="true">{tt("recruiterTalent.options.yes", "Yes")}</option>
+            <option value="false">{tt("recruiterTalent.options.no", "No")}</option>
           </Select>
 
           <label style={styles.fullField}>
-            <span>Professional Summary</span>
+            <span>
+              {tt("recruiterTalent.fields.professionalSummary", "Professional Summary")}
+            </span>
             <textarea
               value={form.professional_summary}
               onChange={(e) => update("professional_summary", e.target.value)}
               style={styles.formTextarea}
-              placeholder="Write a short candidate summary..."
+              placeholder={tt(
+                "recruiterTalent.placeholders.summary",
+                "Write a short candidate summary..."
+              )}
             />
           </label>
         </div>
 
         <div style={styles.formFooter}>
           <button type="button" style={styles.cancelButton} onClick={onClose}>
-            Cancel
+            {tt("recruiterTalent.actions.cancel", "Cancel")}
           </button>
 
           <Button type="submit" disabled={saving}>
             <Save size={15} />
-            {saving ? "Saving..." : submitLabel}
+            {saving ? tt("recruiterTalent.actions.saving", "Saving...") : submitLabel}
           </Button>
         </div>
       </form>
@@ -1101,7 +1352,7 @@ function TalentFormModal({
   );
 }
 
-function BulkCreateModal({ onClose, onSubmit }) {
+function BulkCreateModal({ onClose, onSubmit, tt }) {
   const [rawText, setRawText] = useState(`name,email,phone,country,city,professional_title,desired_job_title,years_of_experience,skills
 Amina Yusuf,amina@example.com,+2348012345678,Nigeria,Lagos,Frontend Developer,React Developer,3,"React, JavaScript, CSS"
 Kwame Mensah,kwame@example.com,+233201234567,Ghana,Accra,Backend Engineer,Node.js Engineer,5,"Node.js, PostgreSQL, APIs"`);
@@ -1123,9 +1374,12 @@ Kwame Mensah,kwame@example.com,+233201234567,Ghana,Accra,Backend Engineer,Node.j
       <div style={styles.bulkModal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.formHeader}>
           <div>
-            <h2>Bulk Create Talent</h2>
+            <h2>{tt("recruiterTalent.bulk.title", "Bulk Create Talent")}</h2>
             <p>
-              Paste CSV-style rows. Each talent will be created as a candidate and assigned to you.
+              {tt(
+                "recruiterTalent.bulk.subtitle",
+                "Paste CSV-style rows. Each talent will be created as a candidate and assigned to you."
+              )}
             </p>
           </div>
 
@@ -1141,17 +1395,20 @@ Kwame Mensah,kwame@example.com,+233201234567,Ghana,Accra,Backend Engineer,Node.j
         />
 
         <div style={styles.bulkMeta}>
-          <strong>{parsedItems.length}</strong> valid records detected.
+          <strong>{parsedItems.length}</strong>{" "}
+          {tt("recruiterTalent.bulk.validRecords", "valid records detected.")}
         </div>
 
         <div style={styles.formFooter}>
           <button type="button" style={styles.cancelButton} onClick={onClose}>
-            Cancel
+            {tt("recruiterTalent.actions.cancel", "Cancel")}
           </button>
 
           <Button onClick={handleSubmit} disabled={saving || parsedItems.length === 0}>
             <Upload size={15} />
-            {saving ? "Importing..." : "Import Talent"}
+            {saving
+              ? tt("recruiterTalent.actions.importing", "Importing...")
+              : tt("recruiterTalent.actions.importTalent", "Import Talent")}
           </Button>
         </div>
       </div>
@@ -1228,7 +1485,11 @@ function Select({ label, value, onChange, children }) {
   return (
     <label style={styles.formField}>
       <span>{label}</span>
-      <select value={value || ""} onChange={(e) => onChange(e.target.value)} style={styles.formInput}>
+      <select
+        value={value || ""}
+        onChange={(e) => onChange(e.target.value)}
+        style={styles.formInput}
+      >
         {children}
       </select>
     </label>

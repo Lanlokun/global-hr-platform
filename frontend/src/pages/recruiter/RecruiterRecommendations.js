@@ -7,7 +7,6 @@ import {
   UserCheck,
   Briefcase,
   Building2,
-  MapPin,
   MessageCircle,
   Eye,
   Filter,
@@ -17,7 +16,6 @@ import {
   TrendingUp,
   Activity,
   ShieldCheck,
-  Mail,
   Clock,
   CheckCircle2,
   FileText,
@@ -28,6 +26,7 @@ import {
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Button from "../../components/ui/Button";
 import api from "../../services/api";
+import { useLanguage } from "../../context/LanguageContext";
 
 const defaultRecruiterSettings = {
   default_candidate_message:
@@ -44,6 +43,12 @@ const defaultRecruiterSettings = {
 
 function RecruiterRecommendations() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const tt = (key, fallback) => {
+    const value = t(key);
+    return value === key ? fallback : value;
+  };
 
   const [recommendations, setRecommendations] = useState([]);
   const [settings, setSettings] = useState(defaultRecruiterSettings);
@@ -74,7 +79,10 @@ function RecruiterRecommendations() {
       } else {
         toast.error(
           recommendationsRes.reason?.response?.data?.error ||
-            "Failed to load recommendations."
+            tt(
+              "recruiterRecommendations.alerts.failedLoadRecommendations",
+              "Failed to load recommendations."
+            )
         );
       }
 
@@ -86,7 +94,12 @@ function RecruiterRecommendations() {
       }
     } catch (err) {
       console.error("Failed to load recruiter recommendation data:", err);
-      toast.error("Failed to load recommendation data.");
+      toast.error(
+        tt(
+          "recruiterRecommendations.alerts.failedLoadData",
+          "Failed to load recommendation data."
+        )
+      );
     } finally {
       setLoading(false);
     }
@@ -204,30 +217,51 @@ function RecruiterRecommendations() {
     setScoreFilter("all");
     setStageFilter("all");
     setSortBy("newest");
-    toast("Filters reset.");
+    toast(tt("recruiterRecommendations.alerts.filtersReset", "Filters reset."));
   };
 
   const buildEmployerMessage = (item) => {
     const aiNotes =
       settings.auto_include_ai_notes && item.ai_notes
-        ? `\n\nAI Match Insight:\n${item.ai_notes}`
+        ? `\n\n${tt("recruiterRecommendations.message.aiMatchInsight", "AI Match Insight")}:\n${item.ai_notes}`
         : "";
 
     return `${settings.default_employer_message}
 
-Candidate: ${item.candidate_name || "Candidate"}
-Role: ${item.job_title || "Job opportunity"}
-Match Score: ${item.match_score || 0}%
-Recommendation Note: ${item.notes || settings.default_recommendation_note}${aiNotes}
+${tt("recruiterRecommendations.message.candidate", "Candidate")}: ${
+      item.candidate_name ||
+      tt("recruiterRecommendations.defaults.candidate", "Candidate")
+    }
+${tt("recruiterRecommendations.message.role", "Role")}: ${
+      item.job_title ||
+      tt("recruiterRecommendations.defaults.jobOpportunity", "Job opportunity")
+    }
+${tt("recruiterRecommendations.message.matchScore", "Match Score")}: ${
+      item.match_score || 0
+    }%
+${tt("recruiterRecommendations.message.recommendationNote", "Recommendation Note")}: ${
+      item.notes || settings.default_recommendation_note
+    }${aiNotes}
 
-Follow-up: I will check back in ${settings.follow_up_days || 3} days.
+${tt("recruiterRecommendations.message.followUp", "Follow-up")}: ${tt(
+      "recruiterRecommendations.message.checkBack",
+      "I will check back in"
+    )} ${settings.follow_up_days || 3} ${tt(
+      "recruiterRecommendations.labels.days",
+      "days"
+    )}.
 
 ${settings.auto_signature || ""}`;
   };
 
   const messageEmployer = async (item) => {
     if (!item.employer_id) {
-      toast.error("No employer account is linked to this job yet.");
+      toast.error(
+        tt(
+          "recruiterRecommendations.alerts.noEmployer",
+          "No employer account is linked to this job yet."
+        )
+      );
       return;
     }
 
@@ -241,14 +275,24 @@ ${settings.auto_signature || ""}`;
       const conversationId =
         res.data?.conversation?.id || res.data?.conversation_id || res.data?.id;
 
-      toast.success("Employer conversation opened.");
+      toast.success(
+        tt(
+          "recruiterRecommendations.alerts.conversationOpened",
+          "Employer conversation opened."
+        )
+      );
 
       navigate(
         `/dashboard/messages?conversation=${conversationId}&employer=${item.employer_id}&job=${item.job_id}`
       );
     } catch (err) {
       console.error("Failed to message employer:", err);
-      toast.error("Could not open conversation. Redirecting to messages.");
+      toast.error(
+        tt(
+          "recruiterRecommendations.alerts.redirectingMessages",
+          "Could not open conversation. Redirecting to messages."
+        )
+      );
 
       navigate(
         `/dashboard/messages?employer=${item.employer_id}&job=${item.job_id}`
@@ -258,52 +302,72 @@ ${settings.auto_signature || ""}`;
 
   return (
     <DashboardLayout
-      title="Talent Recommendations"
-      subtitle="Track recommendation outcomes, employer feedback, AI insights, and recruiter performance."
+      title={tt("recruiterRecommendations.title", "Talent Recommendations")}
+      subtitle={tt(
+        "recruiterRecommendations.subtitle",
+        "Track recommendation outcomes, employer feedback, AI insights, and recruiter performance."
+      )}
     >
       <Toaster position="top-right" />
 
       <div style={styles.settingsNote}>
         <ShieldCheck size={17} />
         <span>
-          Recommendation messages and follow-up timing are powered by your
-          recruiter settings.
+          {tt(
+            "recruiterRecommendations.settings.poweredBySettings",
+            "Recommendation messages and follow-up timing are powered by your recruiter settings."
+          )}
         </span>
       </div>
 
       <div style={styles.statsGrid}>
         <StatCard
           icon={<Star size={25} />}
-          title="Total"
+          title={tt("recruiterRecommendations.stats.total", "Total")}
           value={stats.total}
-          subtext="Recommendations sent"
+          subtext={tt(
+            "recruiterRecommendations.stats.recommendationsSent",
+            "Recommendations sent"
+          )}
           color="#4f46e5"
           bg="#eef2ff"
         />
 
         <StatCard
           icon={<TrendingUp size={25} />}
-          title="Avg Match"
+          title={tt("recruiterRecommendations.stats.avgMatch", "Avg Match")}
           value={`${stats.avgScore}%`}
-          subtext="Recommendation quality"
+          subtext={tt(
+            "recruiterRecommendations.stats.recommendationQuality",
+            "Recommendation quality"
+          )}
           color="#16a34a"
           bg="#dcfce7"
         />
 
         <StatCard
           icon={<UserCheck size={25} />}
-          title="Acceptance"
+          title={tt("recruiterRecommendations.stats.acceptance", "Acceptance")}
           value={`${stats.acceptanceRate}%`}
-          subtext={`${stats.accepted} accepted`}
+          subtext={`${stats.accepted} ${tt(
+            "recruiterRecommendations.stats.accepted",
+            "accepted"
+          )}`}
           color="#2563eb"
           bg="#dbeafe"
         />
 
         <StatCard
           icon={<Activity size={25} />}
-          title="Employer Viewed"
+          title={tt(
+            "recruiterRecommendations.stats.employerViewed",
+            "Employer Viewed"
+          )}
           value={`${stats.engagementRate}%`}
-          subtext="Engagement rate"
+          subtext={tt(
+            "recruiterRecommendations.stats.engagementRate",
+            "Engagement rate"
+          )}
           color="#f97316"
           bg="#ffedd5"
         />
@@ -312,9 +376,17 @@ ${settings.auto_signature || ""}`;
       <section style={styles.panel}>
         <div style={styles.panelHeader}>
           <div>
-            <h2 style={styles.panelTitle}>Recommendation Pipeline</h2>
+            <h2 style={styles.panelTitle}>
+              {tt(
+                "recruiterRecommendations.pipeline.title",
+                "Recommendation Pipeline"
+              )}
+            </h2>
             <p style={styles.panelSubtitle}>
-              Open a recommendation for full details.
+              {tt(
+                "recruiterRecommendations.pipeline.subtitle",
+                "Open a recommendation for full details."
+              )}
             </p>
           </div>
         </div>
@@ -325,7 +397,10 @@ ${settings.auto_signature || ""}`;
             <input
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search candidate, job, company..."
+              placeholder={tt(
+                "recruiterRecommendations.filters.searchPlaceholder",
+                "Search candidate, job, company..."
+              )}
               style={styles.input}
             />
           </div>
@@ -336,52 +411,122 @@ ${settings.auto_signature || ""}`;
               value={statusFilter}
               onChange={setStatusFilter}
             >
-              <option value="all">All status</option>
-              <option value="recommended">Recommended</option>
-              <option value="reviewed">Reviewed</option>
-              <option value="accepted">Accepted</option>
-              <option value="rejected">Rejected</option>
+              <option value="all">
+                {tt("recruiterRecommendations.filters.allStatus", "All status")}
+              </option>
+              <option value="recommended">
+                {tt(
+                  "recruiterRecommendations.filters.recommended",
+                  "Recommended"
+                )}
+              </option>
+              <option value="reviewed">
+                {tt("recruiterRecommendations.filters.reviewed", "Reviewed")}
+              </option>
+              <option value="accepted">
+                {tt("recruiterRecommendations.filters.accepted", "Accepted")}
+              </option>
+              <option value="rejected">
+                {tt("recruiterRecommendations.filters.rejected", "Rejected")}
+              </option>
             </SelectBox>
 
             <SelectBox value={scoreFilter} onChange={setScoreFilter}>
-              <option value="all">All scores</option>
-              <option value="high">High, 80%+</option>
-              <option value="medium">Medium, 50-79%</option>
-              <option value="low">Low, below 50%</option>
+              <option value="all">
+                {tt("recruiterRecommendations.filters.allScores", "All scores")}
+              </option>
+              <option value="high">
+                {tt("recruiterRecommendations.filters.high", "High, 80%+")}
+              </option>
+              <option value="medium">
+                {tt(
+                  "recruiterRecommendations.filters.medium",
+                  "Medium, 50-79%"
+                )}
+              </option>
+              <option value="low">
+                {tt(
+                  "recruiterRecommendations.filters.low",
+                  "Low, below 50%"
+                )}
+              </option>
             </SelectBox>
 
             <SelectBox value={stageFilter} onChange={setStageFilter}>
-              <option value="all">All stages</option>
-              <option value="submitted_to_employer">Submitted</option>
-              <option value="employer_review">Employer Review</option>
-              <option value="accepted_by_employer">Accepted</option>
-              <option value="closed_rejected">Rejected</option>
+              <option value="all">
+                {tt("recruiterRecommendations.filters.allStages", "All stages")}
+              </option>
+              <option value="submitted_to_employer">
+                {tt("recruiterRecommendations.filters.submitted", "Submitted")}
+              </option>
+              <option value="employer_review">
+                {tt(
+                  "recruiterRecommendations.filters.employerReview",
+                  "Employer Review"
+                )}
+              </option>
+              <option value="accepted_by_employer">
+                {tt("recruiterRecommendations.filters.accepted", "Accepted")}
+              </option>
+              <option value="closed_rejected">
+                {tt("recruiterRecommendations.filters.rejected", "Rejected")}
+              </option>
             </SelectBox>
 
             <SelectBox value={sortBy} onChange={setSortBy}>
-              <option value="newest">Newest</option>
-              <option value="match">Highest match</option>
-              <option value="rating">Employer rating</option>
-              <option value="response">Fastest response</option>
+              <option value="newest">
+                {tt("recruiterRecommendations.filters.newest", "Newest")}
+              </option>
+              <option value="match">
+                {tt(
+                  "recruiterRecommendations.filters.highestMatch",
+                  "Highest match"
+                )}
+              </option>
+              <option value="rating">
+                {tt(
+                  "recruiterRecommendations.filters.employerRating",
+                  "Employer rating"
+                )}
+              </option>
+              <option value="response">
+                {tt(
+                  "recruiterRecommendations.filters.fastestResponse",
+                  "Fastest response"
+                )}
+              </option>
             </SelectBox>
 
             <button type="button" style={styles.resetButton} onClick={resetFilters}>
               <RotateCcw size={16} />
-              Reset
+              {tt("recruiterRecommendations.actions.reset", "Reset")}
             </button>
           </div>
         </div>
 
         <div style={styles.panelMeta}>
-          <span>{filteredRecommendations.length} recommendations found</span>
+          <span>
+            {filteredRecommendations.length}{" "}
+            {tt(
+              "recruiterRecommendations.labels.recommendationsFound",
+              "recommendations found"
+            )}
+          </span>
         </div>
 
         {loading ? (
-          <div style={styles.emptyState}>Loading recommendations...</div>
+          <div style={styles.emptyState}>
+            {tt(
+              "recruiterRecommendations.states.loadingRecommendations",
+              "Loading recommendations..."
+            )}
+          </div>
         ) : filteredRecommendations.length === 0 ? (
           <div style={styles.emptyState}>
-            No recommendations found. Use Match Talent on the Jobs page to
-            recommend candidates.
+            {tt(
+              "recruiterRecommendations.states.noRecommendations",
+              "No recommendations found. Use Match Talent on the Jobs page to recommend candidates."
+            )}
           </div>
         ) : (
           <div style={styles.recommendationGrid}>
@@ -389,6 +534,7 @@ ${settings.auto_signature || ""}`;
               <RecommendationCard
                 key={item.id}
                 item={item}
+                tt={tt}
                 onView={() => setSelectedRecommendation(item)}
                 onMessage={() => messageEmployer(item)}
               />
@@ -404,6 +550,7 @@ ${settings.auto_signature || ""}`;
           employerMessage={buildEmployerMessage(selectedRecommendation)}
           onClose={() => setSelectedRecommendation(null)}
           onMessage={() => messageEmployer(selectedRecommendation)}
+          tt={tt}
         />
       )}
     </DashboardLayout>
@@ -439,15 +586,18 @@ function StatCard({ icon, title, value, subtext, color, bg }) {
   );
 }
 
-function RecommendationCard({ item, onView, onMessage }) {
-  const stage = getStageLabel(item.workflow_stage || item.status);
+function RecommendationCard({ item, onView, onMessage, tt }) {
+  const stage = getStageLabel(item.workflow_stage || item.status, tt);
 
   return (
     <div style={styles.recommendationCard}>
       <div style={styles.cardTop}>
         <img
           src={item.candidate_image || "/images/avatar.jpg"}
-          alt={item.candidate_name || "Candidate"}
+          alt={
+            item.candidate_name ||
+            tt("recruiterRecommendations.defaults.candidate", "Candidate")
+          }
           style={styles.avatar}
           onError={(e) => {
             e.currentTarget.src = "/images/avatar.jpg";
@@ -456,10 +606,16 @@ function RecommendationCard({ item, onView, onMessage }) {
 
         <div style={styles.cardIdentity}>
           <h3 style={styles.cardTitle}>
-            {item.candidate_name || "Unnamed Candidate"}
+            {item.candidate_name ||
+              tt(
+                "recruiterRecommendations.defaults.unnamedCandidate",
+                "Unnamed Candidate"
+              )}
           </h3>
           <p style={styles.cardSubtitle}>
-            {item.professional_title || item.desired_job_title || "Candidate"}
+            {item.professional_title ||
+              item.desired_job_title ||
+              tt("recruiterRecommendations.defaults.candidate", "Candidate")}
           </p>
         </div>
 
@@ -468,30 +624,41 @@ function RecommendationCard({ item, onView, onMessage }) {
 
       <div style={styles.cardJobLine}>
         <Briefcase size={14} />
-        <span>{item.job_title || "Untitled Job"}</span>
+        <span>
+          {item.job_title ||
+            tt("recruiterRecommendations.defaults.untitledJob", "Untitled Job")}
+        </span>
       </div>
 
       <div style={styles.cardJobLine}>
         <Building2 size={14} />
-        <span>{item.company_name || "Company not specified"}</span>
+        <span>
+          {item.company_name ||
+            tt(
+              "recruiterRecommendations.defaults.companyNotSpecified",
+              "Company not specified"
+            )}
+        </span>
       </div>
 
       <div style={styles.cardFooter}>
         <span style={styles.stageTag}>{stage}</span>
         <span style={item.employer_viewed ? styles.viewedTag : styles.notViewedTag}>
-          {item.employer_viewed ? "Viewed" : "Not viewed"}
+          {item.employer_viewed
+            ? tt("recruiterRecommendations.labels.viewed", "Viewed")
+            : tt("recruiterRecommendations.labels.notViewed", "Not viewed")}
         </span>
       </div>
 
       <div style={styles.actions}>
         <button type="button" style={styles.viewButton} onClick={onView}>
           <Eye size={15} />
-          View Details
+          {tt("recruiterRecommendations.actions.viewDetails", "View Details")}
         </button>
 
         <button type="button" style={styles.messageButton} onClick={onMessage}>
           <MessageCircle size={15} />
-          Message
+          {tt("recruiterRecommendations.actions.message", "Message")}
         </button>
       </div>
     </div>
@@ -504,8 +671,9 @@ function RecommendationModal({
   employerMessage,
   onClose,
   onMessage,
+  tt,
 }) {
-  const timeline = buildTimeline(item);
+  const timeline = buildTimeline(item, tt);
   const rating = Number(item.employer_rating || 0);
 
   return (
@@ -515,7 +683,10 @@ function RecommendationModal({
           <div style={styles.heroLeft}>
             <img
               src={item.candidate_image || "/images/avatar.jpg"}
-              alt={item.candidate_name || "Candidate"}
+              alt={
+                item.candidate_name ||
+                tt("recruiterRecommendations.defaults.candidate", "Candidate")
+              }
               style={styles.heroAvatar}
               onError={(e) => {
                 e.currentTarget.src = "/images/avatar.jpg";
@@ -523,15 +694,29 @@ function RecommendationModal({
             />
 
             <div>
-              <div style={styles.heroBadge}>Recommendation Details</div>
+              <div style={styles.heroBadge}>
+                {tt(
+                  "recruiterRecommendations.modal.recommendationDetails",
+                  "Recommendation Details"
+                )}
+              </div>
               <h2 style={styles.modalTitle}>
-                {item.candidate_name || "Unnamed Candidate"}
+                {item.candidate_name ||
+                  tt(
+                    "recruiterRecommendations.defaults.unnamedCandidate",
+                    "Unnamed Candidate"
+                  )}
               </h2>
               <p style={styles.modalSubtitle}>
                 {item.professional_title ||
                   item.desired_job_title ||
-                  "Candidate"}{" "}
-                for {item.job_title || "Untitled Job"}
+                  tt("recruiterRecommendations.defaults.candidate", "Candidate")}{" "}
+                {tt("recruiterRecommendations.labels.for", "for")}{" "}
+                {item.job_title ||
+                  tt(
+                    "recruiterRecommendations.defaults.untitledJob",
+                    "Untitled Job"
+                  )}
               </p>
             </div>
           </div>
@@ -544,59 +729,112 @@ function RecommendationModal({
         <div style={styles.modalSummaryGrid}>
           <SummaryCard
             icon={<TrendingUp size={20} />}
-            label="Match Score"
+            label={tt("recruiterRecommendations.summary.matchScore", "Match Score")}
             value={`${item.match_score || 0}%`}
+            tt={tt}
           />
           <SummaryCard
             icon={<CheckCircle2 size={20} />}
-            label="Status"
+            label={tt("recruiterRecommendations.summary.status", "Status")}
             value={item.status || "recommended"}
+            tt={tt}
           />
           <SummaryCard
             icon={<Eye size={20} />}
-            label="Employer Viewed"
-            value={item.employer_viewed ? "Yes" : "No"}
+            label={tt(
+              "recruiterRecommendations.summary.employerViewed",
+              "Employer Viewed"
+            )}
+            value={
+              item.employer_viewed
+                ? tt("recruiterRecommendations.options.yes", "Yes")
+                : tt("recruiterRecommendations.options.no", "No")
+            }
+            tt={tt}
           />
           <SummaryCard
             icon={<Clock size={20} />}
-            label="Response Time"
+            label={tt(
+              "recruiterRecommendations.summary.responseTime",
+              "Response Time"
+            )}
             value={`${item.recruiter_response_time_hours || 0}h`}
+            tt={tt}
           />
         </div>
 
         <div style={styles.modalBody}>
           <div style={styles.modalMain}>
             <section style={styles.modalSection}>
-              <SectionTitle icon={<UserCheck size={18} />} title="Candidate Profile" />
+              <SectionTitle
+                icon={<UserCheck size={18} />}
+                title={tt(
+                  "recruiterRecommendations.sections.candidateProfile",
+                  "Candidate Profile"
+                )}
+              />
 
               <div style={styles.detailGrid}>
-                <Detail label="Name" value={item.candidate_name} />
-                <Detail label="Email" value={item.candidate_email} />
                 <Detail
-                  label="Title"
-                  value={item.professional_title || item.desired_job_title}
+                  label={tt("recruiterRecommendations.fields.name", "Name")}
+                  value={item.candidate_name}
+                  tt={tt}
                 />
                 <Detail
-                  label="Experience"
+                  label={tt("recruiterRecommendations.fields.email", "Email")}
+                  value={item.candidate_email}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt("recruiterRecommendations.fields.title", "Title")}
+                  value={item.professional_title || item.desired_job_title}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt(
+                    "recruiterRecommendations.fields.experience",
+                    "Experience"
+                  )}
                   value={
                     item.years_of_experience
-                      ? `${item.years_of_experience} years`
+                      ? `${item.years_of_experience} ${tt(
+                          "recruiterRecommendations.labels.years",
+                          "years"
+                        )}`
                       : ""
                   }
+                  tt={tt}
                 />
-                <Detail label="Country" value={item.country} />
-                <Detail label="City" value={item.city} />
+                <Detail
+                  label={tt("recruiterRecommendations.fields.country", "Country")}
+                  value={item.country}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt("recruiterRecommendations.fields.city", "City")}
+                  value={item.city}
+                  tt={tt}
+                />
               </div>
             </section>
 
             <section style={styles.modalSection}>
-              <SectionTitle icon={<Briefcase size={18} />} title="Job and Company" />
+              <SectionTitle
+                icon={<Briefcase size={18} />}
+                title={tt(
+                  "recruiterRecommendations.sections.jobAndCompany",
+                  "Job and Company"
+                )}
+              />
 
               <div style={styles.jobHeaderBox}>
                 {item.company_logo ? (
                   <img
                     src={item.company_logo}
-                    alt={item.company_name || "Company"}
+                    alt={
+                      item.company_name ||
+                      tt("recruiterRecommendations.defaults.company", "Company")
+                    }
                     style={styles.companyLogoLarge}
                   />
                 ) : (
@@ -606,55 +844,139 @@ function RecommendationModal({
                 )}
 
                 <div>
-                  <h3>{item.job_title || "Untitled Job"}</h3>
-                  <p>{item.company_name || "Company not specified"}</p>
+                  <h3>
+                    {item.job_title ||
+                      tt(
+                        "recruiterRecommendations.defaults.untitledJob",
+                        "Untitled Job"
+                      )}
+                  </h3>
+                  <p>
+                    {item.company_name ||
+                      tt(
+                        "recruiterRecommendations.defaults.companyNotSpecified",
+                        "Company not specified"
+                      )}
+                  </p>
                 </div>
               </div>
 
               <div style={styles.detailGrid}>
-                <Detail label="Location" value={item.job_location} />
-                <Detail label="Work Mode" value={item.work_mode} />
-                <Detail label="Employment Type" value={item.employment_type} />
-                <Detail label="Job Status" value={item.job_status} />
-                <Detail label="Employer" value={item.employer_name} />
-                <Detail label="Employer Email" value={item.employer_email} />
+                <Detail
+                  label={tt("recruiterRecommendations.fields.location", "Location")}
+                  value={item.job_location}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt("recruiterRecommendations.fields.workMode", "Work Mode")}
+                  value={item.work_mode}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt(
+                    "recruiterRecommendations.fields.employmentType",
+                    "Employment Type"
+                  )}
+                  value={item.employment_type}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt("recruiterRecommendations.fields.jobStatus", "Job Status")}
+                  value={item.job_status}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt("recruiterRecommendations.fields.employer", "Employer")}
+                  value={item.employer_name}
+                  tt={tt}
+                />
+                <Detail
+                  label={tt(
+                    "recruiterRecommendations.fields.employerEmail",
+                    "Employer Email"
+                  )}
+                  value={item.employer_email}
+                  tt={tt}
+                />
               </div>
             </section>
 
             <section style={styles.modalSection}>
-              <SectionTitle icon={<Brain size={18} />} title="AI Match Analysis" />
+              <SectionTitle
+                icon={<Brain size={18} />}
+                title={tt(
+                  "recruiterRecommendations.sections.aiMatchAnalysis",
+                  "AI Match Analysis"
+                )}
+              />
 
               <div style={styles.insightBox}>
                 <p>
                   {settings.auto_include_ai_notes
-                    ? item.ai_notes || "No AI insight available yet."
-                    : "AI notes are disabled in recruiter settings."}
+                    ? item.ai_notes ||
+                      tt(
+                        "recruiterRecommendations.states.noAiInsight",
+                        "No AI insight available yet."
+                      )
+                    : tt(
+                        "recruiterRecommendations.states.aiNotesDisabled",
+                        "AI notes are disabled in recruiter settings."
+                      )}
                 </p>
               </div>
             </section>
 
             <section style={styles.modalSection}>
-              <SectionTitle icon={<FileText size={18} />} title="Recruiter Notes" />
+              <SectionTitle
+                icon={<FileText size={18} />}
+                title={tt(
+                  "recruiterRecommendations.sections.recruiterNotes",
+                  "Recruiter Notes"
+                )}
+              />
               <p style={styles.noteText}>
                 {item.notes || settings.default_recommendation_note}
               </p>
             </section>
 
             <section style={styles.modalSection}>
-              <SectionTitle icon={<MessageCircle size={18} />} title="Employer Feedback" />
+              <SectionTitle
+                icon={<MessageCircle size={18} />}
+                title={tt(
+                  "recruiterRecommendations.sections.employerFeedback",
+                  "Employer Feedback"
+                )}
+              />
 
               <p style={styles.noteText}>
-                {item.employer_feedback || "Pending employer feedback."}
+                {item.employer_feedback ||
+                  tt(
+                    "recruiterRecommendations.states.pendingEmployerFeedback",
+                    "Pending employer feedback."
+                  )}
               </p>
 
               <div style={styles.ratingBox}>
                 <span>{renderStars(rating)}</span>
-                <strong>{rating ? `${rating}/5` : "No rating yet"}</strong>
+                <strong>
+                  {rating
+                    ? `${rating}/5`
+                    : tt(
+                        "recruiterRecommendations.states.noRatingYet",
+                        "No rating yet"
+                      )}
+                </strong>
               </div>
             </section>
 
             <section style={styles.modalSection}>
-              <SectionTitle icon={<Send size={18} />} title="Employer Message Preview" />
+              <SectionTitle
+                icon={<Send size={18} />}
+                title={tt(
+                  "recruiterRecommendations.sections.employerMessagePreview",
+                  "Employer Message Preview"
+                )}
+              />
 
               <pre style={styles.messagePreview}>{employerMessage}</pre>
             </section>
@@ -662,7 +984,10 @@ function RecommendationModal({
 
           <aside style={styles.modalAside}>
             <section style={styles.sidePanel}>
-              <SectionTitle icon={<CalendarDays size={18} />} title="Timeline" />
+              <SectionTitle
+                icon={<CalendarDays size={18} />}
+                title={tt("recruiterRecommendations.sections.timeline", "Timeline")}
+              />
 
               <div style={styles.timeline}>
                 {timeline.map((event, index) => (
@@ -676,7 +1001,10 @@ function RecommendationModal({
 
                     <div>
                       <strong>{event.title}</strong>
-                      <p>{event.date || "Pending"}</p>
+                      <p>
+                        {event.date ||
+                          tt("recruiterRecommendations.states.pending", "Pending")}
+                      </p>
                     </div>
                   </div>
                 ))}
@@ -684,27 +1012,65 @@ function RecommendationModal({
             </section>
 
             <section style={styles.sidePanel}>
-              <SectionTitle icon={<Activity size={18} />} title="Workflow Signals" />
+              <SectionTitle
+                icon={<Activity size={18} />}
+                title={tt(
+                  "recruiterRecommendations.sections.workflowSignals",
+                  "Workflow Signals"
+                )}
+              />
 
               <Signal
-                label="Workflow Stage"
-                value={getStageLabel(item.workflow_stage || item.status)}
+                label={tt(
+                  "recruiterRecommendations.signals.workflowStage",
+                  "Workflow Stage"
+                )}
+                value={getStageLabel(item.workflow_stage || item.status, tt)}
+                tt={tt}
               />
               <Signal
-                label="Employer Viewed"
-                value={item.employer_viewed ? "Yes" : "No"}
+                label={tt(
+                  "recruiterRecommendations.signals.employerViewed",
+                  "Employer Viewed"
+                )}
+                value={
+                  item.employer_viewed
+                    ? tt("recruiterRecommendations.options.yes", "Yes")
+                    : tt("recruiterRecommendations.options.no", "No")
+                }
+                tt={tt}
               />
               <Signal
-                label="Follow-up Window"
-                value={`${settings.follow_up_days || 3} days`}
+                label={tt(
+                  "recruiterRecommendations.signals.followUpWindow",
+                  "Follow-up Window"
+                )}
+                value={`${settings.follow_up_days || 3} ${tt(
+                  "recruiterRecommendations.labels.days",
+                  "days"
+                )}`}
+                tt={tt}
               />
               <Signal
-                label="Auto Notify Employer"
-                value={settings.auto_notify_employer ? "Enabled" : "Disabled"}
+                label={tt(
+                  "recruiterRecommendations.signals.autoNotifyEmployer",
+                  "Auto Notify Employer"
+                )}
+                value={
+                  settings.auto_notify_employer
+                    ? tt("recruiterRecommendations.options.enabled", "Enabled")
+                    : tt("recruiterRecommendations.options.disabled", "Disabled")
+                }
+                tt={tt}
               />
               <Signal
-                label="AI Notes"
-                value={settings.auto_include_ai_notes ? "Enabled" : "Disabled"}
+                label={tt("recruiterRecommendations.signals.aiNotes", "AI Notes")}
+                value={
+                  settings.auto_include_ai_notes
+                    ? tt("recruiterRecommendations.options.enabled", "Enabled")
+                    : tt("recruiterRecommendations.options.disabled", "Disabled")
+                }
+                tt={tt}
               />
             </section>
           </aside>
@@ -712,12 +1078,15 @@ function RecommendationModal({
 
         <div style={styles.modalFooter}>
           <Button variant="secondary" onClick={onClose}>
-            Close
+            {tt("recruiterRecommendations.actions.close", "Close")}
           </Button>
 
           <Button onClick={onMessage}>
             <MessageCircle size={15} />
-            Message Employer
+            {tt(
+              "recruiterRecommendations.actions.messageEmployer",
+              "Message Employer"
+            )}
           </Button>
         </div>
       </div>
@@ -725,12 +1094,14 @@ function RecommendationModal({
   );
 }
 
-function SummaryCard({ icon, label, value }) {
+function SummaryCard({ icon, label, value, tt }) {
   return (
     <div style={styles.summaryCard}>
       <div style={styles.summaryIcon}>{icon}</div>
       <span>{label}</span>
-      <strong>{value || "Not available"}</strong>
+      <strong>
+        {value || tt("recruiterRecommendations.states.notAvailable", "Not available")}
+      </strong>
     </div>
   );
 }
@@ -744,52 +1115,83 @@ function SectionTitle({ icon, title }) {
   );
 }
 
-function Detail({ label, value }) {
+function Detail({ label, value, tt }) {
   return (
     <div style={styles.detailItem}>
       <span>{label}</span>
-      <strong>{value || "Not available"}</strong>
+      <strong>
+        {value || tt("recruiterRecommendations.states.notAvailable", "Not available")}
+      </strong>
     </div>
   );
 }
 
-function Signal({ label, value }) {
+function Signal({ label, value, tt }) {
   return (
     <div style={styles.signalBox}>
       <span>{label}</span>
-      <strong>{value || "Not available"}</strong>
+      <strong>
+        {value || tt("recruiterRecommendations.states.notAvailable", "Not available")}
+      </strong>
     </div>
   );
 }
 
-function buildTimeline(item) {
+function buildTimeline(item, tt) {
   return [
-    { title: "Recommended", date: formatDateTime(item.created_at) },
     {
-      title: "Employer Viewed",
+      title: tt("recruiterRecommendations.timeline.recommended", "Recommended"),
+      date: formatDateTime(item.created_at),
+    },
+    {
+      title: tt("recruiterRecommendations.timeline.employerViewed", "Employer Viewed"),
       date: item.employer_viewed
         ? formatDateTime(item.reviewed_at || item.created_at)
         : null,
     },
-    { title: "Reviewed", date: formatDateTime(item.reviewed_at) },
-    { title: "Accepted", date: formatDateTime(item.accepted_at) },
-    { title: "Rejected", date: formatDateTime(item.rejected_at) },
+    {
+      title: tt("recruiterRecommendations.timeline.reviewed", "Reviewed"),
+      date: formatDateTime(item.reviewed_at),
+    },
+    {
+      title: tt("recruiterRecommendations.timeline.accepted", "Accepted"),
+      date: formatDateTime(item.accepted_at),
+    },
+    {
+      title: tt("recruiterRecommendations.timeline.rejected", "Rejected"),
+      date: formatDateTime(item.rejected_at),
+    },
   ];
 }
 
-function getStageLabel(stage) {
+function getStageLabel(stage, tt) {
   const labels = {
-    submitted_to_employer: "Submitted",
-    employer_review: "Employer Review",
-    accepted_by_employer: "Accepted",
-    closed_rejected: "Rejected",
-    recommended: "Recommended",
-    reviewed: "Reviewed",
-    accepted: "Accepted",
-    rejected: "Rejected",
+    submitted_to_employer: tt(
+      "recruiterRecommendations.stages.submitted",
+      "Submitted"
+    ),
+    employer_review: tt(
+      "recruiterRecommendations.stages.employerReview",
+      "Employer Review"
+    ),
+    accepted_by_employer: tt(
+      "recruiterRecommendations.stages.accepted",
+      "Accepted"
+    ),
+    closed_rejected: tt(
+      "recruiterRecommendations.stages.rejected",
+      "Rejected"
+    ),
+    recommended: tt(
+      "recruiterRecommendations.stages.recommended",
+      "Recommended"
+    ),
+    reviewed: tt("recruiterRecommendations.stages.reviewed", "Reviewed"),
+    accepted: tt("recruiterRecommendations.stages.accepted", "Accepted"),
+    rejected: tt("recruiterRecommendations.stages.rejected", "Rejected"),
   };
 
-  return labels[stage] || "Submitted";
+  return labels[stage] || tt("recruiterRecommendations.stages.submitted", "Submitted");
 }
 
 function renderStars(rating) {
