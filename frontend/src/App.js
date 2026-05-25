@@ -21,6 +21,8 @@ import AdminJobs from "./pages/admin/AdminJobs";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminCandidates from "./pages/admin/AdminCandidates";
 
+import AdminRecruiters from "./pages/admin/AdminRecruiters";
+
 
 import { LanguageProvider } from "./context/LanguageContext";
 
@@ -52,12 +54,14 @@ function App() {
           element={
             <AdminRoute>
               <Routes>
-                <Route path="/" element={<AdminOverview />} />
-                <Route path="/users" element={<AdminUsers />} />
-                <Route path="/companies" element={<AdminCompanies />} />
-                <Route path="/jobs" element={<AdminJobs />} />
-                <Route path="/applications" element={<AdminApplications />} />
-                <Route path="/candidates" element={<AdminCandidates />} />
+                <Route index element={<AdminOverview />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="companies" element={<AdminCompanies />} />
+                <Route path="jobs" element={<AdminJobs />} />
+                <Route path="applications" element={<AdminApplications />} />
+                <Route path="candidates" element={<AdminCandidates />} />
+                <Route path="recruiters" element={<AdminRecruiters />} />
+
               </Routes>
             </AdminRoute>
           }

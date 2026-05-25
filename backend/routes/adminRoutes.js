@@ -17,6 +17,28 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+router.get("/recruiter-stats", adminController.getRecruiterStats);
+router.get("/recruiters", adminController.getRecruiters);
+router.post(
+  "/recruiters/:id/assign-candidates",
+  adminController.assignCandidatesToRecruiter
+);
+router.get(
+  "/recruiters/:id",
+  adminController.getRecruiterDetails
+);
+
+router.patch("/recruiters/:id", adminController.updateRecruiter);
+
+router.patch(
+  "/recruiters/:id/status",
+  adminController.updateRecruiterStatus
+);
+
+router.delete("/recruiters/:id", adminController.deleteRecruiter);
+
+
+
 router.get("/stats", authMiddleware, requireAdmin, adminController.getStats);
 router.get("/activity", authMiddleware, requireAdmin, adminController.getActivity);
 router.get("/analytics", authMiddleware, requireAdmin, adminController.getAnalytics);
