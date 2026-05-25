@@ -23,7 +23,16 @@ import Messages from "./messages/Messages";
 
 function Dashboard() {
   const { t } = useLanguage();
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  const user = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+
+  /*
+  |--------------------------------------------------------------------------
+  | Employer
+  |--------------------------------------------------------------------------
+  */
 
   if (user.role === "employer") {
     return (
@@ -39,37 +48,77 @@ function Dashboard() {
     );
   }
 
+  /*
+  |--------------------------------------------------------------------------
+  | Candidate
+  |--------------------------------------------------------------------------
+  */
+
   if (user.role === "candidate") {
     return (
       <Routes>
         <Route path="/" element={<CandidateOverview />} />
-        <Route path="/opportunities" element={<CandidateOpportunities />} />
-        <Route path="/applications" element={<CandidateApplications />} />
+        <Route
+          path="/opportunities"
+          element={<CandidateOpportunities />}
+        />
+        <Route
+          path="/applications"
+          element={<CandidateApplications />}
+        />
         <Route path="/profile" element={<CandidateProfile />} />
         <Route path="/messages" element={<Messages />} />
       </Routes>
     );
   }
 
-  if (user.role === "admin") {
-    return <Navigate to="/admin" replace />;
-  }
+  /*
+  |--------------------------------------------------------------------------
+  | Recruiter
+  |--------------------------------------------------------------------------
+  */
 
   if (user.role === "recruiter") {
     return (
       <Routes>
-        <Route path="/" element={<Navigate to="overview" replace />} />
+        <Route
+          path="/"
+          element={<Navigate to="/dashboard/overview" replace />}
+        />
+
         <Route path="/overview" element={<RecruiterOverview />} />
+
         <Route path="/talent" element={<RecruiterTalent />} />
+
         <Route path="/jobs" element={<RecruiterJobs />} />
-        <Route path="/recommendations" element={<RecruiterRecommendations />} />
+
+        <Route
+          path="/recommendations"
+          element={<RecruiterRecommendations />}
+        />
+
         <Route path="/messages" element={<Messages />} />
+
         <Route path="/settings" element={<RecruiterSettings />} />
       </Routes>
     );
   }
 
-  return <div>{t("noDashboard") || "No dashboard available"}</div>;
+  /*
+  |--------------------------------------------------------------------------
+  | Admin
+  |--------------------------------------------------------------------------
+  */
+
+  if (user.role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
+
+  return (
+    <div>
+      {t("noDashboard") || "No dashboard available"}
+    </div>
+  );
 }
 
 export default Dashboard;

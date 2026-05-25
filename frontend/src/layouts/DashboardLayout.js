@@ -253,6 +253,12 @@ function DashboardLayout({ title, subtitle, children }) {
       label: t("candidates"),
       icon: <Users size={18} />,
     },
+
+      {
+    to: "/admin/recruiters",
+    label: t("recruiters"),
+    icon: <Shield size={18} />,
+  },
   ];
 
   const navItems =

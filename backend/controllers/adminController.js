@@ -1407,3 +1407,557 @@ exports.resetUserPassword = async (req, res) => {
     res.status(500).json({ error: "Failed to reset password" });
   }
 };
+
+// ======================
+// GET ADMIN RECRUITER STATS
+// ======================
+exports.getRecruiterStats = async (req, res) => {
+  try {
+    const [
+      recruiters,
+      activeRecruiters,
+      totalRecommendations,
+      acceptedRecommendations,
+      assignedTalent,
+    ] = await Promise.all([
+      db.query(`
+        SELECT COUNT(*)
+        FROM recruiters
+      `),
+
+      db.query(`
+        SELECT COUNT(*)
+        FROM recruiters
+        WHERE availability_status = 'available'
+      `),
+
+      db.query(`
+        SELECT COUNT(*)
+        FROM recruiter_recommendations
+      `),
+
+      db.query(`
+        SELECT COUNT(*)
+        FROM recruiter_recommendations
+        WHERE status = 'accepted'
+      `),
+
+      db.query(`
+        SELECT COUNT(*)
+        FROM recruiter_talent_assignments
+      `),
+    ]);
+
+    res.json({
+      recruiters: Number(recruiters.rows[0].count),
+      activeRecruiters: Number(activeRecruiters.rows[0].count),
+      totalRecommendations: Number(totalRecommendations.rows[0].count),
+      acceptedRecommendations: Number(
+        acceptedRecommendations.rows[0].count
+      ),
+      assignedTalent: Number(assignedTalent.rows[0].count),
+    });
+  } catch (err) {
+    console.error("Admin recruiter stats error:", err);
+
+    res.status(500).json({
+      error: "Failed to fetch recruiter stats",
+    });
+  }
+};
+
+// ======================
+// GET ADMIN RECRUITERS
+// ======================
+exports.getRecruiters = async (req, res) => {
+  try {
+    const {
+      search = "",
+      country = "all",
+      page = 1,
+      limit = 10,
+    } = req.query;
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+    const offset = (pageNumber - 1) * limitNumber;
+
+    const conditions = [`u.role = 'recruiter'`];
+    const values = [];
+
+    if (search.trim()) {
+      values.push(`%${search.trim()}%`);
+
+      conditions.push(`
+        (
+          u.name ILIKE $${values.length}
+          OR u.email ILIKE $${values.length}
+          OR u.country ILIKE $${values.length}
+          OR u.city ILIKE $${values.length}
+          OR r.professional_title ILIKE $${values.length}
+        )
+      `);
+    }
+
+    if (country !== "all") {
+      values.push(country);
+      conditions.push(`u.country = $${values.length}`);
+    }
+
+    const whereClause = `WHERE ${conditions.join(" AND ")}`;
+
+    const result = await db.query(
+      `
+      SELECT
+        r.id AS recruiter_id,
+        u.id AS user_id,
+
+        u.name,
+        u.email,
+        u.phone,
+        u.country,
+        u.city,
+        u.profile_image,
+        u.created_at,
+
+        r.professional_title,
+        r.availability_status,
+
+        COUNT(DISTINCT rta.candidate_id)::int AS assigned_talent,
+
+        COUNT(DISTINCT rr.id)::int AS recommendations,
+
+        COALESCE(
+          ROUND(AVG(rr.match_score)::numeric, 1),
+          0
+        ) AS avg_match_score,
+
+        COUNT(
+          DISTINCT CASE
+            WHEN rr.status = 'accepted'
+            THEN rr.id
+          END
+        )::int AS accepted_recommendations,
+
+        COUNT(*) OVER()::int AS total_count
+
+      FROM recruiters r
+
+      JOIN users u
+        ON u.id = r.user_id
+
+      LEFT JOIN recruiter_talent_assignments rta
+        ON rta.recruiter_id = r.id
+
+      LEFT JOIN recruiter_recommendations rr
+        ON rr.recruiter_id = r.id
+
+      ${whereClause}
+
+      GROUP BY r.id, u.id
+
+      ORDER BY u.created_at DESC
+
+      LIMIT $${values.length + 1}
+      OFFSET $${values.length + 2}
+      `,
+      [...values, limitNumber, offset]
+    );
+
+    const total = result.rows[0]?.total_count || 0;
+
+    res.json({
+      recruiters: result.rows,
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+      totalPages: Math.ceil(total / limitNumber),
+    });
+  } catch (err) {
+    console.error("Admin recruiters error:", err);
+
+    res.status(500).json({
+      error: "Failed to fetch recruiters",
+    });
+  }
+};
+
+// ======================
+// GET RECRUITER DETAILS
+// ======================
+exports.getRecruiterDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const recruiterResult = await db.query(
+      `
+      SELECT
+        r.*,
+
+        u.id AS user_id,
+        u.name,
+        u.email,
+        u.phone,
+        u.country,
+        u.city,
+        u.profile_image,
+        u.created_at
+
+      FROM recruiters r
+
+      JOIN users u
+        ON u.id = r.user_id
+
+      WHERE r.id = $1
+      `,
+      [id]
+    );
+
+    if (recruiterResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Recruiter not found",
+      });
+    }
+
+    const recommendationsResult = await db.query(
+      `
+      SELECT
+        rr.id,
+        rr.status,
+        rr.match_score,
+        rr.created_at,
+
+        candidate.name AS candidate_name,
+        jobs.title AS job_title,
+        companies.name AS company_name
+
+      FROM recruiter_recommendations rr
+
+      LEFT JOIN users candidate
+        ON candidate.id = rr.candidate_id
+
+      LEFT JOIN jobs
+        ON jobs.id = rr.job_id
+
+      LEFT JOIN companies
+        ON companies.id = jobs.company_id
+
+      WHERE rr.recruiter_id = $1
+
+      ORDER BY rr.created_at DESC
+      LIMIT 10
+      `,
+      [id]
+    );
+
+    const talentResult = await db.query(
+      `
+      SELECT
+        u.id,
+        u.name,
+        u.email,
+        u.professional_title,
+        rta.status,
+        rta.created_at
+
+      FROM recruiter_talent_assignments rta
+
+      JOIN users u
+        ON u.id = rta.candidate_id
+
+      WHERE rta.recruiter_id = $1
+
+      ORDER BY rta.created_at DESC
+      LIMIT 10
+      `,
+      [id]
+    );
+
+    res.json({
+      recruiter: recruiterResult.rows[0],
+      recommendations: recommendationsResult.rows,
+      talent: talentResult.rows,
+    });
+  } catch (err) {
+    console.error("Admin recruiter details error:", err);
+
+    res.status(500).json({
+      error: "Failed to fetch recruiter details",
+    });
+  }
+};
+
+exports.assignCandidatesToRecruiter = async (req, res) => {
+  const client = await db.connect();
+
+  try {
+    const { id } = req.params;
+    const { candidate_ids = [], notes = "" } = req.body;
+
+    if (!Array.isArray(candidate_ids) || candidate_ids.length === 0) {
+      return res.status(400).json({
+        error: "candidate_ids is required",
+      });
+    }
+
+    await client.query("BEGIN");
+
+    const recruiterResult = await client.query(
+      `
+      SELECT id
+      FROM recruiters
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    if (recruiterResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Recruiter not found" });
+    }
+
+    for (const candidateId of candidate_ids) {
+      await client.query(
+        `
+        INSERT INTO recruiter_talent_assignments (
+          recruiter_id,
+          candidate_id,
+          source,
+          status,
+          notes,
+          created_at
+        )
+        VALUES ($1, $2, 'admin', 'assigned', $3, CURRENT_TIMESTAMP)
+        ON CONFLICT (recruiter_id, candidate_id)
+        DO UPDATE SET
+          status = 'assigned',
+          source = 'admin',
+          notes = EXCLUDED.notes
+        `,
+        [id, candidateId, notes || null]
+      );
+    }
+
+    await client.query("COMMIT");
+
+    res.json({
+      message: "Candidates assigned successfully",
+      assignedCount: candidate_ids.length,
+    });
+  } catch (err) {
+    await client.query("ROLLBACK");
+
+    console.error("Admin assign candidates error:", err);
+    res.status(500).json({
+      error: "Failed to assign candidates",
+    });
+  } finally {
+    client.release();
+  }
+};
+
+
+exports.updateRecruiter = async (req, res) => {
+  const client = await db.connect();
+
+  try {
+    const { id } = req.params;
+
+    const {
+      name,
+      email,
+      phone,
+      country,
+      city,
+      professional_title,
+      recruiter_bio,
+      availability_status,
+      preferred_industries,
+      preferred_countries,
+      specialization_skills,
+    } = req.body;
+
+    await client.query("BEGIN");
+
+    const recruiterResult = await client.query(
+      `
+      SELECT user_id
+      FROM recruiters
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    if (recruiterResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Recruiter not found" });
+    }
+
+    const userId = recruiterResult.rows[0].user_id;
+
+    await client.query(
+      `
+      UPDATE users
+      SET
+        name = COALESCE($1, name),
+        email = COALESCE($2, email),
+        phone = COALESCE($3, phone),
+        country = COALESCE($4, country),
+        city = COALESCE($5, city),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $6
+      `,
+      [name, email, phone, country, city, userId]
+    );
+
+    await client.query(
+      `
+      UPDATE recruiters
+      SET
+        professional_title = COALESCE($1, professional_title),
+        recruiter_bio = COALESCE($2, recruiter_bio),
+        availability_status = COALESCE($3, availability_status),
+        preferred_industries = COALESCE($4, preferred_industries),
+        preferred_countries = COALESCE($5, preferred_countries),
+        specialization_skills = COALESCE($6, specialization_skills),
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $7
+      `,
+      [
+        professional_title,
+        recruiter_bio,
+        availability_status,
+        preferred_industries,
+        preferred_countries,
+        specialization_skills,
+        id,
+      ]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({ message: "Recruiter updated successfully" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+
+    console.error("Admin update recruiter error:", err);
+
+    if (err.code === "23505") {
+      return res.status(409).json({ error: "Email already exists" });
+    }
+
+    res.status(500).json({ error: "Failed to update recruiter" });
+  } finally {
+    client.release();
+  }
+};
+
+exports.updateRecruiterStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    let status;
+
+    if (action === "activate") {
+      status = "available";
+    } else if (action === "suspend") {
+      status = "suspended";
+    } else {
+      return res.status(400).json({ error: "Invalid action" });
+    }
+
+    const result = await db.query(
+      `
+      UPDATE recruiters
+      SET
+        availability_status = $1,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+      RETURNING id, availability_status
+      `,
+      [status, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Recruiter not found" });
+    }
+
+    res.json({
+      message: `Recruiter status updated to ${status}`,
+      recruiter: result.rows[0],
+    });
+  } catch (err) {
+    console.error("Admin update recruiter status error:", err);
+    res.status(500).json({ error: "Failed to update recruiter status" });
+  }
+};
+
+exports.deleteRecruiter = async (req, res) => {
+  const client = await db.connect();
+
+  try {
+    const { id } = req.params;
+
+    await client.query("BEGIN");
+
+    const recruiterResult = await client.query(
+      `
+      SELECT user_id
+      FROM recruiters
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    if (recruiterResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Recruiter not found" });
+    }
+
+    const userId = recruiterResult.rows[0].user_id;
+
+    await client.query(
+      `
+      DELETE FROM recruiter_talent_assignments
+      WHERE recruiter_id = $1
+      `,
+      [id]
+    );
+
+    await client.query(
+      `
+      DELETE FROM recruiter_recommendations
+      WHERE recruiter_id = $1
+      `,
+      [id]
+    );
+
+    await client.query(
+      `
+      DELETE FROM recruiters
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    await client.query(
+      `
+      DELETE FROM users
+      WHERE id = $1
+      `,
+      [userId]
+    );
+
+    await client.query("COMMIT");
+
+    res.json({ message: "Recruiter deleted successfully" });
+  } catch (err) {
+    await client.query("ROLLBACK");
+
+    console.error("Admin delete recruiter error:", err);
+    res.status(500).json({ error: "Failed to delete recruiter" });
+  } finally {
+    client.release();
+  }
+};

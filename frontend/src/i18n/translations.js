@@ -876,6 +876,9 @@ export const translations = {
     },
     },
 
+    applicationsShort: "applications",
+
+
     keyCities: "Key Cities",
     topIndustries: "Top Industries",
     talentHighlights: "Talent Highlights",
@@ -1953,6 +1956,161 @@ export const translations = {
     defaultCandidateMessage: "Hello {{name}}, I would like to discuss your application.",
 
 
+    adminRecruiters: {
+    title: "Recruiter Management",
+    subtitle: "Monitor recruiter performance, assigned talent, and recommendation quality.",
+
+    stats: {
+        recruiters: "Recruiters",
+        recruitersSub: "{{count}} recruiter accounts",
+        available: "Available",
+        availableSub: "{{count}} currently available",
+        assignedTalent: "Assigned Talent",
+        assignedTalentSub: "{{count}} talent assignments",
+        recommendations: "Recommendations",
+        recommendationsSub: "{{count}} submitted recommendations",
+        accepted: "Accepted",
+        acceptedSub: "{{count}} accepted by employers",
+    },
+
+    directory: {
+        title: "Recruiter Directory",
+        subtitle: "Review recruiter activity, performance, and recent assignments.",
+        searchPlaceholder: "Search recruiters by name, email, country, city, or title",
+        loading: "Loading recruiters...",
+        loadingDetails: "Loading recruiter details...",
+        empty: "No recruiters found.",
+    },
+
+    filters: {
+        allCountries: "All countries",
+        search: "Search",
+    },
+
+    table: {
+        recruiter: "Recruiter",
+        location: "Location",
+        talent: "Talent",
+        recommendations: "Recommendations",
+        avgMatch: "Avg Match",
+        success: "Success",
+        status: "Status",
+        actions: "Actions",
+    },
+
+    confirm: {
+        activateTitle: "Activate recruiter",
+        activateMessage: "This recruiter will become available for new assignments.",
+        suspendTitle: "Suspend recruiter",
+        suspendMessage: "This recruiter will be paused and should not receive new assignments.",
+        deleteTitle: "Delete recruiter",
+        deleteMessage: "This action will remove the recruiter account and related recruiter records. This cannot be undone.",
+    },
+
+   actions: {
+    viewDetails: "View Details",
+    assignTalent: "Assign Talent",
+    edit: "Edit",
+    delete: "Delete",
+    activate: "Activate",
+    suspend: "Suspend",
+    previous: "Previous",
+    next: "Next",
+    close: "Close",
+    cancel: "Cancel",
+    save: "Save Changes",
+    saving: "Saving...",
+    page: "Page {{page}} of {{total}}",
+
+    updateSuccess: "Recruiter updated successfully",
+    updateError: "Failed to update recruiter",
+    activateSuccess: "Recruiter activated",
+    suspendSuccess: "Recruiter suspended",
+    statusError: "Failed to update recruiter status",
+    deleteConfirm: "Delete recruiter",
+    deleteSuccess: "Recruiter deleted successfully",
+    deleteError: "Failed to delete recruiter",
+    },
+
+    edit: {
+    title: "Edit Recruiter",
+    subtitle: "Update recruiter profile and availability.",
+    name: "Name",
+    email: "Email",
+    phone: "Phone",
+    country: "Country",
+    city: "City",
+    professionalTitle: "Professional Title",
+    availability: "Availability",
+    preferredIndustries: "Preferred Industries",
+    preferredCountries: "Preferred Countries",
+    specializationSkills: "Specialization Skills",
+    recruiterBio: "Recruiter Bio",
+    },
+
+    availability: {
+    available: "Available",
+    busy: "Busy",
+    inactive: "Inactive",
+    suspended: "Suspended",
+    },
+
+    assign: {
+        title: "Assign Talent",
+        subtitle: "Assign one or more candidates to",
+        searchPlaceholder: "Search candidates by name, email, role, or country",
+        noCandidates: "No candidates found.",
+        notes: "Assignment Notes",
+        notesPlaceholder: "Optional notes for this assignment...",
+        selected: "{{count}} candidates selected",
+        assign: "Assign Candidates",
+        assigning: "Assigning...",
+        unnamedCandidate: "Unnamed candidate",
+        success: "Candidates assigned successfully",
+
+        errors: {
+        fetchCandidates: "Failed to load candidates",
+        selectCandidate: "Please select at least one candidate",
+        assign: "Failed to assign candidates",
+        },
+    },
+
+    modal: {
+        recruiterBio: "Recruiter Bio",
+        preferredIndustries: "Preferred Industries",
+        preferredCountries: "Preferred Countries",
+        recentTalent: "Recent Assigned Talent",
+        recentRecommendations: "Recent Recommendations",
+    },
+
+    details: {
+        recruiterId: "Recruiter ID",
+        userId: "User ID",
+        email: "Email",
+        phone: "Phone",
+        country: "Country",
+        city: "City",
+        availability: "Availability",
+        joined: "Joined",
+    },
+
+    fallback: {
+        unnamed: "Unnamed recruiter",
+        noEmail: "No email",
+        recruiter: "Recruiter",
+        noLocation: "No location",
+        noBio: "No recruiter bio has been added yet.",
+        notSpecified: "Not specified",
+        noTalent: "No assigned talent yet.",
+        noRecommendations: "No recommendations yet.",
+    },
+
+    errors: {
+        fetch: "Failed to fetch recruiters",
+        details: "Failed to fetch recruiter details",
+    },
+    },
+
 
     // en
     createAccount: "Create account",
@@ -2749,6 +2907,160 @@ export const translations = {
     activeWorkspace: "当前工作区",
     adminWorkspace: "管理员工作区",
     adminWorkspaceDesc: "管理用户、公司、职位、候选人和平台活动。",
+
+    adminRecruiters: {
+    title: "招聘顾问管理",
+    subtitle: "监控招聘顾问绩效、人才分配情况以及推荐质量。",
+
+    stats: {
+        recruiters: "招聘顾问",
+        recruitersSub: "{{count}} 个招聘顾问账户",
+        available: "可用",
+        availableSub: "{{count}} 当前可用",
+        assignedTalent: "已分配人才",
+        assignedTalentSub: "{{count}} 条人才分配记录",
+        recommendations: "推荐记录",
+        recommendationsSub: "{{count}} 条已提交推荐",
+        accepted: "已接受",
+        acceptedSub: "{{count}} 条被雇主接受",
+    },
+    confirm: {
+        activateTitle: "启用招聘顾问",
+        activateMessage: "该招聘顾问将可接收新的分配任务。",
+        suspendTitle: "暂停招聘顾问",
+        suspendMessage: "该招聘顾问将被暂停，暂时不应接收新的分配任务。",
+        deleteTitle: "删除招聘顾问",
+        deleteMessage: "此操作将删除招聘顾问账户及相关记录，且无法撤销。",
+        },
+
+    directory: {
+        title: "招聘顾问目录",
+        subtitle: "查看招聘顾问活动、绩效和最近的人才分配情况。",
+        searchPlaceholder: "按姓名、邮箱、国家、城市或职位搜索招聘顾问",
+        loading: "正在加载招聘顾问...",
+        loadingDetails: "正在加载招聘顾问详情...",
+        empty: "未找到招聘顾问。",
+    },
+
+    filters: {
+        allCountries: "所有国家",
+        search: "搜索",
+    },
+
+    table: {
+        recruiter: "招聘顾问",
+        location: "地点",
+        talent: "人才",
+        recommendations: "推荐",
+        avgMatch: "平均匹配",
+        success: "成功率",
+        status: "状态",
+        actions: "操作",
+    },
+
+    actions: {
+        viewDetails: "查看详情",
+        assignTalent: "分配人才",
+        edit: "编辑",
+        delete: "删除",
+        activate: "启用",
+        suspend: "暂停",
+        previous: "上一页",
+        next: "下一页",
+        close: "关闭",
+        cancel: "取消",
+        save: "保存修改",
+        saving: "正在保存...",
+        page: "第 {{page}} 页，共 {{total}} 页",
+
+        updateSuccess: "招聘顾问更新成功",
+        updateError: "招聘顾问更新失败",
+        activateSuccess: "招聘顾问已启用",
+        suspendSuccess: "招聘顾问已暂停",
+        statusError: "招聘顾问状态更新失败",
+        deleteConfirm: "删除招聘顾问",
+        deleteSuccess: "招聘顾问删除成功",
+        deleteError: "招聘顾问删除失败",
+        },
+
+        edit: {
+        title: "编辑招聘顾问",
+        subtitle: "更新招聘顾问资料和可用状态。",
+        name: "姓名",
+        email: "邮箱",
+        phone: "电话",
+        country: "国家",
+        city: "城市",
+        professionalTitle: "职位名称",
+        availability: "可用状态",
+        preferredIndustries: "偏好行业",
+        preferredCountries: "偏好国家",
+        specializationSkills: "专业技能",
+        recruiterBio: "招聘顾问简介",
+        },
+
+        availability: {
+        available: "可用",
+        busy: "忙碌",
+        inactive: "未激活",
+        suspended: "已暂停",
+        },
+
+    assign: {
+        title: "分配人才",
+        subtitle: "将一个或多个候选人分配给",
+        searchPlaceholder: "按姓名、邮箱、职位或国家搜索候选人",
+        noCandidates: "未找到候选人。",
+        notes: "分配备注",
+        notesPlaceholder: "可填写此次分配的备注...",
+        selected: "已选择 {{count}} 位候选人",
+        assign: "分配候选人",
+        assigning: "正在分配...",
+        unnamedCandidate: "未命名候选人",
+        success: "候选人分配成功",
+
+        errors: {
+        fetchCandidates: "候选人加载失败",
+        selectCandidate: "请至少选择一位候选人",
+        assign: "候选人分配失败",
+        },
+    },
+
+    modal: {
+        recruiterBio: "招聘顾问简介",
+        preferredIndustries: "偏好行业",
+        preferredCountries: "偏好国家",
+        recentTalent: "最近分配的人才",
+        recentRecommendations: "最近推荐记录",
+    },
+
+    details: {
+        recruiterId: "招聘顾问 ID",
+        userId: "用户 ID",
+        email: "邮箱",
+        phone: "电话",
+        country: "国家",
+        city: "城市",
+        availability: "可用状态",
+        joined: "加入时间",
+    },
+
+    fallback: {
+        unnamed: "未命名招聘顾问",
+        noEmail: "无邮箱",
+        recruiter: "招聘顾问",
+        noLocation: "无地点信息",
+        noBio: "暂无招聘顾问简介。",
+        notSpecified: "未指定",
+        noTalent: "暂无已分配人才。",
+        noRecommendations: "暂无推荐记录。",
+    },
+
+    errors: {
+        fetch: "招聘顾问加载失败",
+        details: "招聘顾问详情加载失败",
+    },
+    },
 
     adminUsers: {
         title: "用户管理",
@@ -3867,6 +4179,8 @@ export const translations = {
     title: "招聘顾问职位",
     subtitle: "浏览招聘机会，查看职位详情，推荐人才，并发布招聘顾问负责的职位。",
 
+    
+
     stats: {
         totalJobs: "职位总数",
         activeJobs: "开放职位",
@@ -4680,6 +4994,8 @@ export const translations = {
     role: "角色",
     invite: "邀请",
 
+    applicationsShort: "申请",
+
     teamMemberNamePlaceholder: "成员姓名",
 
     emailRequired: "请输入邮箱",
@@ -5276,6 +5592,7 @@ export const translations = {
         ]
     }
     },
+
 
     language: "语言",
     english: "English",
