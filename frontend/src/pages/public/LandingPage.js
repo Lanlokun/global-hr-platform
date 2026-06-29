@@ -29,6 +29,8 @@ const countries = [
   { name: "Angola", slug: "angola", flag: "🇦🇴", coordinates: [17.3, -12.4] },
   { name: "South Africa", slug: "south-africa", flag: "🇿🇦", coordinates: [24.2, -29.0] },
   { name: "Madagascar", slug: "madagascar", flag: "🇲🇬", coordinates: [47.2, -19.1] },
+  { name: "Sierra Leone", slug: "sierra-leone", flag: "🇸🇱", coordinates: [-11.8, 8.5] },
+  { name: "The Gambia", slug: "gambia", flag: "🇬🇲", coordinates: [-15.3, 13.4] },
 ];
 
 function LandingPage() {
