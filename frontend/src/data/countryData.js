@@ -458,6 +458,84 @@ export const countryData = {
     ],
   },
 
+    "sierra-leone": {
+    name: "Sierra Leone",
+    flag: "🇸🇱",
+    description:
+      "An emerging West African market with a young English-speaking workforce and growing opportunities in mining, agriculture, technology, and business services.",
+    keyCities: ["Freetown", "Bo", "Kenema", "Makeni"],
+    topIndustries: [
+      "Mining",
+      "Agriculture",
+      "Technology",
+      "Tourism",
+      "Financial Services",
+    ],
+    talentHighlights:
+      "Young English-speaking workforce with increasing digital skills and growing entrepreneurial activity.",
+    needToKnows: [
+      "Freetown is the country's commercial and administrative center.",
+      "English is the official language, making collaboration with international teams straightforward.",
+      "The market is well suited for operations, customer support, technology, and development-focused organizations.",
+    ],
+    marketInfo: {
+      timezone: "GMT",
+      language: "English",
+      hiringOutlook: "Growing for technology, operations, and support roles",
+      commonEmploymentTypes: ["Full-time", "Contract", "Remote"],
+    },
+    talentPool: [
+      "Software Developers",
+      "Customer Support Specialists",
+      "Operations Coordinators",
+      "Finance Professionals",
+    ],
+    salarySnapshot: [
+      { role: "Software Developer", range: "$600 - $1,300", availability: "Medium" },
+      { role: "Customer Support", range: "$300 - $700", availability: "High" },
+      { role: "Operations Officer", range: "$400 - $900", availability: "Medium" },
+    ],
+  },
+
+  gambia: {
+    name: "The Gambia",
+    flag: "🇬🇲",
+    description:
+      "Africa's smallest mainland country offers an English-speaking workforce, a stable business environment, and growing opportunities in tourism, agriculture, digital services, and trade.",
+    keyCities: ["Banjul", "Serekunda", "Brikama", "Bakau"],
+    topIndustries: [
+      "Tourism",
+      "Agriculture",
+      "Trade & Logistics",
+      "Technology",
+      "Financial Services",
+    ],
+    talentHighlights:
+      "English-speaking professionals, a youthful workforce, and increasing interest in digital skills and entrepreneurship.",
+    needToKnows: [
+      "The Greater Banjul Area is the country's main commercial and employment hub.",
+      "English is the official language, simplifying hiring for international organizations.",
+      "The Gambia is well suited for customer support, administrative, operations, and remote technology roles.",
+    ],
+    marketInfo: {
+      timezone: "GMT",
+      language: "English",
+      hiringOutlook: "Growing for business services, technology, and support functions",
+      commonEmploymentTypes: ["Full-time", "Contract", "Remote"],
+    },
+    talentPool: [
+      "Software Developers",
+      "Customer Success Specialists",
+      "Administrative Professionals",
+      "Operations Coordinators",
+    ],
+    salarySnapshot: [
+      { role: "Software Developer", range: "$500 - $1,200", availability: "Medium" },
+      { role: "Customer Support", range: "$300 - $700", availability: "High" },
+      { role: "Operations Officer", range: "$400 - $900", availability: "Medium" },
+    ],
+  },
+
   angola: {
     name: "Angola",
     flag: "🇦🇴",

@@ -8,6 +8,7 @@
   overflow: visible;
 }
 
+/* ================= NAV ================= */
 
 .itss-nav {
   position: fixed;
@@ -21,7 +22,7 @@
   justify-content: space-between;
   padding: 14px 28px;
 
-  background: rgba(2, 6, 23, 0.7);
+  background: rgba(2, 6, 23, 0.78);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 }
@@ -31,6 +32,7 @@
   font-weight: 800;
   letter-spacing: 0.01em;
   color: #ffffff;
+  text-decoration: none;
 }
 
 .itss-nav-actions {
@@ -48,6 +50,8 @@
 .itss-link:hover {
   color: #ffffff;
 }
+
+/* ================= BUTTONS ================= */
 
 .itss-btn,
 .itss-btn-secondary {
@@ -80,6 +84,8 @@
 .itss-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* ================= HERO ================= */
 
 .itss-hero {
   display: grid;
@@ -130,6 +136,8 @@
   flex-wrap: wrap;
 }
 
+/* ================= MAP ================= */
+
 .itss-map-wrap {
   width: 100%;
   display: flex;
@@ -163,34 +171,7 @@
   user-select: none;
 }
 
-@media (max-width: 900px) {
-  .itss-page {
-    padding: 18px 16px 8px;
-  }
-
-  .itss-nav {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .itss-nav-actions {
-    width: 100%;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .itss-hero-copy {
-    text-align: left;
-    margin: 0;
-  }
-
-  .itss-hero-actions {
-    justify-content: flex-start;
-  }
-
-}
-  
-
+/* ================= FOOTER ================= */
 
 .itss-footer-bottom {
   width: 100%;
@@ -202,6 +183,7 @@
   background: #010409;
 }
 
+/* ================= COUNTRY PAGE ================= */
 
 .itss-country-hero {
   max-width: 1280px;
@@ -262,11 +244,19 @@
 }
 
 .itss-info-card {
-  padding: 18px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
+  backdrop-filter: blur(10px);
 }
 
 .itss-info-card h3 {
-  font-size: 0.98rem;
+  margin: 0 0 16px;
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 
 .itss-country-info,
@@ -307,43 +297,62 @@
 
 .itss-job-card {
   background:
-    linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.76));
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 22px;
-  padding: 22px;
+    linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.75));
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 20px;
+  padding: 20px;
+  transition: all 0.25s ease;
 }
 
 .itss-job-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(96, 165, 250, 0.45);
-  box-shadow: 0 18px 42px rgba(37, 99, 235, 0.16);
+  transform: translateY(-4px);
+  border-color: rgba(96, 165, 250, 0.5);
+  box-shadow: 0 20px 50px rgba(37, 99, 235, 0.2);
 }
 
-.itss-info-card {
-  background: rgba(15, 23, 42, 0.88);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  border-radius: 22px;
-  padding: 22px;
-  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
-  backdrop-filter: blur(10px);
-}
-
-.itss-info-card h3 {
-  margin: 0 0 16px;
+.itss-job-card h3 {
+  margin: 0 0 10px;
   color: #ffffff;
-  font-size: 1.05rem;
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.itss-job-company {
   font-weight: 700;
+  color: #93c5fd;
+}
+
+.itss-job-location,
+.itss-job-type {
+  color: #94a3b8;
+  font-size: 0.9rem;
+}
+
+.itss-job-link {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8px;
+  color: #93c5fd;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.itss-job-link:hover {
+  color: #ffffff;
 }
 
 .itss-city-grid,
-.itss-industry-grid {
+.itss-industry-grid,
+.itss-chip-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
 .itss-city-item,
-.itss-industry-item {
+.itss-industry-item,
+.itss-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -356,7 +365,8 @@
   line-height: 1.2;
 }
 
-.itss-talent-highlights {
+.itss-talent-highlights,
+.itss-card-text {
   margin: 0;
   color: #dbeafe;
   line-height: 1.7;
@@ -372,7 +382,8 @@
   color: #dbeafe;
 }
 
-.itss-need-item {
+.itss-need-item,
+.itss-need-list li {
   line-height: 1.65;
   font-size: 0.96rem;
 }
@@ -393,14 +404,16 @@
   border: 1px solid rgba(148, 163, 184, 0.14);
 }
 
-.itss-market-label {
+.itss-market-label,
+.itss-market-item span {
   color: #94a3b8;
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.itss-market-value {
+.itss-market-value,
+.itss-market-item strong {
   color: #f8fafc;
   font-size: 0.95rem;
   line-height: 1.45;
@@ -543,52 +556,6 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.itss-job-card {
-  background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(2,6,23,0.75));
-  border: 1px solid rgba(148,163,184,0.18);
-  border-radius: 20px;
-  padding: 20px;
-  transition: all 0.25s ease;
-}
-
-.itss-job-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(96,165,250,0.5);
-  box-shadow: 0 20px 50px rgba(37,99,235,0.2);
-}
-
-.itss-job-card h3 {
-  margin: 0 0 10px;
-  color: #ffffff;
-  font-size: 1.08rem;
-  line-height: 1.35;
-}
-
-.itss-job-company {
-  font-weight: 700;
-  color: #93c5fd;
-}
-
-.itss-job-location,
-.itss-job-type {
-  color: #94a3b8;
-  font-size: 0.9rem;
-}
-
-
-.itss-job-link {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 8px;
-  color: #93c5fd;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.itss-job-link:hover {
-  color: #ffffff;
-}
 
 .itss-loading,
 .itss-no-jobs {
@@ -600,94 +567,12 @@
   box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
 }
 
-.itss-no-jobs h3 {
-  margin: 0 0 10px;
-  color: #ffffff;
-}
-
-.itss-no-jobs p {
-  margin: 0 0 18px;
-  color: #cbd5e1;
-  line-height: 1.65;
-}
-
 .itss-loading {
   text-align: center;
   font-size: 0.98rem;
 }
 
-@media (max-width: 1100px) {
-  .itss-country-content {
-    grid-template-columns: 1fr;
-  }
-
-  .itss-market-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .itss-country-hero {
-    padding: 28px 16px 56px;
-  }
-
-  .itss-jobs-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .itss-market-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .itss-salary-head,
-  .itss-salary-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-
-  .itss-salary-head {
-    display: none;
-  }
-
-  .itss-salary-row {
-    gap: 8px;
-  }
-
-  .itss-info-card,
-  .itss-job-card,
-  .itss-loading,
-  .itss-no-jobs {
-    padding: 18px;
-    border-radius: 18px;
-  }
-
-  .itss-country-description,
-  .itss-talent-highlights,
-  .itss-need-item,
-  .itss-job-company,
-  .itss-job-location,
-  .itss-job-type {
-    font-size: 0.94rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .itss-country-hero {
-    padding: 24px 14px 44px;
-  }
-
-  .itss-title {
-    line-height: 1.2;
-  }
-
-  .itss-city-item,
-  .itss-industry-item {
-    width: 100%;
-    justify-content: flex-start;
-    border-radius: 14px;
-  }
-}
+/* ================= VIEW TOGGLE ================= */
 
 .itss-view-toggle {
   display: grid;
@@ -772,25 +657,7 @@
   max-width: 28ch;
 }
 
-@media (max-width: 768px) {
-  .itss-view-toggle {
-    grid-template-columns: 1fr;
-  }
-
-  .itss-toggle-btn {
-    padding: 16px 16px;
-    border-radius: 16px;
-  }
-
-  .itss-toggle-title {
-    font-size: 0.98rem;
-  }
-
-  .itss-toggle-text {
-    font-size: 0.88rem;
-    max-width: none;
-  }
-}
+/* ================= PAGINATION ================= */
 
 .itss-pagination {
   display: flex;
@@ -825,4 +692,247 @@
 
 .itss-section-spacer {
   margin-top: 34px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 1100px) {
+  .itss-country-content {
+    grid-template-columns: 1fr;
+  }
+
+  .itss-market-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .itss-page {
+    padding: 118px 18px 30px;
+    min-height: auto;
+  }
+
+  .itss-nav {
+    padding: 12px 18px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .itss-brand {
+    font-size: 1.08rem;
+    line-height: 1.2;
+    max-width: none;
+    text-align: center;
+  }
+
+  .itss-nav-actions {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .itss-nav-actions select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .itss-link {
+    text-align: center;
+    white-space: nowrap;
+    font-size: 0.92rem;
+  }
+
+  .itss-btn,
+  .itss-btn-secondary {
+    padding: 10px 18px;
+    font-size: 0.92rem;
+    white-space: nowrap;
+  }
+
+  .itss-hero {
+    gap: 26px;
+  }
+
+  .itss-hero-copy {
+    text-align: center;
+    margin: 0 auto;
+  }
+
+  .itss-badge {
+    display: inline-flex;
+    justify-content: center;
+  }
+
+  .itss-title {
+    font-size: clamp(2.35rem, 9vw, 3.2rem);
+    line-height: 1.1;
+    text-align: center;
+    letter-spacing: -0.03em;
+  }
+
+  .itss-subtitle {
+    text-align: center;
+    font-size: 1.02rem;
+    line-height: 1.7;
+  }
+
+  .itss-hero-actions {
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .itss-map-wrap {
+    margin-top: 0;
+    overflow: hidden;
+  }
+
+  .itss-map {
+    width: 115%;
+    max-width: none;
+    margin-left: -7.5%;
+    min-height: 320px;
+  }
+
+  .itss-country-hero {
+    padding: 28px 16px 56px;
+  }
+
+  .itss-jobs-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .itss-jobs-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .itss-market-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .itss-salary-head {
+    display: none;
+  }
+
+  .itss-salary-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .itss-info-card,
+  .itss-job-card,
+  .itss-loading,
+  .itss-no-jobs {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .itss-country-description,
+  .itss-talent-highlights,
+  .itss-card-text,
+  .itss-need-item,
+  .itss-need-list li,
+  .itss-job-company,
+  .itss-job-location,
+  .itss-job-type {
+    font-size: 0.94rem;
+  }
+
+  .itss-view-toggle {
+    grid-template-columns: 1fr;
+  }
+
+  .itss-toggle-btn {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .itss-toggle-title {
+    font-size: 0.98rem;
+  }
+
+  .itss-toggle-text {
+    font-size: 0.88rem;
+    max-width: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .itss-page {
+    padding: 122px 16px 28px;
+  }
+
+  .itss-brand {
+    font-size: 1rem;
+  }
+
+  .itss-nav-actions {
+    grid-template-columns: 1fr auto auto;
+    gap: 8px;
+  }
+
+  .itss-title {
+    font-size: 2.35rem;
+    line-height: 1.12;
+  }
+
+  .itss-subtitle {
+    font-size: 0.98rem;
+  }
+
+  .itss-btn,
+  .itss-btn-secondary {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+
+  .itss-map {
+    width: 125%;
+    margin-left: -12.5%;
+    min-height: 340px;
+  }
+
+  .itss-country-hero {
+    padding: 24px 14px 44px;
+  }
+
+  .itss-city-item,
+  .itss-industry-item,
+  .itss-chip {
+    width: 100%;
+    justify-content: flex-start;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .itss-page {
+    padding-top: 128px;
+  }
+
+  .itss-brand {
+    font-size: 0.95rem;
+  }
+
+  .itss-link {
+    font-size: 0.86rem;
+  }
+
+  .itss-btn,
+  .itss-btn-secondary {
+    padding: 9px 13px;
+    font-size: 0.86rem;
+  }
+
+  .itss-title {
+    font-size: 2.05rem;
+  }
+
+  .itss-map {
+    width: 132%;
+    margin-left: -16%;
+  }
 }
